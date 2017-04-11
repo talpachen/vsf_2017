@@ -19,7 +19,7 @@
 
 #include "vsf.h"
 
-#ifndef VSFSM_CFG_NOCRIT
+#if VSFSM_CFG_PREMPT_EN
 static struct vsfsm_evtq_t *vsfsm_cur_evtq = NULL;
 struct vsfsm_evtq_t* vsfsm_evtq_set(struct vsfsm_evtq_t *queue)
 {
@@ -40,6 +40,7 @@ uint32_t vsfsm_get_event_pending(void)
 	return vsfsm_cur_evtq->evt_count;
 }
 
+static vsf_err_t vsfsm_dispatch_evt(struct vsfsm_t *sm, vsfsm_evt_t evt);
 static vsf_err_t vsfsm_evtq_post(struct vsfsm_t *sm, vsfsm_evt_t evt)
 {
 	struct vsfsm_evtq_t *evtq = sm->evtq;
@@ -47,7 +48,14 @@ static vsf_err_t vsfsm_evtq_post(struct vsfsm_t *sm, vsfsm_evt_t evt)
 
 	vsf_enter_critical();
 
-	if (evtq->evt_count >= evtq->size)
+	if (!evtq)
+	{
+		// no valid queue, just process the event directly
+		vsfsm_dispatch_evt(sm, evt);
+		vsf_set_gint(gint);
+		return VSFERR_NONE;
+	}
+	else if (evtq->evt_count >= evtq->size)
 	{
 		vsf_set_gint(gint);
 		return VSFERR_NOT_ENOUGH_RESOURCES;
@@ -79,7 +87,7 @@ static vsf_err_t vsfsm_evtq_post(struct vsfsm_t *sm, vsfsm_evt_t evt)
 
 	return VSFERR_NONE;
 }
-#endif		// #ifndef VSFSM_CFG_NOCRIT
+#endif		// VSFSM_CFG_PREMPT_EN
 
 #if VSFSM_CFG_SM_EN && VSFSM_CFG_HSM_EN
 static bool vsfsm_is_in(struct vsfsm_state_t *s, struct vsfsm_state_t *t)
@@ -288,7 +296,7 @@ vsf_err_t vsfsm_remove_subsm(struct vsfsm_state_t *state, struct vsfsm_t *sm)
 
 vsf_err_t vsfsm_init(struct vsfsm_t *sm)
 {
-#ifndef VSFSM_CFG_NOCRIT
+#if VSFSM_CFG_PREMPT_EN
 	sm->evtq = vsfsm_cur_evtq;
 	sm->evt_count = 0;
 #endif
@@ -314,7 +322,7 @@ vsf_err_t vsfsm_init(struct vsfsm_t *sm)
 // MUST make sure no event will be sent to the sm in the queue when vsfsm_fini
 vsf_err_t vsfsm_fini(struct vsfsm_t *sm)
 {
-#ifndef VSFSM_CFG_NOCRIT
+#if VSFSM_CFG_PREMPT_EN
 	struct vsfsm_evtq_element_t *tmp;
 #endif
 
@@ -322,7 +330,7 @@ vsf_err_t vsfsm_fini(struct vsfsm_t *sm)
 	vsfsm_set_active(sm, false);
 #endif
 
-#ifndef VSFSM_CFG_NOCRIT
+#if VSFSM_CFG_PREMPT_EN
 	tmp = (struct vsfsm_evtq_element_t *)sm->evtq->head;
 	while (tmp != sm->evtq->tail)
 	{
@@ -339,7 +347,7 @@ vsf_err_t vsfsm_fini(struct vsfsm_t *sm)
 	return VSFERR_NONE;
 }
 
-#ifndef VSFSM_CFG_NOCRIT
+#if VSFSM_CFG_PREMPT_EN
 vsf_err_t vsfsm_poll(void)
 {
 	struct vsfsm_evtq_element_t tmp;
@@ -373,13 +381,7 @@ vsf_err_t vsfsm_poll(void)
 #if VSFSM_CFG_ACTIVE_EN
 vsf_err_t vsfsm_set_active(struct vsfsm_t *sm, bool active)
 {
-#ifndef VSFSM_CFG_NOCRIT
-	vsf_enter_critical();
-#endif
 	sm->active = active;
-#ifndef VSFSM_CFG_NOCRIT
-	vsf_leave_critical();
-#endif
 	return VSFERR_NONE;
 }
 #endif
@@ -387,21 +389,22 @@ vsf_err_t vsfsm_set_active(struct vsfsm_t *sm, bool active)
 vsf_err_t vsfsm_post_evt(struct vsfsm_t *sm, vsfsm_evt_t evt)
 {
 	return
-#ifdef VSFSM_CFG_NOCRIT
+#if VSFSM_CFG_PREMPT_EN
+#if VSFSM_CFG_ACTIVE_EN
+			!sm->active ||
+#endif
+			// instant event can not be sent to a valid queue
+			(sm->evtq && (sm->evtq != vsfsm_cur_evtq) &&
+				(evt & VSFSM_EVT_INSTANT_MSK)) ? VSFERR_FAIL :
+			// call vsfsm_evtq_post for invalid evtq will dispatch evt 
+			!sm->evtq || (sm->evtq != vsfsm_cur_evtq) ||
+				(((evt & VSFSM_EVT_INSTANT_MSK) == 0) && sm->evt_count) ?
+				vsfsm_evtq_post(sm, evt) : vsfsm_dispatch_evt(sm, evt);
+#else
 #if VSFSM_CFG_ACTIVE_EN
 			(!sm->active) ? VSFERR_FAIL :
 #endif
 			vsfsm_dispatch_evt(sm, evt);
-#else
-#if VSFSM_CFG_ACTIVE_EN
-			(!sm->active) ||
-#endif
-			// send evt to different evtq, MUST call vsfsm_evtq_post
-			((sm->evtq != vsfsm_cur_evtq) &&
-				(evt & VSFSM_EVT_INSTANT_MSK)) ? VSFERR_FAIL :
-			(sm->evtq != vsfsm_cur_evtq) ||
-			(((evt & VSFSM_EVT_INSTANT_MSK) == 0) && sm->evt_count) ?
-				vsfsm_evtq_post(sm, evt) : vsfsm_dispatch_evt(sm, evt);
 #endif
 }
 
@@ -409,14 +412,15 @@ vsf_err_t vsfsm_post_evt(struct vsfsm_t *sm, vsfsm_evt_t evt)
 vsf_err_t vsfsm_post_evt_pending(struct vsfsm_t *sm, vsfsm_evt_t evt)
 {
 	return
-#ifdef VSFSM_CFG_NOCRIT
-			vsfsm_post_evt(sm, evt);
-#else
+#if VSFSM_CFG_PREMPT_EN
 #if VSFSM_CFG_ACTIVE_EN
-			(!sm->active) ||
+			!sm->active ||
 #endif
-			(evt & VSFSM_EVT_INSTANT_MSK) ?
+			// can not post pending event to a invalid queue
+			!sm->evtq || (evt & VSFSM_EVT_INSTANT_MSK) ?
 				VSFERR_FAIL : vsfsm_evtq_post(sm, evt);
+#else
+			vsfsm_post_evt(sm, evt);
 #endif
 }
 
