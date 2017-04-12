@@ -7,11 +7,11 @@
 #define UART_IS_TX_EMPTY(uart)		((uart->FIFOSTS & UART_FIFOSTS_TXEMPTYF_Msk) >> UART_FIFOSTS_TXEMPTYF_Pos)
 #define UART_IS_TX_FIFO_FULL(uart)	((uart->FIFOSTS & UART_FIFOSTS_TXFULL_Msk) >> UART_FIFOSTS_TXFULL_Pos)
 
-static void (*nuc400_usart_ontx[USART_NUM])(void *);
-static void (*nuc400_usart_onrx[USART_NUM])(void *, uint16_t data);
-static void *nuc400_usart_callback_param[USART_NUM];
+static void (*vsfhal_usart_ontx[USART_NUM])(void *);
+static void (*vsfhal_usart_onrx[USART_NUM])(void *, uint16_t data);
+static void *vsfhal_usart_callback_param[USART_NUM];
 
-vsf_err_t nuc400_usart_init(uint8_t index)
+vsf_err_t vsfhal_usart_init(uint8_t index)
 {
 	uint8_t usart_idx = (index >> 4) & 0x0F;
 	uint8_t remap_idx = index & 0x0F;
@@ -107,7 +107,7 @@ vsf_err_t nuc400_usart_init(uint8_t index)
 	return VSFERR_NONE;
 }
 
-vsf_err_t nuc400_usart_fini(uint8_t index)
+vsf_err_t vsfhal_usart_fini(uint8_t index)
 {
 	uint8_t usart_idx = (index >> 4) & 0x0F;
 	uint8_t remap_idx = index & 0x0F;
@@ -179,11 +179,11 @@ vsf_err_t nuc400_usart_fini(uint8_t index)
 	return VSFERR_NONE;
 }
 
-vsf_err_t nuc400_usart_config(uint8_t index, uint32_t baudrate, uint32_t mode)
+vsf_err_t vsfhal_usart_config(uint8_t index, uint32_t baudrate, uint32_t mode)
 {
 	UART_T *usart;
 	uint8_t usart_idx = (index >> 4) & 0x0F;
-	struct nuc400_info_t *info;
+	struct vsfhal_info_t *info;
 	uint32_t baud_div = 0, reg_line = 0;
 
 	usart = (UART_T *)(UART0_BASE + (usart_idx << 12));
@@ -200,7 +200,7 @@ vsf_err_t nuc400_usart_config(uint8_t index, uint32_t baudrate, uint32_t mode)
 	usart->FIFO = 0x5ul << 4; // 46/14 (64/16)
 	usart->TOUT = 60;
 
-	if (nuc400_interface_get_info(&info))
+	if (vsfhal_interface_get_info(&info))
 	{
 		return VSFERR_FAIL;
 	}
@@ -265,19 +265,19 @@ vsf_err_t nuc400_usart_config(uint8_t index, uint32_t baudrate, uint32_t mode)
 	return VSFERR_NONE;
 }
 
-vsf_err_t nuc400_usart_config_cb(uint8_t index, uint32_t int_priority,
+vsf_err_t vsfhal_usart_config_cb(uint8_t index, uint32_t int_priority,
 				void *p, void (*ontx)(void *), void (*onrx)(void *, uint16_t))
 {
 	uint8_t usart_idx = (index >> 4) & 0x0F;
 
-	nuc400_usart_ontx[usart_idx] = ontx;
-	nuc400_usart_onrx[usart_idx] = onrx;
-	nuc400_usart_callback_param[usart_idx] = p;
+	vsfhal_usart_ontx[usart_idx] = ontx;
+	vsfhal_usart_onrx[usart_idx] = onrx;
+	vsfhal_usart_callback_param[usart_idx] = p;
 
 	return VSFERR_NONE;
 }
 
-vsf_err_t nuc400_usart_tx(uint8_t index, uint16_t data)
+vsf_err_t vsfhal_usart_tx(uint8_t index, uint16_t data)
 {
 	UART_T *usart;
 	uint8_t usart_idx = (index >> 4) & 0x0F;
@@ -290,7 +290,7 @@ vsf_err_t nuc400_usart_tx(uint8_t index, uint16_t data)
 	return VSFERR_NONE;
 }
 
-uint16_t nuc400_usart_rx(uint8_t index)
+uint16_t vsfhal_usart_rx(uint8_t index)
 {
 	UART_T *usart;
 	uint8_t usart_idx = (index >> 4) & 0x0F;
@@ -300,7 +300,7 @@ uint16_t nuc400_usart_rx(uint8_t index)
 	return usart->DAT;
 }
 
-uint16_t nuc400_usart_tx_bytes(uint8_t index, uint8_t *data, uint16_t size)
+uint16_t vsfhal_usart_tx_bytes(uint8_t index, uint8_t *data, uint16_t size)
 {
 	UART_T *usart;
 	uint8_t usart_idx = (index >> 4) & 0x0F;
@@ -317,7 +317,7 @@ uint16_t nuc400_usart_tx_bytes(uint8_t index, uint8_t *data, uint16_t size)
 	return 0;
 }
 
-uint16_t nuc400_usart_tx_get_free_size(uint8_t index)
+uint16_t vsfhal_usart_tx_get_free_size(uint8_t index)
 {
 	UART_T *usart;
 	uint8_t usart_idx = (index >> 4) & 0x0F;
@@ -337,7 +337,7 @@ uint16_t nuc400_usart_tx_get_free_size(uint8_t index)
 	}
 }
 
-uint16_t nuc400_usart_rx_bytes(uint8_t index, uint8_t *data, uint16_t size)
+uint16_t vsfhal_usart_rx_bytes(uint8_t index, uint8_t *data, uint16_t size)
 {
 	UART_T *usart;
 	uint8_t usart_idx = (index >> 4) & 0x0F;
@@ -359,7 +359,7 @@ uint16_t nuc400_usart_rx_bytes(uint8_t index, uint8_t *data, uint16_t size)
 	return i;
 }
 
-uint16_t nuc400_usart_rx_get_data_size(uint8_t index)
+uint16_t vsfhal_usart_rx_get_data_size(uint8_t index)
 {
 	UART_T *usart;
 	uint8_t usart_idx = (index >> 4) & 0x0F;
@@ -385,16 +385,16 @@ static void uart_handler(uint8_t index)
 	
 	if (usart->INTSTS & UART_INTSTS_RDAIF_Msk)
 	{
-		nuc400_usart_onrx[index](nuc400_usart_callback_param[index], usart->DAT);
+		vsfhal_usart_onrx[index](vsfhal_usart_callback_param[index], usart->DAT);
 	}
 	else if (usart->INTSTS & UART_INTSTS_RXTOINT_Msk)
 	{
-		nuc400_usart_onrx[index](nuc400_usart_callback_param[index], usart->DAT);
+		vsfhal_usart_onrx[index](vsfhal_usart_callback_param[index], usart->DAT);
 	}
 	if (usart->INTSTS & UART_INTSTS_THREINT_Msk)
 	{
 		usart->INTEN &= ~UART_INTEN_THREIEN_Msk;
-		nuc400_usart_ontx[index](nuc400_usart_callback_param[index]);
+		vsfhal_usart_ontx[index](vsfhal_usart_callback_param[index]);
 	}
 }
 

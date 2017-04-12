@@ -30,7 +30,7 @@
 #define NUC400_TCSR_MODE_TOGGLE				(0x02UL << TIMER_CTL_OPMODE_Pos)
 #define NUC400_TCSR_MODE_COUNTINUOUS		(0x03UL << TIMER_CTL_OPMODE_Pos)
 
-static struct nuc400_info_t nuc400_info =
+static struct vsfhal_info_t vsfhal_info =
 {
 	0, CORE_VECTOR_TABLE,
 	CORE_CLKEN, CORE_HCLKSRC, CORE_PCLKSRC, CORE_PLLSRC, 
@@ -38,40 +38,40 @@ static struct nuc400_info_t nuc400_info =
 	CORE_PLL_FREQ_HZ, CPU_FREQ_HZ, HCLK_FREQ_HZ, PCLK_FREQ_HZ,
 };
 
-vsf_err_t nuc400_interface_get_info(struct nuc400_info_t **info)
+vsf_err_t vsfhal_interface_get_info(struct vsfhal_info_t **info)
 {
-	*info = &nuc400_info;
+	*info = &vsfhal_info;
 	return VSFERR_NONE;
 }
 
 // Pendsv
-struct nuc400_pendsv_t
+struct vsfhal_pendsv_t
 {
 	void (*on_pendsv)(void *);
 	void *param;
-} static nuc400_pendsv;
+} static vsfhal_pendsv;
 
 ROOTFUNC void PendSV_Handler(void)
 {
-	if (nuc400_pendsv.on_pendsv != NULL)
+	if (vsfhal_pendsv.on_pendsv != NULL)
 	{
-		nuc400_pendsv.on_pendsv(nuc400_pendsv.param);
+		vsfhal_pendsv.on_pendsv(vsfhal_pendsv.param);
 	}
 }
 
-vsf_err_t nuc400_interface_pendsv_config(void (*on_pendsv)(void *), void *param)
+vsf_err_t vsfhal_interface_pendsv_config(void (*on_pendsv)(void *), void *param)
 {
-	nuc400_pendsv.on_pendsv = on_pendsv;
-	nuc400_pendsv.param = param;
+	vsfhal_pendsv.on_pendsv = on_pendsv;
+	vsfhal_pendsv.param = param;
 
-	if (nuc400_pendsv.on_pendsv != NULL)
+	if (vsfhal_pendsv.on_pendsv != NULL)
 	{
 		SCB->SHP[10] = 0xFF;
 	}
 	return VSFERR_NONE;
 }
 
-vsf_err_t nuc400_interface_pendsv_trigger(void)
+vsf_err_t vsfhal_interface_pendsv_trigger(void)
 {
 	SCB->ICSR = SCB_ICSR_PENDSVSET_Msk;
 	return VSFERR_NONE;
@@ -82,22 +82,22 @@ void HardFault_Handler(void)
 	while (1);
 }
 
-vsf_err_t nuc400_interface_fini(void *p)
+vsf_err_t vsfhal_interface_fini(void *p)
 {
 	return VSFERR_NONE;
 }
 
-vsf_err_t nuc400_interface_reset(void *p)
+vsf_err_t vsfhal_interface_reset(void *p)
 {
 	return VSFERR_NONE;
 }
 
-uint32_t nuc400_interface_get_stack(void)
+uint32_t vsfhal_interface_get_stack(void)
 {
 	return __get_MSP();
 }
 
-vsf_err_t nuc400_interface_set_stack(uint32_t sp)
+vsf_err_t vsfhal_interface_set_stack(uint32_t sp)
 {
 	__set_MSP(sp);
 	return VSFERR_NONE;
@@ -106,7 +106,7 @@ vsf_err_t nuc400_interface_set_stack(uint32_t sp)
 // sleep will enable interrupt
 // for cortex processor, if an interrupt occur between enable the interrupt
 // 		and __WFI, wfi will not make the core sleep
-void nuc400_interface_sleep(uint32_t mode)
+void vsfhal_interface_sleep(uint32_t mode)
 {
 	vsf_leave_critical();
 	__WFI();
@@ -121,27 +121,27 @@ void nuc400_unlock_reg(void)
     }
 }
 
-void nuc400_lock_reg(void)
+void nuc400l_lock_reg(void)
 {
 	SYS->REGLCTL = 0;
 }
 
-vsf_err_t nuc400_interface_init(void *p)
+vsf_err_t vsfhal_interface_init(void *p)
 {
 	uint32_t temp32;
 	uint32_t freq_in;
 	
 	if (p != NULL)
 	{
-		nuc400_info = *(struct nuc400_info_t *)p;
+		vsfhal_info = *(struct vsfhal_info_t *)p;
 	}
 
 	nuc400_unlock_reg();
 	
 	// enable clocks
 	CLK->PWRCTL = 0x18;
-	CLK->PWRCTL |= nuc400_info.clk_enable;
-	temp32 = nuc400_info.clk_enable;
+	CLK->PWRCTL |= vsfhal_info.clk_enable;
+	temp32 = vsfhal_info.clk_enable;
 	temp32 = ((temp32 & NUC400_CLK_HXT) ? CLK_STATUS_HXTSTB_Msk : 0) |
 				((temp32 & NUC400_CLK_LXT) ? CLK_STATUS_LXTSTB_Msk : 0) |
 				((temp32 & NUC400_CLK_HIRC) ? CLK_STATUS_HIRCSTB_Msk : 0) |
@@ -149,39 +149,39 @@ vsf_err_t nuc400_interface_init(void *p)
 	while ((CLK->STATUS & temp32) != temp32);
 
 	// enable PLLs
-	if (nuc400_info.pllsrc != NUC400_PLLSRC_NONE)
+	if (vsfhal_info.pllsrc != NUC400_PLLSRC_NONE)
 	{
 		uint8_t no;
 		uint32_t no_mask;
 
-		switch (nuc400_info.pllsrc)
+		switch (vsfhal_info.pllsrc)
 		{
 		case NUC400_PLLSRC_HXT:
 			temp32 = 0;
-			freq_in = nuc400_info.osc_freq_hz;
+			freq_in = vsfhal_info.osc_freq_hz;
 			break;
 		case NUC400_PLLSRC_HIRC:
 			temp32 = CLK_PLLCTL_PLLSRC_Pos;
-			freq_in = nuc400_info.hirc_freq_hz;
+			freq_in = vsfhal_info.hirc_freq_hz;
 			break;
 		default:
 			return VSFERR_INVALID_PARAMETER;
 		}
 		// Fin/NR: 2MHz
-		if ((nuc400_info.pll_freq_hz * 1 > (120 * 1000 * 1000)) &&
-				(nuc400_info.pll_freq_hz * 1 < (200 * 1000 * 1000)))
+		if ((vsfhal_info.pll_freq_hz * 1 > (120 * 1000 * 1000)) &&
+				(vsfhal_info.pll_freq_hz * 1 < (200 * 1000 * 1000)))
 		{
 			no = 1;
 			no_mask = NUC400_CLK_PLLCTL_NO_1;
 		}
-		else if ((nuc400_info.pll_freq_hz * 2 > (120 * 1000 * 1000)) &&
-				(nuc400_info.pll_freq_hz * 2 < (200 * 1000 * 1000)))
+		else if ((vsfhal_info.pll_freq_hz * 2 > (120 * 1000 * 1000)) &&
+				(vsfhal_info.pll_freq_hz * 2 < (200 * 1000 * 1000)))
 		{
 			no = 2;
 			no_mask = NUC400_CLK_PLLCTL_NO_2;
 		}
-		else if ((nuc400_info.pll_freq_hz * 4 > (120 * 1000 * 1000)) &&
-				(nuc400_info.pll_freq_hz * 4 < (200 * 1000 * 1000)))
+		else if ((vsfhal_info.pll_freq_hz * 4 > (120 * 1000 * 1000)) &&
+				(vsfhal_info.pll_freq_hz * 4 < (200 * 1000 * 1000)))
 		{
 			no = 4;
 			no_mask = NUC400_CLK_PLLCTL_NO_4;
@@ -193,15 +193,15 @@ vsf_err_t nuc400_interface_init(void *p)
 
 		CLK->PLLCTL = temp32 | no_mask |
 			NUC400_CLK_PLLCTL_NR(freq_in / 2000000) |
-			NUC400_CLK_PLLCTL_NF(nuc400_info.pll_freq_hz * no / 2000000);
+			NUC400_CLK_PLLCTL_NF(vsfhal_info.pll_freq_hz * no / 2000000);
 		while ((CLK->STATUS & CLK_STATUS_PLLSTB_Msk) != CLK_STATUS_PLLSTB_Msk);
 	}
 	
 	// set hclk
-	switch (nuc400_info.hclksrc)
+	switch (vsfhal_info.hclksrc)
 	{
 	case NUC400_HCLKSRC_HIRC:
-		freq_in = nuc400_info.hirc_freq_hz;
+		freq_in = vsfhal_info.hirc_freq_hz;
 		temp32 = NUC400_CLK_CLKSEL0_HCLKSEL_HIRC;
 		break;
 	case NUC400_HCLKSRC_PLL2FOUT:
@@ -209,38 +209,38 @@ vsf_err_t nuc400_interface_init(void *p)
 		temp32 = NUC400_CLK_CLKSEL0_HCLKSEL_USBPLL;
 		break;
 	case NUC400_HCLKSRC_LIRC:
-		freq_in = nuc400_info.lirc_freq_hz;
+		freq_in = vsfhal_info.lirc_freq_hz;
 		temp32 = NUC400_CLK_CLKSEL0_HCLKSEL_LIRC;
 		break;
 	case NUC400_HCLKSRC_PLLFOUT:
-		freq_in = nuc400_info.pll_freq_hz;
+		freq_in = vsfhal_info.pll_freq_hz;
 		temp32 = NUC400_CLK_CLKSEL0_HCLKSEL_PLL;
 		break;
 	case NUC400_HCLKSRC_LXT:
-		freq_in = nuc400_info.osc32k_freq_hz;
+		freq_in = vsfhal_info.osc32k_freq_hz;
 		temp32 = NUC400_CLK_CLKSEL0_HCLKSEL_LXT;
 		break;
 	case NUC400_HCLKSRC_HXT:
-		freq_in = nuc400_info.osc_freq_hz;
+		freq_in = vsfhal_info.osc_freq_hz;
 		temp32 = NUC400_CLK_CLKSEL0_HCLKSEL_HXT;
 		break;
 	default:
 		return VSFERR_INVALID_PARAMETER;
 	}
 	CLK->CLKDIV0 = (CLK->CLKDIV0 & ~CLK_CLKDIV0_HCLKDIV_Msk) |
-			((freq_in / nuc400_info.hclk_freq_hz) - 1);
+			((freq_in / vsfhal_info.hclk_freq_hz) - 1);
 	CLK->CLKSEL0 = (CLK->CLKSEL0 & ~CLK_CLKSEL0_HCLKSEL_Msk) | temp32;
 
 
-	if (nuc400_info.cpu_freq_hz <= 24 * 1000 * 1000)
+	if (vsfhal_info.cpu_freq_hz <= 24 * 1000 * 1000)
 	{
 		FMC->FTCTL = 0x1 << 4;
 	}
-	else if (nuc400_info.cpu_freq_hz <= 48 * 1000 * 1000)
+	else if (vsfhal_info.cpu_freq_hz <= 48 * 1000 * 1000)
 	{
 		FMC->FTCTL = 0x2 << 4;
 	}
-	else if (nuc400_info.cpu_freq_hz <= 72 * 1000 * 1000)
+	else if (vsfhal_info.cpu_freq_hz <= 72 * 1000 * 1000)
 	{
 		FMC->FTCTL = 0x3 << 4;
 	}
@@ -259,14 +259,14 @@ vsf_err_t nuc400_interface_init(void *p)
 	}	
 #endif
 	
-	nuc400_lock_reg();
+	nuc400l_lock_reg();
 
-	SCB->VTOR = nuc400_info.vector_table;
-	SCB->AIRCR = 0x05FA0000 | nuc400_info.priority_group;
+	SCB->VTOR = vsfhal_info.vector_table;
+	SCB->AIRCR = 0x05FA0000 | vsfhal_info.priority_group;
 	return VSFERR_NONE;
 }
 
-uint32_t nuc400_uid_get(uint8_t *buffer, uint32_t size)
+uint32_t vsfhal_uid_get(uint8_t *buffer, uint32_t size)
 {
 	return 0;
 }
@@ -280,7 +280,7 @@ static uint32_t tickclk_get_count_local(void)
 	return tickcnt;
 }
 
-uint32_t nuc400_tickclk_get_count(void)
+uint32_t vsfhal_tickclk_get_count(void)
 {
 	uint32_t count1, count2;
 
@@ -300,35 +300,35 @@ ROOTFUNC void SysTick_Handler(void)
 	}
 }
 
-vsf_err_t nuc400_tickclk_config_cb(void (*callback)(void*), void *param)
+vsf_err_t vsfhal_tickclk_config_cb(void (*callback)(void*), void *param)
 {
 	tickclk_callback = callback;
 	tickclk_param = param;
 	return VSFERR_NONE;
 }
 
-vsf_err_t nuc400_tickclk_start(void)
+vsf_err_t vsfhal_tickclk_start(void)
 {
 	SysTick->VAL = 0;
 	SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk;
 	return VSFERR_NONE;
 }
 
-vsf_err_t nuc400_tickclk_stop(void)
+vsf_err_t vsfhal_tickclk_stop(void)
 {
 	SysTick->CTRL &= ~SysTick_CTRL_ENABLE_Msk;
 	return VSFERR_NONE;
 }
 
-vsf_err_t nuc400_tickclk_init(void)
+vsf_err_t vsfhal_tickclk_init(void)
 {
-	SysTick->LOAD = nuc400_info.cpu_freq_hz / 1000;
+	SysTick->LOAD = vsfhal_info.cpu_freq_hz / 1000;
 	SysTick->CTRL = SysTick_CTRL_TICKINT_Msk | SysTick_CTRL_CLKSOURCE_Msk;
 	NVIC_SetPriority(SysTick_IRQn, (1 << __NVIC_PRIO_BITS) - 1);
 	return VSFERR_NONE;
 }
 
-vsf_err_t nuc400_tickclk_fini(void)
+vsf_err_t vsfhal_tickclk_fini(void)
 {
-	return nuc400_tickclk_stop();
+	return vsfhal_tickclk_stop();
 }

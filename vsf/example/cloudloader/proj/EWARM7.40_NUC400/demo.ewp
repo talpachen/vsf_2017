@@ -185,7 +185,6 @@
         </option>
         <option>
           <name>CCDefines</name>
-          <state>__TARGET_CHIP__=nuc400</state>
           <state>FLASH_LOAD_OFFSET=0x0000</state>
         </option>
         <option>
@@ -1149,7 +1148,6 @@
         <option>
           <name>CCDefines</name>
           <state>NDEBUG</state>
-          <state>__TARGET_CHIP__=nuc400</state>
           <state>FLASH_LOAD_OFFSET=0x00010200</state>
         </option>
         <option>
@@ -1286,6 +1284,7 @@
           <state>$PROJ_DIR$\..\..\..\..\compiler\IAR</state>
           <state>$PROJ_DIR$\..\..\..\..\interfaces</state>
           <state>$PROJ_DIR$\..\..\..\..\interfaces\cpu\nuc400</state>
+          <state>$PROJ_DIR$\..\..\..\..\interfaces\cpu\nuc400\core</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>

@@ -21,7 +21,7 @@
 
 #define NUC400_GPIO_NUM					7
 
-vsf_err_t nuc400_gpio_init(uint8_t index)
+vsf_err_t vsfhal_gpio_init(uint8_t index)
 {
 #if __VSF_DEBUG__
 	if (index >= NUC400_GPIO_NUM)
@@ -33,7 +33,7 @@ vsf_err_t nuc400_gpio_init(uint8_t index)
 	return VSFERR_NONE;
 }
 
-vsf_err_t nuc400_gpio_fini(uint8_t index)
+vsf_err_t vsfhal_gpio_fini(uint8_t index)
 {
 #if __VSF_DEBUG__
 	if (index >= NUC400_GPIO_NUM)
@@ -45,7 +45,7 @@ vsf_err_t nuc400_gpio_fini(uint8_t index)
 	return VSFERR_NONE;
 }
 
-vsf_err_t nuc400_gpio_config_pin(uint8_t index, uint8_t pin_idx, uint32_t mode)
+vsf_err_t vsfhal_gpio_config_pin(uint8_t index, uint8_t pin_idx, uint32_t mode)
 {
 	GPIO_T *gpio;
 	uint32_t tmpreg = mode & 0x03;
@@ -64,7 +64,7 @@ vsf_err_t nuc400_gpio_config_pin(uint8_t index, uint8_t pin_idx, uint32_t mode)
 	return VSFERR_NONE;
 }
 
-vsf_err_t nuc400_gpio_config(uint8_t index, uint32_t pin_mask, uint32_t io, 
+vsf_err_t vsfhal_gpio_config(uint8_t index, uint32_t pin_mask, uint32_t io, 
 							uint32_t pull_en_mask, uint32_t input_pull_mask)
 {
 	uint32_t i, mask;
@@ -82,16 +82,16 @@ vsf_err_t nuc400_gpio_config(uint8_t index, uint32_t pin_mask, uint32_t io,
 		mask = 1UL << i;
 		if (pin_mask & mask)
 		{
-			mode = !(io & mask) ? nuc400_GPIO_INFLOAT :
-				(pull_en_mask & input_pull_mask & mask) ? nuc400_GPIO_OUTOD :
-				nuc400_GPIO_OUTPP;
-			nuc400_gpio_config_pin(index, i, mode);
+			mode = !(io & mask) ? vsfhal_GPIO_INFLOAT :
+				(pull_en_mask & input_pull_mask & mask) ? vsfhal_GPIO_OUTOD :
+				vsfhal_GPIO_OUTPP;
+			vsfhal_gpio_config_pin(index, i, mode);
 		}
 	}
 	return VSFERR_NONE;
 }
 
-vsf_err_t nuc400_gpio_set(uint8_t index, uint32_t pin_mask)
+vsf_err_t vsfhal_gpio_set(uint8_t index, uint32_t pin_mask)
 {
 	uint32_t *gpio;
 	uint32_t i;
@@ -114,7 +114,7 @@ vsf_err_t nuc400_gpio_set(uint8_t index, uint32_t pin_mask)
 	return VSFERR_NONE;
 }
 
-vsf_err_t nuc400_gpio_clear(uint8_t index, uint32_t pin_mask)
+vsf_err_t vsfhal_gpio_clear(uint8_t index, uint32_t pin_mask)
 {
 	uint32_t *gpio;
 	uint32_t i;
@@ -137,7 +137,7 @@ vsf_err_t nuc400_gpio_clear(uint8_t index, uint32_t pin_mask)
 	return VSFERR_NONE;
 }
 
-vsf_err_t nuc400_gpio_out(uint8_t index, uint32_t pin_mask, uint32_t value)
+vsf_err_t vsfhal_gpio_out(uint8_t index, uint32_t pin_mask, uint32_t value)
 {
 	uint32_t *gpio;
 	uint32_t i;
@@ -160,7 +160,7 @@ vsf_err_t nuc400_gpio_out(uint8_t index, uint32_t pin_mask, uint32_t value)
 	return VSFERR_NONE;
 }
 
-vsf_err_t nuc400_gpio_in(uint8_t index, uint32_t pin_mask, uint32_t *value)
+vsf_err_t vsfhal_gpio_in(uint8_t index, uint32_t pin_mask, uint32_t *value)
 {
 	GPIO_T *gpio;
 	
@@ -176,7 +176,7 @@ vsf_err_t nuc400_gpio_in(uint8_t index, uint32_t pin_mask, uint32_t *value)
 	return VSFERR_NONE;
 }
 
-uint32_t nuc400_gpio_get(uint8_t index, uint32_t pin_mask)
+uint32_t vsfhal_gpio_get(uint8_t index, uint32_t pin_mask)
 {
 	GPIO_T *gpio;
 	

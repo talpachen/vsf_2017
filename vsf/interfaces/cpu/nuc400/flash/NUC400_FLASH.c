@@ -10,9 +10,9 @@
 #define NUC400_FLASH_SIZE_KB				(512)
 
 extern void nuc400_unlock_reg(void);
-extern void nuc400_lock_reg(void);
+extern void nuc400l_lock_reg(void);
 
-static vsf_err_t nuc400_flash_lock(uint8_t index)
+static vsf_err_t vsfhal_flash_lock(uint8_t index)
 {
 	switch (index)
 	{
@@ -24,7 +24,7 @@ static vsf_err_t nuc400_flash_lock(uint8_t index)
 	}
 }
 
-static vsf_err_t nuc400_flash_unlock(uint8_t index)
+static vsf_err_t vsfhal_flash_unlock(uint8_t index)
 {
 	switch (index)
 	{
@@ -36,12 +36,12 @@ static vsf_err_t nuc400_flash_unlock(uint8_t index)
 	}
 }
 	
-vsf_err_t nuc400_flash_checkidx(uint8_t index)
+vsf_err_t vsfhal_flash_checkidx(uint8_t index)
 {
 	return (index < NUC400_FLASH_NUM) ? VSFERR_NONE : VSFERR_NOT_SUPPORT;
 }
 
-vsf_err_t nuc400_flash_capacity(uint8_t index, uint32_t *pagesize, 
+vsf_err_t vsfhal_flash_capacity(uint8_t index, uint32_t *pagesize, 
 		uint32_t *pagenum)
 {
 	switch (index)
@@ -61,22 +61,22 @@ vsf_err_t nuc400_flash_capacity(uint8_t index, uint32_t *pagesize,
 	}
 }
 
-uint32_t nuc400_flash_baseaddr(uint8_t index)
+uint32_t vsfhal_flash_baseaddr(uint8_t index)
 {
 	return NUC400_FLASH_BASEADDR;
 }
 
 // op -- operation: 0(ERASE), 1(READ), 2(WRITE)
-uint32_t nuc400_flash_blocksize(uint8_t index, uint32_t addr, uint32_t size,
+uint32_t vsfhal_flash_blocksize(uint8_t index, uint32_t addr, uint32_t size,
 		int op)
 {
 	uint32_t pagesize;
-	if (nuc400_flash_capacity(index, &pagesize, NULL))
+	if (vsfhal_flash_capacity(index, &pagesize, NULL))
 		return 0;
 	return !op ? pagesize : 4;
 }
 
-vsf_err_t nuc400_flash_init(uint8_t index)
+vsf_err_t vsfhal_flash_init(uint8_t index)
 {
 	switch (index)
 	{
@@ -84,14 +84,14 @@ vsf_err_t nuc400_flash_init(uint8_t index)
 		nuc400_unlock_reg();
 		FMC->ISPCTL |= FMC_ISPCTL_APUEN_Msk;
 		FMC->ISPCTL |= FMC_ISPCTL_ISPEN_Msk;
-		nuc400_lock_reg();
+		nuc400l_lock_reg();
 		return VSFERR_NONE;
 	default:
 		return VSFERR_NOT_SUPPORT;
 	}
 }
 
-vsf_err_t nuc400_flash_fini(uint8_t index)
+vsf_err_t vsfhal_flash_fini(uint8_t index)
 {
 	switch (index)
 	{
@@ -102,7 +102,7 @@ vsf_err_t nuc400_flash_fini(uint8_t index)
 	}
 }
 
-vsf_err_t nuc400_flash_erase(uint8_t index, uint32_t addr)
+vsf_err_t vsfhal_flash_erase(uint8_t index, uint32_t addr)
 {
 	switch (index)
 	{
@@ -112,7 +112,7 @@ vsf_err_t nuc400_flash_erase(uint8_t index, uint32_t addr)
 		FMC->ISPADDR = NUC400_FLASH_ADDR(addr);
 		FMC->ISPTRG = FMC_ISPTRG_ISPGO_Msk;
 		while (FMC->ISPTRG & FMC_ISPTRG_ISPGO_Msk);
-		nuc400_lock_reg();
+		nuc400l_lock_reg();
 		break;
 	default:
 		return VSFERR_NOT_SUPPORT;
@@ -120,12 +120,12 @@ vsf_err_t nuc400_flash_erase(uint8_t index, uint32_t addr)
 	return VSFERR_NONE;
 }
 
-vsf_err_t nuc400_flash_read(uint8_t index, uint32_t addr, uint8_t *buff)
+vsf_err_t vsfhal_flash_read(uint8_t index, uint32_t addr, uint8_t *buff)
 {
 	return VSFERR_NOT_SUPPORT;
 }
 
-vsf_err_t nuc400_flash_write(uint8_t index, uint32_t addr, uint8_t *buff)
+vsf_err_t vsfhal_flash_write(uint8_t index, uint32_t addr, uint8_t *buff)
 {
 	switch (index)
 	{
@@ -136,7 +136,7 @@ vsf_err_t nuc400_flash_write(uint8_t index, uint32_t addr, uint8_t *buff)
 		FMC->MPDAT0 = *(uint32_t *)buff;
 		FMC->ISPTRG = FMC_ISPTRG_ISPGO_Msk;
 		while (FMC->ISPTRG & FMC_ISPTRG_ISPGO_Msk);
-		nuc400_lock_reg();
+		nuc400l_lock_reg();
 		break;
 	default:
 		return VSFERR_NOT_SUPPORT;
