@@ -3,6 +3,11 @@
 
 #include "usbd_config.c"
 
+static vsf_err_t cdcuart1_set_line_coding(struct usb_CDCACM_line_coding_t *line_coding);
+static vsf_err_t cdcuart2_set_line_coding(struct usb_CDCACM_line_coding_t *line_coding);
+static vsf_err_t cdcuart3_set_line_coding(struct usb_CDCACM_line_coding_t *line_coding);
+static vsf_err_t cdcuart4_set_line_coding(struct usb_CDCACM_line_coding_t *line_coding);
+
 struct usrapp_t usrapp =
 {
 	.usbd.device.num_of_configuration		= dimof(usrapp.usbd.config),
@@ -39,41 +44,115 @@ struct usrapp_t usrapp =
 	.usbd.cdc[0].param.CDC.ep_notify			= 1,
 	.usbd.cdc[0].param.CDC.ep_out				= 2,
 	.usbd.cdc[0].param.CDC.ep_in				= 2,
-	.usbd.cdc[0].param.CDC.stream_tx			= (struct vsf_stream_t *)&usrapp.usbd.cdc[0].stream_tx,
-	.usbd.cdc[0].param.CDC.stream_rx			= (struct vsf_stream_t *)&usrapp.usbd.cdc[0].stream_rx,
+	.usbd.cdc[0].param.CDC.stream_tx			= (struct vsf_stream_t *)&usrapp.usbd.cdc[0].stream_rx,
+	.usbd.cdc[0].param.CDC.stream_rx			= (struct vsf_stream_t *)&usrapp.usbd.cdc[0].stream_tx,
 	.usbd.cdc[0].param.line_coding.bitrate		= 115200,
 	.usbd.cdc[0].param.line_coding.stopbittype	= 0,
 	.usbd.cdc[0].param.line_coding.paritytype	= 0,
 	.usbd.cdc[0].param.line_coding.datatype		= 8,
+	.usbd.cdc[0].param.callback.set_line_coding = cdcuart1_set_line_coding,
 	.usbd.cdc[0].stream_tx.stream.op			= &fifostream_op,
 	.usbd.cdc[0].stream_tx.mem.buffer.buffer	= (uint8_t *)&usrapp.usbd.cdc[0].txbuff,
 	.usbd.cdc[0].stream_tx.mem.buffer.size		= sizeof(usrapp.usbd.cdc[0].txbuff),
 	.usbd.cdc[0].stream_rx.stream.op			= &fifostream_op, 
 	.usbd.cdc[0].stream_rx.mem.buffer.buffer	= (uint8_t *)&usrapp.usbd.cdc[0].rxbuff,
 	.usbd.cdc[0].stream_rx.mem.buffer.size		= sizeof(usrapp.usbd.cdc[0].rxbuff),
-	
+
 	.usbd.cdc[1].usart_stream.index				= CDCUART_2_INDEX,
 	.usbd.cdc[1].usart_stream.mode				= VSFHAL_USART_STOPBITS_1 | VSFHAL_USART_PARITY_NONE,
 	.usbd.cdc[1].usart_stream.int_priority		= 0,
 	.usbd.cdc[1].usart_stream.baudrate			= 115200,
 	.usbd.cdc[1].usart_stream.stream_tx			= (struct vsf_stream_t *)&usrapp.usbd.cdc[1].stream_tx,
 	.usbd.cdc[1].usart_stream.stream_rx			= (struct vsf_stream_t *)&usrapp.usbd.cdc[1].stream_rx,
-	.usbd.cdc[1].param.CDC.ep_notify			= 1,
-	.usbd.cdc[1].param.CDC.ep_out				= 2,
-	.usbd.cdc[1].param.CDC.ep_in				= 2,
-	.usbd.cdc[1].param.CDC.stream_tx			= (struct vsf_stream_t *)&usrapp.usbd.cdc[1].stream_tx,
-	.usbd.cdc[1].param.CDC.stream_rx			= (struct vsf_stream_t *)&usrapp.usbd.cdc[1].stream_rx,
+	.usbd.cdc[1].param.CDC.ep_notify			= 2,
+	.usbd.cdc[1].param.CDC.ep_out				= 3,
+	.usbd.cdc[1].param.CDC.ep_in				= 3,
+	.usbd.cdc[1].param.CDC.stream_tx			= (struct vsf_stream_t *)&usrapp.usbd.cdc[1].stream_rx,
+	.usbd.cdc[1].param.CDC.stream_rx			= (struct vsf_stream_t *)&usrapp.usbd.cdc[1].stream_tx,
 	.usbd.cdc[1].param.line_coding.bitrate		= 115200,
 	.usbd.cdc[1].param.line_coding.stopbittype	= 0,
 	.usbd.cdc[1].param.line_coding.paritytype	= 0,
 	.usbd.cdc[1].param.line_coding.datatype		= 8,
+	.usbd.cdc[1].param.callback.set_line_coding = cdcuart2_set_line_coding,
 	.usbd.cdc[1].stream_tx.stream.op			= &fifostream_op,
 	.usbd.cdc[1].stream_tx.mem.buffer.buffer	= (uint8_t *)&usrapp.usbd.cdc[1].txbuff,
 	.usbd.cdc[1].stream_tx.mem.buffer.size		= sizeof(usrapp.usbd.cdc[1].txbuff),
 	.usbd.cdc[1].stream_rx.stream.op			= &fifostream_op, 
 	.usbd.cdc[1].stream_rx.mem.buffer.buffer	= (uint8_t *)&usrapp.usbd.cdc[1].rxbuff,
 	.usbd.cdc[1].stream_rx.mem.buffer.size		= sizeof(usrapp.usbd.cdc[1].rxbuff),
+
+	.usbd.cdc[2].usart_stream.index				= CDCUART_3_INDEX,
+	.usbd.cdc[2].usart_stream.mode				= VSFHAL_USART_STOPBITS_1 | VSFHAL_USART_PARITY_NONE,
+	.usbd.cdc[2].usart_stream.int_priority		= 0,
+	.usbd.cdc[2].usart_stream.baudrate			= 115200,
+	.usbd.cdc[2].usart_stream.stream_tx			= (struct vsf_stream_t *)&usrapp.usbd.cdc[2].stream_tx,
+	.usbd.cdc[2].usart_stream.stream_rx			= (struct vsf_stream_t *)&usrapp.usbd.cdc[2].stream_rx,
+	.usbd.cdc[2].param.CDC.ep_notify			= 4,
+	.usbd.cdc[2].param.CDC.ep_out				= 5,
+	.usbd.cdc[2].param.CDC.ep_in				= 5,
+	.usbd.cdc[2].param.CDC.stream_tx			= (struct vsf_stream_t *)&usrapp.usbd.cdc[2].stream_rx,
+	.usbd.cdc[2].param.CDC.stream_rx			= (struct vsf_stream_t *)&usrapp.usbd.cdc[2].stream_tx,
+	.usbd.cdc[2].param.line_coding.bitrate		= 115200,
+	.usbd.cdc[2].param.line_coding.stopbittype	= 0,
+	.usbd.cdc[2].param.line_coding.paritytype	= 0,
+	.usbd.cdc[2].param.line_coding.datatype		= 8,
+	.usbd.cdc[2].param.callback.set_line_coding = cdcuart3_set_line_coding,
+	.usbd.cdc[2].stream_tx.stream.op			= &fifostream_op,
+	.usbd.cdc[2].stream_tx.mem.buffer.buffer	= (uint8_t *)&usrapp.usbd.cdc[2].txbuff,
+	.usbd.cdc[2].stream_tx.mem.buffer.size		= sizeof(usrapp.usbd.cdc[2].txbuff),
+	.usbd.cdc[2].stream_rx.stream.op			= &fifostream_op, 
+	.usbd.cdc[2].stream_rx.mem.buffer.buffer	= (uint8_t *)&usrapp.usbd.cdc[2].rxbuff,
+	.usbd.cdc[2].stream_rx.mem.buffer.size		= sizeof(usrapp.usbd.cdc[2].rxbuff),
+	
+	.usbd.cdc[3].usart_stream.index				= CDCUART_4_INDEX,
+	.usbd.cdc[3].usart_stream.mode				= VSFHAL_USART_STOPBITS_1 | VSFHAL_USART_PARITY_NONE,
+	.usbd.cdc[3].usart_stream.int_priority		= 0,
+	.usbd.cdc[3].usart_stream.baudrate			= 115200,
+	.usbd.cdc[3].usart_stream.stream_tx			= (struct vsf_stream_t *)&usrapp.usbd.cdc[3].stream_tx,
+	.usbd.cdc[3].usart_stream.stream_rx			= (struct vsf_stream_t *)&usrapp.usbd.cdc[3].stream_rx,
+	.usbd.cdc[3].param.CDC.ep_notify			= 6,
+	.usbd.cdc[3].param.CDC.ep_out				= 7,
+	.usbd.cdc[3].param.CDC.ep_in				= 7,
+	.usbd.cdc[3].param.CDC.stream_tx			= (struct vsf_stream_t *)&usrapp.usbd.cdc[3].stream_rx,
+	.usbd.cdc[3].param.CDC.stream_rx			= (struct vsf_stream_t *)&usrapp.usbd.cdc[3].stream_tx,
+	.usbd.cdc[3].param.line_coding.bitrate		= 115200,
+	.usbd.cdc[3].param.line_coding.stopbittype	= 0,
+	.usbd.cdc[3].param.line_coding.paritytype	= 0,
+	.usbd.cdc[3].param.line_coding.datatype		= 8,
+	.usbd.cdc[3].param.callback.set_line_coding = cdcuart4_set_line_coding,
+	.usbd.cdc[3].stream_tx.stream.op			= &fifostream_op,
+	.usbd.cdc[3].stream_tx.mem.buffer.buffer	= (uint8_t *)&usrapp.usbd.cdc[3].txbuff,
+	.usbd.cdc[3].stream_tx.mem.buffer.size		= sizeof(usrapp.usbd.cdc[3].txbuff),
+	.usbd.cdc[3].stream_rx.stream.op			= &fifostream_op, 
+	.usbd.cdc[3].stream_rx.mem.buffer.buffer	= (uint8_t *)&usrapp.usbd.cdc[3].rxbuff,
+	.usbd.cdc[3].stream_rx.mem.buffer.size		= sizeof(usrapp.usbd.cdc[3].rxbuff),
 };
+
+static vsf_err_t cdcuart1_set_line_coding(struct usb_CDCACM_line_coding_t *line_coding)
+{
+	usrapp.usbd.cdc[0].usart_stream.baudrate = line_coding->bitrate;	
+	// TODO
+	//usrapp.usbd.cdc[0].usart_stream.mode = VSFHAL_USART_STOPBITS_1 | VSFHAL_USART_PARITY_NONE,
+	return usart_stream_init(&usrapp.usbd.cdc[0].usart_stream);
+}
+
+static vsf_err_t cdcuart2_set_line_coding(struct usb_CDCACM_line_coding_t *line_coding)
+{
+	usrapp.usbd.cdc[1].usart_stream.baudrate = line_coding->bitrate;	
+	return usart_stream_init(&usrapp.usbd.cdc[1].usart_stream);
+}
+
+static vsf_err_t cdcuart3_set_line_coding(struct usb_CDCACM_line_coding_t *line_coding)
+{
+	usrapp.usbd.cdc[2].usart_stream.baudrate = line_coding->bitrate;	
+	return usart_stream_init(&usrapp.usbd.cdc[2].usart_stream);
+}
+
+static vsf_err_t cdcuart4_set_line_coding(struct usb_CDCACM_line_coding_t *line_coding)
+{
+	usrapp.usbd.cdc[3].usart_stream.baudrate = line_coding->bitrate;	
+	return usart_stream_init(&usrapp.usbd.cdc[3].usart_stream);
+}
 
 static void usbd_connect(void *p)
 {
@@ -92,9 +171,9 @@ void usrapp_init(struct usrapp_t *app)
 {
 	// vsfcdc init
 	cdc_uart_init(&app->usbd.cdc[0]);
-	//cdc_uart_init(&app->usbd.cdc[1]);
-	//cdc_uart_init(&app->usbd.cdc[2]);
-	//cdc_uart_init(&app->usbd.cdc[3]);
+	cdc_uart_init(&app->usbd.cdc[1]);
+	cdc_uart_init(&app->usbd.cdc[2]);
+	cdc_uart_init(&app->usbd.cdc[3]);
 	
 	// usbd init
 	vsfusbd_device_init(&app->usbd.device);		

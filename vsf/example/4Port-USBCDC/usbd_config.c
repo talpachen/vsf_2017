@@ -8,7 +8,7 @@ static const uint8_t USB_DeviceDescriptor[] =
 	0x01,		// device protocol
 	0x40,		// max packet size
 	0x09, 0x12,	// vendor
-	0x66, 0x67,	// product
+	0x66, 0x66,	// product
 	0x00, 0x01,	// bcdDevice
 	1,			// manu facturer
 	2,			// product
