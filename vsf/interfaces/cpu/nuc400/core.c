@@ -38,7 +38,7 @@ static struct vsfhal_info_t vsfhal_info =
 	CORE_PLL_FREQ_HZ, CPU_FREQ_HZ, HCLK_FREQ_HZ, PCLK_FREQ_HZ,
 };
 
-vsf_err_t vsfhal_interface_get_info(struct vsfhal_info_t **info)
+vsf_err_t vsfhal_core_get_info(struct vsfhal_info_t **info)
 {
 	*info = &vsfhal_info;
 	return VSFERR_NONE;
@@ -59,7 +59,7 @@ ROOTFUNC void PendSV_Handler(void)
 	}
 }
 
-vsf_err_t vsfhal_interface_pendsv_config(void (*on_pendsv)(void *), void *param)
+vsf_err_t vsfhal_core_pendsv_config(void (*on_pendsv)(void *), void *param)
 {
 	vsfhal_pendsv.on_pendsv = on_pendsv;
 	vsfhal_pendsv.param = param;
@@ -71,7 +71,7 @@ vsf_err_t vsfhal_interface_pendsv_config(void (*on_pendsv)(void *), void *param)
 	return VSFERR_NONE;
 }
 
-vsf_err_t vsfhal_interface_pendsv_trigger(void)
+vsf_err_t vsfhal_core_pendsv_trigger(void)
 {
 	SCB->ICSR = SCB_ICSR_PENDSVSET_Msk;
 	return VSFERR_NONE;
@@ -82,22 +82,22 @@ void HardFault_Handler(void)
 	while (1);
 }
 
-vsf_err_t vsfhal_interface_fini(void *p)
+vsf_err_t vsfhal_core_fini(void *p)
 {
 	return VSFERR_NONE;
 }
 
-vsf_err_t vsfhal_interface_reset(void *p)
+vsf_err_t vsfhal_core_reset(void *p)
 {
 	return VSFERR_NONE;
 }
 
-uint32_t vsfhal_interface_get_stack(void)
+uint32_t vsfhal_core_get_stack(void)
 {
 	return __get_MSP();
 }
 
-vsf_err_t vsfhal_interface_set_stack(uint32_t sp)
+vsf_err_t vsfhal_core_set_stack(uint32_t sp)
 {
 	__set_MSP(sp);
 	return VSFERR_NONE;
@@ -106,7 +106,7 @@ vsf_err_t vsfhal_interface_set_stack(uint32_t sp)
 // sleep will enable interrupt
 // for cortex processor, if an interrupt occur between enable the interrupt
 // 		and __WFI, wfi will not make the core sleep
-void vsfhal_interface_sleep(uint32_t mode)
+void vsfhal_core_sleep(uint32_t mode)
 {
 	vsf_leave_critical();
 	__WFI();
@@ -121,12 +121,12 @@ void nuc400_unlock_reg(void)
     }
 }
 
-void nuc400l_lock_reg(void)
+void nuc400_lock_reg(void)
 {
 	SYS->REGLCTL = 0;
 }
 
-vsf_err_t vsfhal_interface_init(void *p)
+vsf_err_t vsfhal_core_init(void *p)
 {
 	uint32_t temp32;
 	uint32_t freq_in;
@@ -259,7 +259,7 @@ vsf_err_t vsfhal_interface_init(void *p)
 	}	
 #endif
 	
-	nuc400l_lock_reg();
+	nuc400_lock_reg();
 
 	SCB->VTOR = vsfhal_info.vector_table;
 	SCB->AIRCR = 0x05FA0000 | vsfhal_info.priority_group;

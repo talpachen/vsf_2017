@@ -13,8 +13,6 @@
  *      YYYY-MM-DD:     What(by Who)                                      *
  *      2008-11-07:     created(by SimonQian)                             *
  **************************************************************************/
-#ifndef __INTERFACES_CFG_H__
-#define __INTERFACES_CFG_H__
 
 #ifndef CORE_CLKEN
 #	define CORE_CLKEN						NUC400_CLK_HXT
@@ -80,6 +78,4 @@
 #define USART3_INT_EN						1
 #define USART4_0_ENABLE						1
 #define USART4_INT_EN						1
-
-#endif // __INTERFACES_CFG_H__
 

@@ -125,7 +125,7 @@ static void vsfusbd_transact_out(struct vsfusbd_device_t *device,
 									struct vsfusbd_transact_t *transact)
 {
 	uint8_t ep = transact->ep;
-	struct interface_usbd_t *drv = device->drv;
+	struct vsfhal_usbd_t *drv = device->drv;
 
 	if (transact->idle)
 	{
@@ -411,7 +411,7 @@ static vsf_err_t vsfusbd_auto_init(struct vsfusbd_device_t *device)
 
 static vsf_err_t vsfusbd_stdctrl_prepare(struct vsfusbd_device_t *device)
 {
-	struct interface_usbd_t *drv = device->drv;
+	struct vsfhal_usbd_t *drv = device->drv;
 	struct vsfusbd_config_t *config = &device->config[device->configuration];
 	struct vsfusbd_ctrl_handler_t *ctrl_handler = &device->ctrl_handler;
 	struct usb_ctrlrequest_t *request = &ctrl_handler->request;
@@ -991,7 +991,7 @@ vsfusbd_evt_handler(struct vsfsm_t *sm, vsfsm_evt_t evt)
 {
 	struct vsfusbd_device_t *device =
 								container_of(sm, struct vsfusbd_device_t, sm);
-	struct interface_usbd_t *drv = device->drv;
+	struct vsfhal_usbd_t *drv = device->drv;
 	vsf_err_t err = VSFERR_NONE;
 
 	switch (evt)

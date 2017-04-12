@@ -27,8 +27,8 @@
 #define VSFCFG_LIST
 #define VSFCFG_STREAM
 #define VSFCFG_MAL
-#define VSFCFG_SCSI
-#define VSFCFG_FILE
+//#define VSFCFG_SCSI
+//#define VSFCFG_FILE
 
 // include VSFCFG_STANDALONE_MODULE to compile the project as a module
 //#define VSFCFG_STANDALONE_MODULE
@@ -38,6 +38,8 @@
 
 // define VSFCFG_FUNC_XXXX to include corresponding func
 #define VSFCFG_FUNC_USBD
-
-#define VSFUSBD_CFG_EPMAXNO				1
+//#define VSFCFG_FUNC_USBH
+#define VSFCFG_FUNC_SHELL
+//#define VSFCFG_FUNC_TCPIP
+//#define VSFCFG_FUNC_BCMWIFI
 

@@ -139,7 +139,7 @@ struct vsfusbd_device_t
 	struct vsfusbd_config_t *config;
 	struct vsfusbd_desc_filter_t *desc_filter;
 	uint8_t device_class_iface;
-	struct interface_usbd_t *drv;
+	struct vsfhal_usbd_t *drv;
 	int32_t int_priority;
 
 	struct vsfusbd_user_callback_t

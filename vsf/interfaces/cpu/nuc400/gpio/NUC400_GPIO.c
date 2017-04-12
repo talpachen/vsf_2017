@@ -64,33 +64,6 @@ vsf_err_t vsfhal_gpio_config_pin(uint8_t index, uint8_t pin_idx, uint32_t mode)
 	return VSFERR_NONE;
 }
 
-vsf_err_t vsfhal_gpio_config(uint8_t index, uint32_t pin_mask, uint32_t io, 
-							uint32_t pull_en_mask, uint32_t input_pull_mask)
-{
-	uint32_t i, mask;
-	uint8_t mode;
-	
-#if __VSF_DEBUG__
-	if (index >= NUC400_GPIO_NUM)
-	{
-		return VSFERR_NOT_SUPPORT;
-	}
-#endif
-	
-	for (i = 0; i < 16; i++)
-	{
-		mask = 1UL << i;
-		if (pin_mask & mask)
-		{
-			mode = !(io & mask) ? vsfhal_GPIO_INFLOAT :
-				(pull_en_mask & input_pull_mask & mask) ? vsfhal_GPIO_OUTOD :
-				vsfhal_GPIO_OUTPP;
-			vsfhal_gpio_config_pin(index, i, mode);
-		}
-	}
-	return VSFERR_NONE;
-}
-
 vsf_err_t vsfhal_gpio_set(uint8_t index, uint32_t pin_mask)
 {
 	uint32_t *gpio;

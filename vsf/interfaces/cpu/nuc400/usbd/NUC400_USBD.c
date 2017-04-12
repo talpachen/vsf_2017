@@ -63,7 +63,7 @@
 
 #define NUC400_USBD_EP_NUM					(12 + 2)
 const uint8_t vsfhal_usbd_ep_num = NUC400_USBD_EP_NUM;
-struct interface_usbd_callback_t vsfhal_usbd_callback;
+struct vsfhal_usbd_callback_t vsfhal_usbd_callback;
 static uint16_t EP_Cfg_Ptr;
 static uint16_t max_ctl_ep_size = 64;
 
@@ -75,6 +75,9 @@ static volatile uint16_t vsfhal_outrdy = 0, vsfhal_outen = 0;
 #define NUC400_USBD_EPOUT					0x00
 static int8_t vsfhal_usbd_epaddr[NUC400_USBD_EP_NUM];
 
+extern void nuc400_unlock_reg(void);
+extern void nuc400_lock_reg(void);
+
 vsf_err_t vsfhal_usbd_init(int32_t int_priority)
 {
 	nuc400_unlock_reg();
@@ -82,7 +85,7 @@ vsf_err_t vsfhal_usbd_init(int32_t int_priority)
 	CLK->AHBCLK |= CLK_AHBCLK_USBDCKEN_Msk;
 	// Enable USB PHY: USB device
 	SYS->USBPHY = 0x100;
-	nuc400l_lock_reg();
+	nuc400_lock_reg();
 
 	USBD->PHYCTL |= USBD_PHYCTL_PHYEN_Msk;
 	while (USBD->EP[0].EPMPS != 0x20)

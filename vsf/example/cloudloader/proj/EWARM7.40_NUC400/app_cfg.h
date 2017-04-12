@@ -14,18 +14,9 @@
  *      2008-11-07:     created(by SimonQian)                             *
  **************************************************************************/
 
-// hardware config file
-#include "hw_cfg_nuc400.h"
-
-// compiler config
-#include "compiler.h"
-
-
-#define APPCFG_VSFTIMER_NUM				64
-#define APPCFG_VSFSM_PENDSVQ_LEN		0
-#define APPCFG_VSFSM_MAINQ_LEN			64
-#define APPCFG_VSFSM_MAINQ_POLLING
-
-#define APPCFG_BUFMGR_SIZE				(8 * 1024)
-
-
+// framework config
+#define APPCFG_VSFTIMER_NUM					16
+#define APPCFG_VSFSM_PENDSVQ_LEN			0
+#define APPCFG_VSFSM_MAINQ_LEN				16
+//#define APPCFG_VSFSM_MAINQ_POLLING
+#define APPCFG_BUFMGR_SIZE					(8 * 1024)

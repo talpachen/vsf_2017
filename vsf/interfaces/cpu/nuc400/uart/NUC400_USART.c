@@ -200,7 +200,7 @@ vsf_err_t vsfhal_usart_config(uint8_t index, uint32_t baudrate, uint32_t mode)
 	usart->FIFO = 0x5ul << 4; // 46/14 (64/16)
 	usart->TOUT = 60;
 
-	if (vsfhal_interface_get_info(&info))
+	if (vsfhal_core_get_info(&info))
 	{
 		return VSFERR_FAIL;
 	}

@@ -321,7 +321,6 @@
           <state>$PROJ_DIR$\..\..\..\..\compiler\IAR</state>
           <state>$PROJ_DIR$\..\..\..\..\interfaces</state>
           <state>$PROJ_DIR$\..\..\..\..\interfaces\cpu\nuc400</state>
-          <state>$PROJ_DIR$\..\..\..\..\interfaces\cpu\nuc400\core</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -1941,48 +1940,12 @@
         </file>
       </group>
       <group>
-        <name>file</name>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\..\component\file\fs\malfs\vsf_malfs.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\..\component\file\fs\malfs\vsf_malfs.h</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\..\component\file\fs\malfs\fat\vsffat.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\..\component\file\fs\malfs\fat\vsffat.h</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\..\component\file\vsfile.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\..\component\file\vsfile.h</name>
-        </file>
-      </group>
-      <group>
         <name>list</name>
         <file>
           <name>$PROJ_DIR$\..\..\..\..\component\list\list.c</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\..\component\list\list.h</name>
-        </file>
-      </group>
-      <group>
-        <name>mal</name>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\..\component\mal\vsfmal.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\..\component\mal\vsfmal.h</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\..\component\mal\vsfscsi.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\..\component\mal\vsfscsi.h</name>
         </file>
       </group>
       <group>
@@ -2105,15 +2068,6 @@
           </group>
           <group>
             <name>device</name>
-            <group>
-              <name>MSC</name>
-              <file>
-                <name>$PROJ_DIR$\..\..\..\..\stack\usb\class\device\MSC\vsfusbd_MSC_BOT.c</name>
-              </file>
-              <file>
-                <name>$PROJ_DIR$\..\..\..\..\stack\usb\class\device\MSC\vsfusbd_MSC_BOT.h</name>
-              </file>
-            </group>
           </group>
         </group>
         <group>

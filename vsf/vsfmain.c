@@ -185,7 +185,7 @@ int main(void)
 		else
 			vsf_leave_critical();
 #else
-		vsfhal_core_sleep(SLEEP_WFI);
+		vsfhal_core_sleep(VSFHAL_SLEEP_WFI);
 #endif
 	}
 }

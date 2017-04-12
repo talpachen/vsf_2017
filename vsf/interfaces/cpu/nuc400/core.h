@@ -47,23 +47,5 @@ struct vsfhal_info_t
 	uint32_t pclk_freq_hz;
 };
 
-vsf_err_t vsfhal_interface_init(void *p);
-vsf_err_t vsfhal_interface_fini(void *p);
-vsf_err_t vsfhal_interface_reset(void *p);
-uint32_t vsfhal_interface_get_stack(void);
-vsf_err_t vsfhal_interface_set_stack(uint32_t sp);
-void vsfhal_interface_sleep(uint32_t mode);
-vsf_err_t vsfhal_interface_get_info(struct vsfhal_info_t **info);
-
-uint32_t vsfhal_uid_get(uint8_t *buffer, uint32_t size);
-
-vsf_err_t vsfhal_delay_delayms(uint16_t ms);
-vsf_err_t vsfhal_delay_delayus(uint16_t us);
-
-vsf_err_t vsfhal_tickclk_init(void);
-vsf_err_t vsfhal_tickclk_fini(void);
-vsf_err_t vsfhal_tickclk_start(void);
-vsf_err_t vsfhal_tickclk_stop(void);
-uint32_t vsfhal_tickclk_get_count(void);
-
 #endif	// __NUC400_CORE_H_INCLUDED__
+

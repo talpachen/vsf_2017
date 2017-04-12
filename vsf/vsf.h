@@ -490,7 +490,7 @@ struct vsf_t
 #define vsfhal_eint_enable				vsfhal_eint_if->enable
 #define vsfhal_eint_disable				vsfhal_eint_if->disable
 
-#define vsfhal_usbd_if					((struct interface_usbd_t *)vafhal_getif("usbd"))
+#define vsfhal_usbd_if					((struct vsfhal_usbd_t *)vafhal_getif("usbd"))
 
 #define vsfhal_hcd_if					((struct interface_hcd_t *)vafhal_getif("hcd"))
 #define vsfhal_hcd_init					vsfhal_hcd_if->init

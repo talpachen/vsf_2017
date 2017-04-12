@@ -13,16 +13,34 @@
  *      YYYY-MM-DD:     What(by Who)                                      *
  *      2011-04-08:     created(by SimonQian)                             *
  **************************************************************************/
-#ifndef __NUC400_INTERFACE_CONST_H_INCLUDED__
-#define __NUC400_INTERFACE_CONST_H_INCLUDED__
+#ifndef __INTERFACE_CONST_H__
+#define __INTERFACE_CONST_H__
 
 #include "NUC472_442.h"
 
-#define VSF_BASE_ADDR				0x00000200
+// common
+#define VSFHAL_DUMMY_PORT					0xFF
 
-#define vsfhal_SLEEP_WFI			0
-#define vsfhal_SLEEP_PWRDOWN		1
+// core
+#define VSFHAL_SLEEP_WFI					(0x1ul << 0)
+#define VSFHAL_SLEEP_PWRDOWN				(0x1ul << 1)
 
+// usart
+#define VSFHAL_USART_STOPBITS_1				(0x0ul << 4)
+#define VSFHAL_USART_STOPBITS_1P5			(0x1ul << 4)
+#define VSFHAL_USART_STOPBITS_2				(0x1ul << 4)
+#define VSFHAL_USART_PARITY_NONE			(0x0ul << 0)
+#define VSFHAL_USART_PARITY_ODD				(0x2ul << 0)
+#define VSFHAL_USART_PARITY_EVEN			(0x3ul << 0)
+
+// GPIO
+#define VSFHAL_GPIO_INPUT					(0x0ul << 0)
+#define VSFHAL_GPIO_OUTPP					(0x0ul << 0)
+#define VSFHAL_GPIO_OUTOD					(0x0ul << 0)
+#define VSFHAL_GPIO_PULLUP					(0x1ul << 0)
+#define VSFHAL_GPIO_PULLDOWN				(0x1ul << 0)
+
+#if 0
 #define vsfhal_USART_MODE0			
 #define vsfhal_USART_MODE1			
 #define vsfhal_USART_MODE2			
@@ -62,5 +80,5 @@
 #define vsfhal_SDIO_RESP_NONE		
 #define vsfhal_SDIO_RESP_SHORT		
 #define vsfhal_SDIO_RESP_LONG		
-
-#endif	// __NUC400_INTERFACE_CONST_H_INCLUDED__
+#endif
+#endif	// __INTERFACE_CONST_H__

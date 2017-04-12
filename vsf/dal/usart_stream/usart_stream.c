@@ -77,7 +77,7 @@ static void uart_on_rx(void *p)
 
 vsf_err_t usart_stream_init(struct usart_stream_info_t *usart_stream)
 {
-	if (usart_stream->index == IFS_DUMMY_PORT)
+	if (usart_stream->index == VSFHAL_DUMMY_PORT)
 		return VSFERR_FAIL;
 	
 	stream_init(usart_stream->stream_tx);
@@ -105,7 +105,7 @@ vsf_err_t usart_stream_init(struct usart_stream_info_t *usart_stream)
 
 vsf_err_t usart_stream_fini(struct usart_stream_info_t *usart_stream)
 {
-	if (usart_stream->index == IFS_DUMMY_PORT)
+	if (usart_stream->index == VSFHAL_DUMMY_PORT)
 		return VSFERR_FAIL;
 
 	vsfhal_usart_config_cb(usart_stream->index, 0, NULL, NULL, NULL);
