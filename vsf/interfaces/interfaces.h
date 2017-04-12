@@ -119,7 +119,7 @@ struct vsfhal_usbd_callback_t
 };
 struct vsfhal_usbd_t
 {
-	vsf_err_t (*init)(uint32_t int_priority);
+	vsf_err_t (*init)(int32_t int_priority);
 	vsf_err_t (*fini)(void);
 	vsf_err_t (*reset)(void);
 

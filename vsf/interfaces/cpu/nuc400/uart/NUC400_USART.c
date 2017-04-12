@@ -1,15 +1,15 @@
 #include "vsf.h"
 #include "core.h"
 
-#if IFS_USART_EN
+#if VSFHAL_USART_EN
 
 #define UART_IS_RX_READY(uart)		((uart->FIFOSTS & UART_FIFOSTS_RXEMPTY_Msk) >> UART_FIFOSTS_RXEMPTY_Pos)
 #define UART_IS_TX_EMPTY(uart)		((uart->FIFOSTS & UART_FIFOSTS_TXEMPTYF_Msk) >> UART_FIFOSTS_TXEMPTYF_Pos)
 #define UART_IS_TX_FIFO_FULL(uart)	((uart->FIFOSTS & UART_FIFOSTS_TXFULL_Msk) >> UART_FIFOSTS_TXFULL_Pos)
 
-static void (*vsfhal_usart_ontx[USART_NUM])(void *);
-static void (*vsfhal_usart_onrx[USART_NUM])(void *, uint16_t data);
-static void *vsfhal_usart_callback_param[USART_NUM];
+static void (*vsfhal_usart_ontx[VSFHAL_USART_NUM])(void *);
+static void (*vsfhal_usart_onrx[VSFHAL_USART_NUM])(void *, uint16_t data);
+static void *vsfhal_usart_callback_param[VSFHAL_USART_NUM];
 
 vsf_err_t vsfhal_usart_init(uint8_t index)
 {

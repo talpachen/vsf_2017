@@ -1927,6 +1927,21 @@
     </settings>
   </configuration>
   <group>
+    <name>shell_cmd</name>
+    <file>
+      <name>$PROJ_DIR$\shell_cmd\cdcuart.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\shell_cmd\cdcuart.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\shell_cmd\help.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\shell_cmd\help.h</name>
+    </file>
+  </group>
+  <group>
     <name>vsf</name>
     <group>
       <name>component</name>
@@ -1972,6 +1987,15 @@
     </group>
     <group>
       <name>framework</name>
+      <group>
+        <name>vsfshell</name>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\..\framework\vsfshell\vsfshell.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\..\framework\vsfshell\vsfshell.h</name>
+        </file>
+      </group>
       <group>
         <name>vsfsm</name>
         <file>
@@ -2068,6 +2092,21 @@
           </group>
           <group>
             <name>device</name>
+            <group>
+              <name>CDC</name>
+              <file>
+                <name>$PROJ_DIR$\..\..\..\..\stack\usb\class\device\CDC\vsfusbd_CDC.c</name>
+              </file>
+              <file>
+                <name>$PROJ_DIR$\..\..\..\..\stack\usb\class\device\CDC\vsfusbd_CDC.h</name>
+              </file>
+              <file>
+                <name>$PROJ_DIR$\..\..\..\..\stack\usb\class\device\CDC\vsfusbd_CDCACM.c</name>
+              </file>
+              <file>
+                <name>$PROJ_DIR$\..\..\..\..\stack\usb\class\device\CDC\vsfusbd_CDCACM.h</name>
+              </file>
+            </group>
           </group>
         </group>
         <group>
@@ -2128,10 +2167,9 @@
     <name>$PROJ_DIR$\interfaces_cfg.h</name>
   </file>
   <file>
-    <name>$PROJ_DIR$\..\..\usbd_msc_config.c</name>
+    <name>$PROJ_DIR$\..\..\usbd_config.c</name>
     <excluded>
       <configuration>Debug</configuration>
-      <configuration>Release</configuration>
     </excluded>
   </file>
   <file>

@@ -339,7 +339,11 @@ vsf_err_t vsfshell_input_thread(struct vsfsm_pt_t *pt, vsfsm_evt_t evt)
 	vsfsm_pt_begin(pt);
 	vsfsm_pt_wfe(pt, VSFSHELL_EVT_STREAMTX_ONCONN);
 	vsfshell_printf(output_pt,
-					"vsfshell 0.1 beta by SimonQian" VSFSHELL_LINEEND);
+		"vsfshell 0.1 beta by SimonQian" VSFSHELL_LINEEND);
+	vsfshell_printf(output_pt,
+		"    https://github.com/versaloon/vsf" VSFSHELL_LINEEND);
+	vsfshell_printf(output_pt,
+		"    Using \"help\" for more information" VSFSHELL_LINEEND);
 	vsfshell_printf(output_pt, VSFSHELL_PROMPT);
 	shell->prompted = true;
 	while (1)

@@ -17,7 +17,11 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "vsf.h"
+#include "compiler.h"
+
+#include "vsftimer.h"
+#include "interfaces.h"
+#include "framework/vsfsm/vsfsm.h"
 
 static struct vsfsm_state_t *
 vsftimer_init_handler(struct vsfsm_t *sm, vsfsm_evt_t evt);

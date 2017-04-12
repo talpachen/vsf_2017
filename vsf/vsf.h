@@ -20,6 +20,10 @@
 #ifndef __VSF_H_INCLUDED__
 #define __VSF_H_INCLUDED__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "app_cfg.h"
 #include "app_type.h"
 
@@ -111,9 +115,6 @@ struct vsf_module_t
 #ifdef VSFCFG_SCSI
 #include "stack/usb/class/device/MSC/vsfusbd_MSC_BOT.h"
 #endif
-#ifdef VSFCFG_FUNC_SDCD
-#include "stack/usb/core/dcd/sdcd/vsfsdcd.h"
-#endif
 #endif
 
 #ifdef VSFCFG_FUNC_USBH
@@ -125,12 +126,6 @@ struct vsf_module_t
 #ifdef VSFCFG_SCSI
 #include "stack/usb/class/host/MSC/vsfusbh_MSC.h"
 #endif
-#endif
-
-#ifdef VSFCFG_FUNC_MFI
-#include "stack/mfi/vsfmfi.h"
-#include "stack/mfi/func/HID/vsfmfi_HID.h"
-#include "stack/mfi/func/EAP/vsfmfi_EAP.h"
 #endif
 
 #ifdef VSFCFG_FUNC_BCMWIFI
@@ -681,5 +676,9 @@ void* vsf_module_load(char *name, bool dead);
 void vsf_module_unload(char *name);
 #endif
 #endif		// VSFCFG_STANDALONE_MODULE
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif		// __VSF_H_INCLUDED__

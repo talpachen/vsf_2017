@@ -3,6 +3,8 @@
 #include "NUC472_442.h"
 #include "NUC400_FLASH.h"
 
+#if VSFHAL_FLASH_EN
+
 #define NUC400_FLASH_NUM					1
 
 #define NUC400_FLASH_BASEADDR				0x00000000
@@ -143,3 +145,6 @@ vsf_err_t vsfhal_flash_write(uint8_t index, uint32_t addr, uint8_t *buff)
 	}
 	return VSFERR_NONE;
 }
+
+#endif // VSFHAL_FLASH_EN
+

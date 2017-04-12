@@ -56,7 +56,7 @@
 //	*((__IO uint8_t *)((uint32_t)&USBD->reg + (uint32_t)((uint8_t)(ep) * 0x28)))
 #define NUC400_USBD_EP_REG(ep, reg)			(USBD->EP[ep].reg)
 
-#if IFS_USBD_EN
+#if VSFHAL_USBD_EN
 
 #include "NUC400_USBD.h"
 #include "NUC472_442.h"

@@ -48,25 +48,14 @@
 #	define CORE_VECTOR_TABLE				FLASH_LOAD_OFFSET
 #endif
 
+#define VSFHAL_GPIO_EN						1
+#define VSFHAL_USBD_EN						1
+#define VSFHAL_USART_EN						1
+#define VSFHAL_FLASH_EN						1
+
 
 // USART config
-#define USART_NUM							5
-
-#define IFS_FLASH_EN						1
-#define IFS_USART_EN						1
-#define IFS_SPI_EN							0
-#define IFS_ADC_EN							0
-#define IFS_GPIO_EN							1
-#define IFS_I2C_EN							0
-#define IFS_PWM_EN							0
-#define IFS_MICROWIRE_EN					0
-#define IFS_TIMER_EN						0
-#define IFS_EINT_EN							0
-#define IFS_EBI_EN							0
-#define IFS_SDIO_EN							0
-#define IFS_USBD_EN							1
-#define IFS_USBIO_EN						0
-#define IFS_HCD_EN							0
+#define VSFHAL_USART_NUM					5
 
 #define USART0_0_ENABLE						1
 #define USART0_INT_EN						1

@@ -15,7 +15,7 @@
  **************************************************************************/
 #include "vsf.h"
 
-#if IFS_GPIO_EN
+#if VSFHAL_GPIO_EN
 
 #include "NUC400_GPIO.h"
 

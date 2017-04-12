@@ -245,7 +245,7 @@ vsf_err_t vsfhal_core_init(void *p)
 		FMC->FTCTL = 0x3 << 4;
 	}
 	
-#if (IFS_USBD_EN | IFS_HCD_EN)
+#if (VSFHAL_USBD_EN | VSFHAL_HCD_EN)
 	CLK->AHBCLK |= CLK_AHBCLK_USBDCKEN_Msk;
 	SYS->USBPHY = 0x100;
 	USBD->PHYCTL |= USBD_PHYCTL_PHYEN_Msk;

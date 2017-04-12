@@ -56,23 +56,6 @@
 #	define REFERENCE_PARAMETER(a)	(a) = (a)
 #endif
 
-#define REPEAT_CODE_B0(body)		body
-#define REPEAT_CODE_B1(body)		REPEAT_CODE_B0(body) REPEAT_CODE_B0(body)
-#define REPEAT_CODE_B2(body)		REPEAT_CODE_B1(body) REPEAT_CODE_B1(body)
-#define REPEAT_CODE_B3(body)		REPEAT_CODE_B2(body) REPEAT_CODE_B2(body)
-#define REPEAT_CODE_B4(body)		REPEAT_CODE_B3(body) REPEAT_CODE_B3(body)
-#define REPEAT_CODE_B5(body)		REPEAT_CODE_B4(body) REPEAT_CODE_B4(body)
-#define REPEAT_CODE_B6(body)		REPEAT_CODE_B5(body) REPEAT_CODE_B5(body)
-#define REPEAT_CODE_B7(body)		REPEAT_CODE_B6(body) REPEAT_CODE_B6(body)
-#define REPEAT_CODE(n, body)		if ((n) & 0x80){REPEAT_CODE_B7(body)}\
-									if ((n) & 0x40){REPEAT_CODE_B6(body)}\
-									if ((n) & 0x20){REPEAT_CODE_B5(body)}\
-									if ((n) & 0x10){REPEAT_CODE_B4(body)}\
-									if ((n) & 0x08){REPEAT_CODE_B3(body)}\
-									if ((n) & 0x04){REPEAT_CODE_B2(body)}\
-									if ((n) & 0x02){REPEAT_CODE_B1(body)}\
-									if ((n) & 0x01){REPEAT_CODE_B0(body)}
-
 #include "tool/bittool/bittool.h"
 
 #define BIT_REVERSE_U8C(v8)			do {\
