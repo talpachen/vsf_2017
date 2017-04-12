@@ -27486,25 +27486,329 @@ typedef struct {
     @addtogroup USBD USB Device Controller(USBD)
     Memory Mapped Structure for USBD Controller
 @{ */
+ 
+ typedef struct {
 
-typedef struct {
+    union {
+
+    /**
+     * EPxDAT
+     * ===================================================================================================
+     * Offset: 0x64+x*0x28   Endpoint x Data Register
+     * ---------------------------------------------------------------------------------------------------
+     * |Bits    |Field     |Descriptions
+     * | :----: | :----:   | :---- |
+     * |[31:0]  |EPDAT     |Endpoint A~L Data Register
+     * |        |          |Endpoint A~L data buffer for the buffer transaction (read or write).
+     * |        |          |Only word or byte access are supported.
+ */			
+        __IO uint32_t EPDAT;
+  /**
+     * EPxDAT_BYTE
+     * ===================================================================================================
+     * Offset: 0x64+x*0x28   Endpoint x Data Register for Byte Access
+     * ---------------------------------------------------------------------------------------------------
+     * |Bits    |Field     |Descriptions
+     * | :----: | :----:   | :---- |
+     * |[31:0]  |EPDAT     |Endpoint A~L Data Register
+     * |        |          |Endpoint A~L data buffer for the buffer transaction (read or write).
+     * |        |          |Only word or byte access are supported.
+ */							
+        __IO uint8_t  EPDAT_BYTE;
+
+    }; ///< Define EPx Data Register 32-bit or 8-bit access
+ /**
+     * EPxINTSTS
+     * ===================================================================================================
+     * Offset: 0x68+x*0x28  Endpoint x Interrupt Status Register
+     * ---------------------------------------------------------------------------------------------------
+     * |Bits    |Field     |Descriptions
+     * | :----: | :----:   | :---- |
+     * |[0]     |BUFFULLIF |Buffer Full
+     * |        |          |For an IN endpoint, the currently selected buffer is full, or no buffer is available to the local side for writing (no space to write).
+     * |        |          |For an OUT endpoint, there is a buffer available on the local side, and there are FIFO full of bytes available to be read (entire packet is available for reading.
+     * |        |          |0 = The endpoint packet buffer is not full.
+     * |        |          |1 = The endpoint packet buffer is full.
+     * |        |          |Note: This bit is read-only.
+     * |[1]     |BUFEMPTYIF|Buffer Empty
+     * |        |          |For an IN endpoint, a buffer is available to the local side for writing up to FIFO full of bytes.
+     * |        |          |0 = The endpoint buffer is not empty.
+     * |        |          |1 = The endpoint buffer is empty.
+     * |        |          |For an OUT endpoint:
+     * |        |          |0 = The currently selected buffer does not have a count of 0.
+     * |        |          |1 = The currently selected buffer has a count of 0, or no buffer is available on the local side (nothing to read).
+     * |        |          |Note: This bit is read-only.
+     * |[2]     |SHORTTXIF |Short Packet Transferred Interrupt
+     * |        |          |0 = The length of the last packet was not less than the Maximum Packet Size (EPMPS).
+     * |        |          |1 = The length of the last packet was less than the Maximum Packet Size (EPMPS).
+     * |        |          |Note: Write 1 to clear this bit to 0.
+     * |[3]     |TXPKIF    |Data Packet Transmitted Interrupt
+     * |        |          |0 = No data packet is transmitted from the endpoint to the host.
+     * |        |          |1 = A data packet is transmitted from the endpoint to the host.
+     * |        |          |Note: Write 1 to clear this bit to 0.
+     * |[4]     |RXPKIF    |Data Packet Received Interrupt
+     * |        |          |0 = No data packet is received from the host by the endpoint.
+     * |        |          |1 = A data packet is received from the host by the endpoint.
+     * |        |          |Note: Write 1 to clear this bit to 0.
+     * |[5]     |OUTTKIF   |Data OUT Token Interrupt
+     * |        |          |0 = A Data OUT token has not been received from the host.
+     * |        |          |1 = A Data OUT token has been received from the host.
+     * |        |          |This bit also set by PING token (in high-speed only.
+     * |        |          |Note: Write 1 to clear this bit to 0.
+     * |[6]     |INTKIF    |Data IN Token Interrupt
+     * |        |          |0 = No Data IN token has been received from the host.
+     * |        |          |1 = A Data IN token has been received from the host.
+     * |        |          |Write 1 to clear this bit to 0.
+     * |[7]     |PINGIF    |PING Token Interrupt
+     * |        |          |0 = A Data PING token has not been received from the host.
+     * |        |          |1 = A Data PING token has been received from the host.
+     * |        |          |Write 1 to clear this bit to 0.
+     * |[8]     |NAKIF     |USB NAK Sent
+     * |        |          |0 = The last USB IN packet could be provided, and was acknowledged with an ACK.
+     * |        |          |1 = The last USB IN packet could not be provided, and was acknowledged with a NAK.
+     * |        |          |Write 1 to clear this bit to 0.
+     * |[9]     |STALLIF   |USB STALL Sent
+     * |        |          |0 = The last USB packet could be accepted or provided because the endpoint was stalled, and was acknowledged with a STALL.
+     * |        |          |1 = The last USB packet could not be accepted or provided because the endpoint was stalled, and was acknowledged with a STALL.
+     * |        |          |Write 1 to clear this bit to 0.
+     * |[10]    |NYETIF    |NYET Sent
+     * |        |          |0 = The space available in the RAM is sufficient to accommodate the next on coming data packet.
+     * |        |          |1 = The space available in the RAM is not sufficient to accommodate the next on coming data packet.
+     * |        |          |Write 1 to clear this bit to 0.
+     * |[11]    |ERRIF     |ERR Sent
+     * |        |          |0 = No any error in the transaction.
+     * |        |          |1 = There occurs any error in the transaction.
+     * |        |          |Write 1 to clear this bit to 0.
+     * |[12]    |SHORTRXIF |Bulk Out Short Packet Received
+     * |        |          |0 = No bulk out short packet is received.
+     * |        |          |1 = Received bulk out short packet (including zero length packet).
+     * |        |          |Write 1 to clear this bit to 0.
+ */
+    __IO uint32_t EPINTSTS;
+   /**
+     * EPxINTEN
+     * ===================================================================================================
+     * Offset: 0x6C+x*0x28   Endpoint x Interrupt Enable Register
+     * ---------------------------------------------------------------------------------------------------
+     * |Bits    |Field     |Descriptions
+     * | :----: | :----:   | :---- |
+     * |[0]     |BUFFULLIEN|Buffer Full Interrupt
+     * |        |          |When set, this bit enables a local interrupt to be set when a buffer full condition is detected on the bus.
+     * |        |          |0 = Buffer full interrupt Disabled.
+     * |        |          |1 = Buffer full interrupt Enabled.
+     * |[1]     |BUFEMPTYIEN|Buffer Empty Interrupt
+     * |        |          |When set, this bit enables a local interrupt to be set when a buffer empty condition is detected on the bus.
+     * |        |          |0 = Buffer empty interrupt Disabled.
+     * |        |          |1 = Buffer empty interrupt Enabled.
+     * |[2]     |SHORTTXIEN|Short Packet Transferred Interrupt Enable Bit
+     * |        |          |When set, this bit enables a local interrupt to be set when a short data packet has been transferred to/from the host.
+     * |        |          |0 = Short data packet interrupt Disabled.
+     * |        |          |1 = Short data packet interrupt Enabled.
+     * |[3]     |TXPKIEN   |Data Packet Transmitted Interrupt Enable Bit
+     * |        |          |When set, this bit enables a local interrupt to be set when a data packet has been received from the host.
+     * |        |          |0 = Data packet has been received from the host interrupt Disabled.
+     * |        |          |1 = Data packet has been received from the host interrupt Enabled.
+     * |[4]     |RXPKIEN   |Data Packet Received Interrupt Enable Bit
+     * |        |          |When set, this bit enables a local interrupt to be set when a data packet has been transmitted to the host.
+     * |        |          |0 = Data packet has been transmitted to the host interrupt Disabled.
+     * |        |          |1 = Data packet has been transmitted to the host interrupt Enabled.
+     * |[5]     |OUTTKIEN  |Data OUT Token Interrupt Enable Bit
+     * |        |          |When set, this bit enables a local interrupt to be set when a Data OUT token has been received from the host.
+     * |        |          |0 = Data OUT token interrupt Disabled.
+     * |        |          |1 = Data OUT token interrupt Enabled.
+     * |[6]     |INTKIEN   |Data IN Token Interrupt Enable Bit
+     * |        |          |When set, this bit enables a local interrupt to be set when a Data IN token has been received from the host.
+     * |        |          |0 = Data IN token interrupt Disabled.
+     * |        |          |1 = Data IN token interrupt Enabled.
+     * |[7]     |PINGIEN   |PING Token Interrupt Enable Bit
+     * |        |          |When set, this bit enables a local interrupt to be set when a PING token has been received from the host.
+     * |        |          |0 = PING token interrupt Disabled.
+     * |        |          |1 = PING token interrupt Enabled.
+     * |[8]     |NAKIEN    |USB NAK Sent Interrupt Enable Bit
+     * |        |          |When set, this bit enables a local interrupt to be set when a NAK token is sent to the host.
+     * |        |          |0 = NAK token interrupt Disabled.
+     * |        |          |1 = NAK token interrupt Enabled.
+     * |[9]     |STALLIEN  |USB STALL Sent Interrupt Enable Bit
+     * |        |          |When set, this bit enables a local interrupt to be set when a stall token is sent to the host.
+     * |        |          |0 = STALL token interrupt Disabled.
+     * |        |          |1 = STALL token interrupt Enabled.
+     * |[10]    |NYETIEN   |NYET Interrupt Enable Bit
+     * |        |          |When set, this bit enables a local interrupt to be set whenever NYET condition occurs on the bus for this endpoint.
+     * |        |          |0 = NYET condition interrupt Disabled.
+     * |        |          |1 = NYET condition interrupt Enabled.
+     * |[11]    |ERRIEN    |ERR Interrupt Enable Bit
+     * |        |          |When set, this bit enables a local interrupt to be set whenever ERR condition occurs on the bus for this endpoint.
+     * |        |          |0 = Error event interrupt Disabled.
+     * |        |          |1 = Error event interrupt Enabled.
+     * |[12]    |SHORTRXIEN|Bulk Out Short Packet Interrupt Enable Bit
+     * |        |          |When set, this bit enables a local interrupt to be set whenever bulk out short packet occurs on the bus for this endpoint.
+     * |        |          |0 = Bulk out interrupt Disabled.
+     * |        |          |1 = Bulk out interrupt Enabled.
+ */
+    __IO uint32_t EPINTEN;
+    /**
+     * EPxDATCNT
+     * ===================================================================================================
+     * Offset: 0x70+x*0x28   Endpoint x Data Available Count Register
+     * ---------------------------------------------------------------------------------------------------
+     * |Bits    |Field     |Descriptions
+     * | :----: | :----:   | :---- |
+     * |[15:0]  |DATCNT    |Data Count
+     * |        |          |For an IN endpoint (EPDIR(USBD_EPxCFG[3] is high.), this register returns the number of valid bytes in the IN endpoint packet buffer.
+     * |        |          |For an OUT endpoint (EPDIR(USBD_EPxCFG[3] is low.), this register returns the number of received valid bytes in the Host OUT transfer.
+     * |[30:16] |DMALOOP   |DMA Loop
+     * |        |          |This register is the remaining DMA loop to complete. Each loop means 32-byte transfer.
+ */
+    __I  uint32_t EPDATCNT;
+
+    /**
+     * EPxRSPCTL
+     * ===================================================================================================
+     * Offset: 0x74+x*0x28  Endpoint x Response Control Register
+     * ---------------------------------------------------------------------------------------------------
+     * |Bits    |Field     |Descriptions
+     * | :----: | :----:   | :---- |
+     * |[0]     |FLUSH     |Buffer Flush
+     * |        |          |Writing 1 to this bit causes the packet buffer to be flushed and the corresponding EP_AVAIL register to be cleared.
+     * |        |          |This bit is self-cleared.
+     * |        |          |This bit should always be written after a configuration even.
+     * |        |          |0 = The packet buffer is not flushed.
+     * |        |          |1 = The packet buffer is flushed by user.
+     * |[2:1]   |MODE      |Mode Control
+     * |        |          |The two bits determine the operation mode of the in-endpoint.
+     * |        |          |00 = Auto-Validate Mode.
+     * |        |          |01 = Manual-Validate Mode.
+     * |        |          |10 = Fly Mode.
+     * |        |          |11 = Reserved.
+     * |        |          |Note: These bits are not valid for an out-endpoint.
+     * |        |          |The auto validate mode will be activated when the reserved mode is selected.
+     * |[3]     |TOGGLE    |Endpoint Toggle
+     * |        |          |This bit is used to clear the endpoint data toggle bit.
+     * |        |          |Reading this bit returns the current state of the endpoint data toggle bi.
+     * |        |          |The local CPU may use this bit to initialize the end-point's toggle in case of reception of a Set Interface request or a Clear Feature (ep_halt) request from the host.
+     * |        |          |Only when toggle bit is "1", this bit can be written into the inversed write data bit[3.
+     * |        |          |0 = Do not clear the endpoint data toggle bit.
+     * |        |          |1 = Clear the endpoint data toggle bit.
+     * |[4]     |HALT      |Endpoint Halt
+     * |        |          |This bit is used to send a STALL handshake as response to the token from the host.
+     * |        |          |When an Endpoint Set Feature (ep_halt) is detected by the local CPU, it must write a '1' to this bi.
+     * |        |          |0 = Do not send a STALL handshake as response to the token from the host.
+     * |        |          |1 = Send a STALL handshake as response to the token from the host.
+     * |[5]     |ZEROLEN   |Zero Length
+     * |        |          |This bit is used to send a zero-length packet response to an IN-token.
+     * |        |          |When this bit is set, a zero packet is sent to the host on reception of an IN-token.
+     * |        |          |This bit gets cleared once the zero length data packet is sen.
+     * |        |          |0 = A zero packet is not sent to the host on reception of an IN-token.
+     * |        |          |1 = A zero packet is sent to the host on reception of an IN-token.
+     * |[6]     |SHORTTXEN |Short Packet Transfer Enable Bit
+     * |        |          |This bit is applicable only in case of Auto-Validate Method.
+     * |        |          |This bit is set to validate any remaining data in the buffer which is not equal to the MPS of the endpoint, and happens to be the last transfer.
+     * |        |          |This bit gets cleared once the data packet is sen.
+     * |        |          |0 = Not validate any remaining data in the buffer which is not equal to the MPS of the endpoint.
+     * |        |          |1 = Validate any remaining data in the buffer which is not equal to the MPS of the endpoint.
+     * |[7]     |DISBUF    |Buffer Disable Bit
+     * |        |          |This bit is used to receive unknown size OUT short packet.
+     * |        |          |The received packet size is reference USBD_EPxDATCNT registe.
+     * |        |          |0 = Buffer Not Disabled when Bulk-OUT short packet is received.
+     * |        |          |1 = Buffer Disabled when Bulk-OUT short packet is received.
+ */
+    __IO uint32_t EPRSPCTL;
+    /**
+     * EPxMPS
+     * ===================================================================================================
+     * Offset: 0x78+x*0x28  Endpoint x Maximum Packet Size Register
+     * ---------------------------------------------------------------------------------------------------
+     * |Bits    |Field     |Descriptions
+     * | :----: | :----:   | :---- |
+     * |[10:0]  |EPMPS     |Endpoint Maximum Packet Size
+     * |        |          |This field determines the Maximum Packet Size of the Endpoint.
+ */
+    __IO uint32_t EPMPS;
+    /**
+     * EPxTXCNT
+     * ===================================================================================================
+     * Offset: 0x7C+x*0x28  Endpoint x Transfer Count Register
+     * ---------------------------------------------------------------------------------------------------
+     * |Bits    |Field     |Descriptions
+     * | :----: | :----:   | :---- |
+     * |[10:0]  |TXCNT     |Endpoint Transfer Count
+     * |        |          |For IN endpoints, this field determines the total number of bytes to be sent to the host in case of manual validation method.
+     * |        |          |For OUT endpoints, this field has no effect.
+ */
+    __IO uint32_t EPTXCNT;
+
+    /**
+     * EPxCFG
+     * ===================================================================================================
+     * Offset: 0x80+x*0x28   Endpoint x Configuration Register
+     * ---------------------------------------------------------------------------------------------------
+     * |Bits    |Field     |Descriptions
+     * | :----: | :----:   | :---- |
+     * |[0]     |EPEN      |Endpoint Valid
+     * |        |          |When set, this bit enables this endpoint.
+     * |        |          |This bit has no effect on Endpoint 0, which is always enabled.
+     * |        |          |0 = The endpoint Disabled.
+     * |        |          |1 = The endpoint Enabled.
+     * |[2:1]   |EPTYPE    |Endpoint Type
+     * |        |          |This field selects the type of this endpoint. Endpoint 0 is forced to a Control type.
+     * |        |          |00 = Reserved.
+     * |        |          |01 = Bulk.
+     * |        |          |10 = Interrupt.
+     * |        |          |11 = Isochronous.
+     * |[3]     |EPDIR     |Endpoint Direction
+     * |        |          |0 = out-endpoint (Host OUT to Device).
+     * |        |          |1 = in-endpoint (Host IN to Device).
+     * |        |          |A maximum of one OUT and IN endpoint is allowed for each endpoint number.
+     * |[7:4]   |EPNUM     |Endpoint Number
+     * |        |          |This field selects the number of the endpoint. Valid numbers 1 to 15.
+     * |        |          |Do not support two endpoints have same endpoint number.
+ */
+    __IO uint32_t EPCFG;
+    /**
+     * EPxBUFSTART
+     * ===================================================================================================
+     * Offset: 0x84+x*0x28  Endpoint x RAM Start Address Register
+     * ---------------------------------------------------------------------------------------------------
+     * |Bits    |Field     |Descriptions
+     * | :----: | :----:   | :---- |
+     * |[11:0]  |SADDR     |Endpoint Start Address
+     * |        |          |This is the start-address of the RAM space allocated for the endpoint A~L.
+ */
+    __IO uint32_t EPBUFSTART;
+    /**
+     * EPxBUFEND
+     * ===================================================================================================
+     * Offset: 0x88+x*0x28  Endpoint x RAM End Address Register
+     * ---------------------------------------------------------------------------------------------------
+     * |Bits    |Field     |Descriptions
+     * | :----: | :----:   | :---- |
+     * |[11:0]  |EADDR     |Endpoint End Address
+     * |        |          |This is the end-address of the RAM space allocated for the endpoint A~L.
+ */
+    __IO uint32_t EPBUFEND;
+
+
+} USBD_EP_T;
+
+typedef struct
+{
 
 
     /**
      * GINTSTS
      * ===================================================================================================
-     * Offset: 0x00  Interrupt Status Low Register
+     * Offset: 0x00  Global Interrupt Status Register
      * ---------------------------------------------------------------------------------------------------
      * |Bits    |Field     |Descriptions
      * | :----: | :----:   | :---- |
      * |[0]     |USBIF     |USB Interrupt
      * |        |          |This bit conveys the interrupt status for USB specific events endpoint.
-     * |        |          |When set, USB interrupt status register should be read to determine the cause of the interrupt.
+     * |        |          |When set, USB interrupt status register should be read to determine the cause of the interrup.
      * |        |          |0 = No interrupt event occurred.
      * |        |          |1 = The related interrupt event is occurred.
      * |[1]     |CEPIF     |Control Endpoint Interrupt
      * |        |          |This bit conveys the interrupt status for control endpoint.
-     * |        |          |When set, Control-ep's interrupt status register should be read to determine the cause of the interrupt.
+     * |        |          |When set, Control-ep's interrupt status register should be read to determine the cause of the interrup.
      * |        |          |0 = No interrupt event occurred.
      * |        |          |1 = The related interrupt event is occurred.
      * |[2]     |EPAIF     |Endpoints A Interrupt
@@ -27555,77 +27859,77 @@ typedef struct {
      * |        |          |When set, the corresponding Endpoint L's interrupt status register should be read to determine the cause of the interrupt.
      * |        |          |0 = No interrupt event occurred.
      * |        |          |1 = The related interrupt event is occurred.
-    */
-    __I  uint32_t GINTSTS;
-    uint32_t RESERVE0[1];
+ */
+    __IO  uint32_t GINTSTS;               
+         uint32_t RESERVE0[1];
 
 
     /**
      * GINTEN
      * ===================================================================================================
-     * Offset: 0x08  Interrupt Enable Low Register
+     * Offset: 0x08  Global Interrupt Enable Register
      * ---------------------------------------------------------------------------------------------------
      * |Bits    |Field     |Descriptions
      * | :----: | :----:   | :---- |
-     * |[0]     |USBIE     |USB Interrupt Enable Control
+     * |[0]     |USBIEN    |USB Interrupt Enable Bit
      * |        |          |When set, this bit enables a local interrupt to be generated when a USB event occurs on the bus.
      * |        |          |0 = The related interrupt Disabled.
      * |        |          |1 = The related interrupt Enabled.
-     * |[1]     |CEPIE     |Control Endpoint Interrupt Enable Control
+     * |[1]     |CEPIEN    |Control Endpoint Interrupt Enable Bit
      * |        |          |When set, this bit enables a local interrupt to be generated when an interrupt is pending for the control endpoint.
      * |        |          |0 = The related interrupt Disabled.
      * |        |          |1 = The related interrupt Enabled.
-     * |[2]     |EPAIE     |Interrupt Enable Control For Endpoint A
+     * |[2]     |EPAIEN    |Interrupt Enable Control For Endpoint A
      * |        |          |When set, this bit enables a local interrupt to be generated when an interrupt is pending for the endpoint A.
      * |        |          |0 = The related interrupt Disabled.
      * |        |          |1 = The related interrupt Enabled.
-     * |[3]     |EPBIE     |Interrupt Enable Control For Endpoint B
+     * |[3]     |EPBIEN    |Interrupt Enable Control For Endpoint B
      * |        |          |When set, this bit enables a local interrupt to be generated when an interrupt is pending for the endpoint B
      * |        |          |0 = The related interrupt Disabled.
      * |        |          |1 = The related interrupt Enabled.
-     * |[4]     |EPCIE     |Interrupt Enable Control For Endpoint C
+     * |[4]     |EPCIEN    |Interrupt Enable Control For Endpoint C
      * |        |          |When set, this bit enables a local interrupt to be generated when an interrupt is pending for the endpoint C
      * |        |          |0 = The related interrupt Disabled.
      * |        |          |1 = The related interrupt Enabled.
-     * |[5]     |EPDIE     |Interrupt Enable Control For Endpoint D
+     * |[5]     |EPDIEN    |Interrupt Enable Control For Endpoint D
      * |        |          |When set, this bit enables a local interrupt to be generated when an interrupt is pending for the endpoint D
      * |        |          |0 = The related interrupt Disabled.
      * |        |          |1 = The related interrupt Enabled.
-     * |[6]     |EPEIE     |Interrupt Enable Control For Endpoint E
+     * |[6]     |EPEIEN    |Interrupt Enable Control For Endpoint E
      * |        |          |When set, this bit enables a local interrupt to be generated when an interrupt is pending for the endpoint E
      * |        |          |0 = The related interrupt Disabled.
      * |        |          |1 = The related interrupt Enabled.
-     * |[7]     |EPFIE     |Interrupt Enable Control For Endpoint F
+     * |[7]     |EPFIEN    |Interrupt Enable Control For Endpoint F
      * |        |          |When set, this bit enables a local interrupt to be generated when an interrupt is pending for the endpoint F
      * |        |          |0 = The related interrupt Disabled.
      * |        |          |1 = The related interrupt Enabled.
-     * |[8]     |EPGIE     |Interrupt Enable Control For Endpoint G
+     * |[8]     |EPGIEN    |Interrupt Enable Control For Endpoint G
      * |        |          |When set, this bit enables a local interrupt to be generated when an interrupt is pending for the endpoint G
      * |        |          |0 = The related interrupt Disabled.
      * |        |          |1 = The related interrupt Enabled.
-     * |[9]     |EPHIE     |Interrupt Enable Control For Endpoint H
+     * |[9]     |EPHIEN    |Interrupt Enable Control For Endpoint H
      * |        |          |When set, this bit enables a local interrupt to be generated when an interrupt is pending for the endpoint H
      * |        |          |0 = The related interrupt Disabled.
      * |        |          |1 = The related interrupt Enabled.
-     * |[10]    |EPIIE     |Interrupt Enable Control For Endpoint I
+     * |[10]    |EPIIEN    |Interrupt Enable Control For Endpoint I
      * |        |          |When set, this bit enables a local interrupt to be generated when an interrupt is pending for the endpoint I
      * |        |          |0 = The related interrupt Disabled.
      * |        |          |1 = The related interrupt Enabled.
-     * |[11]    |EPJIE     |Interrupt Enable Control For Endpoint J
+     * |[11]    |EPJIEN    |Interrupt Enable Control For Endpoint J
      * |        |          |When set, this bit enables a local interrupt to be generated when an interrupt is pending for the endpoint J
      * |        |          |0 = The related interrupt Disabled.
      * |        |          |1 = The related interrupt Enabled.
-     * |[12]    |EPKIE     |Interrupt Enable Control For Endpoint K
+     * |[12]    |EPKIEN    |Interrupt Enable Control For Endpoint K
      * |        |          |When set, this bit enables a local interrupt to be generated when an interrupt is pending for the endpoint K
      * |        |          |0 = The related interrupt Disabled.
      * |        |          |1 = The related interrupt Enabled.
-     * |[13]    |EPLIE     |Interrupt Enable Control For Endpoint L
+     * |[13]    |EPLIEN    |Interrupt Enable Control For Endpoint L
      * |        |          |When set, this bit enables a local interrupt to be generated when an interrupt is pending for the endpoint L
      * |        |          |0 = The related interrupt Disabled.
      * |        |          |1 = The related interrupt Enabled.
-    */
-    __IO uint32_t GINTEN;
-    uint32_t RESERVE1[1];
+ */
+    __IO uint32_t GINTEN;                
+         uint32_t RESERVE1[1];
 
 
     /**
@@ -27639,41 +27943,41 @@ typedef struct {
      * |        |          |This bit indicates when a start-of-frame packet has been received.
      * |        |          |0 = No start-of-frame packet has been received.
      * |        |          |1 = Start-of-frame packet has been received.
-     * |        |          |Note: Write 1 to clear this bit to 0.
+     * |        |          |Write 1 to clear this bit to 0.
      * |[1]     |RSTIF     |Reset Status
      * |        |          |When set, this bit indicates that either the USB root port reset is end.
      * |        |          |0 = No USB root port reset is end.
      * |        |          |1 = USB root port reset is end.
-     * |        |          |Note: Write 1 to clear this bit to 0.
+     * |        |          |Write 1 to clear this bit to 0.
      * |[2]     |RESUMEIF  |Resume
      * |        |          |When set, this bit indicates that a device resume has occurred.
      * |        |          |0 = No device resume has occurred.
      * |        |          |1 = Device resume has occurred.
-     * |        |          |Note: Write 1 to clear this bit to 0.
+     * |        |          |Write 1 to clear this bit to 0.
      * |[3]     |SUSPENDIF |Suspend Request
      * |        |          |This bit is set as default and it has to be cleared by writing '1' before the USB reset.
-     * |        |          |This bit is also set when a USB Suspend request is detected from the host.
+     * |        |          |This bit is also set when a USB Suspend request is detected from the hos.
      * |        |          |0 = No USB Suspend request is detected from the host.
      * |        |          |1= USB Suspend request is detected from the host.
-     * |        |          |Note: Write 1 to clear this bit to 0.
+     * |        |          |Write 1 to clear this bit to 0.
      * |[4]     |HISPDIF   |High-Speed Settle
      * |        |          |0 = No valid high-speed reset protocol is detected.
      * |        |          |1 = Valid high-speed reset protocol is over and the device has settled in high-speed.
-     * |        |          |Note: Write 1 to clear this bit to 0.
+     * |        |          |Write 1 to clear this bit to 0.
      * |[5]     |DMADONEIF |DMA Completion Interrupt
      * |        |          |0 = No DMA transfer over.
      * |        |          |1 = DMA transfer is over.
-     * |        |          |Note: Write 1 to clear this bit to 0.
+     * |        |          |Write 1 to clear this bit to 0.
      * |[6]     |PHYCLKVLDIF|Usable Clock Interrupt
      * |        |          |0 = Usable clock is not available.
      * |        |          |1 = Usable clock is available from the transceiver.
-     * |        |          |Note: Write 1 to clear this bit to 0.
+     * |        |          |Write 1 to clear this bit to 0.
      * |[8]     |VBUSDETIF |VBUS Detection Interrupt Status
      * |        |          |0 = No VBUS is plug-in.
      * |        |          |1 = VBUS is plug-in.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-    */
-    __IO uint32_t BUSINTSTS;
+     * |        |          |Write 1 to clear this bit to 0.
+ */
+    __IO uint32_t BUSINTSTS;             
 
     /**
      * BUSINTEN
@@ -27714,8 +28018,8 @@ typedef struct {
      * |        |          |This bit enables the VBUS floating detection interrupt.
      * |        |          |0 = VBUS floating detection interrupt Disabled.
      * |        |          |1 = VBUS floating detection interrupt Enabled.
-    */
-    __IO uint32_t BUSINTEN;
+ */
+    __IO uint32_t BUSINTEN;              
 
     /**
      * OPER
@@ -27725,17 +28029,17 @@ typedef struct {
      * |Bits    |Field     |Descriptions
      * | :----: | :----:   | :---- |
      * |[0]     |RESUMEEN  |Generate Resume
-     * |        |          |0 = No Resume sequence to be initiated to the host.
-     * |        |          |1 = A Resume sequence to be initiated to the host if device remote wakeup is enabled.
-     * |        |          |This bit is self-clearing.
+     * |        |          |0 = No resume sequence to be initiated to the host.
+     * |        |          |1 = A resume sequence to be initiated to the host if device remote wake-up is enabled.
+     * |        |          |This bit is self-cleare.
      * |[1]     |HISPDEN   |USB High-Speed
-     * |        |          |0 = The USB device controller to suppress the chirp-sequence during reset protocol, thereby allowing the USB device controller to settle in full-speed, even though it is connected to a USB2.0 Host.
-     * |        |          |1 = The USB device controller to initiate a chirp-sequence during reset protocol.
-     * |[2]     |CURSPD    |USB Current Speed
+     * |        |          |0 = The USB device controller suppresses the chirp-sequence during reset protocol, thereby allowing the USB device controller to settle in full-speed, even though it is connected to a USB2.0 Host.
+     * |        |          |1 = The USB device controller initiates a chirp-sequence during reset protocol.
+     * |[2]     |CURSPD    |Current USB Speed
      * |        |          |0 = The device has settled in Full Speed.
      * |        |          |1 = The USB device controller has settled in High-speed.
-    */
-    __IO uint32_t OPER;
+ */
+    __IO uint32_t OPER;                  
 
     /**
      * FRAMECNT
@@ -27744,12 +28048,12 @@ typedef struct {
      * ---------------------------------------------------------------------------------------------------
      * |Bits    |Field     |Descriptions
      * | :----: | :----:   | :---- |
-     * |[0:2]   |MFRAMECNT |Micro-Frame Counter
+     * |[2:0]   |MFRAMECNT |Micro-Frame Counter
      * |        |          |This field contains the micro-frame number for the frame number in the frame counter field.
-     * |[3:13]  |FRAMECNT  |Frame Counter
+     * |[13:3]  |FRAMECNT  |Frame Counter
      * |        |          |This field contains the frame count from the most recent start-of-frame packet.
-    */
-    __I  uint32_t FRAMECNT;
+ */
+    __I  uint32_t FRAMECNT;              
 
     /**
      * FADDR
@@ -27758,11 +28062,11 @@ typedef struct {
      * ---------------------------------------------------------------------------------------------------
      * |Bits    |Field     |Descriptions
      * | :----: | :----:   | :---- |
-     * |[0:6]   |FADDR     |USB Function Address
+     * |[6:0]   |FADDR     |USB Function Address
      * |        |          |This field contains the current USB address of the device.
      * |        |          |This field is cleared when a root port reset is detected.
-    */
-    __IO uint32_t FADDR;
+ */
+    __IO uint32_t FADDR;                 
 
     /**
      * TEST
@@ -27771,7 +28075,7 @@ typedef struct {
      * ---------------------------------------------------------------------------------------------------
      * |Bits    |Field     |Descriptions
      * | :----: | :----:   | :---- |
-     * |[0:2]   |TESTMODE  |Test Mode Selection
+     * |[2:0]   |TESTMODE  |Test Mode Selection
      * |        |          |000 = Normal Operation.
      * |        |          |001 = Test_J.
      * |        |          |010 = Test_K.
@@ -27781,72 +28085,80 @@ typedef struct {
      * |        |          |110 = Reserved.
      * |        |          |111 = Reserved.
      * |        |          |Note: This field is cleared when root port reset is detected.
-    */
-    __IO uint32_t TEST;
+ */
+    __IO uint32_t TEST;                  
 
     union {
-
+    /**
+     * CEPDAT
+     * ===================================================================================================
+     * Offset: 0x28  Control-Endpoint Data Buffer
+     * ---------------------------------------------------------------------------------------------------
+     * |Bits    |Field     |Descriptions
+     * | :----: | :----:   | :---- |
+     * |[31:0]  |DAT       |Control-Endpoint Data Buffer
+     * |        |          |Control endpoint data buffer for the buffer transaction (read or write).
+     * |        |          |Only word or byte access is supported.
+ */
+    __IO uint32_t CEPDAT;                
         /**
-         * CEPDAT
+         * CEPDAT_BYTE
          * ===================================================================================================
-         * Offset: 0x28  Control-Endpoint Data Buffer
+         * Offset: 0x28  Control-Endpoint Data Buffer for Byte Access
          * ---------------------------------------------------------------------------------------------------
          * |Bits    |Field     |Descriptions
          * | :----: | :----:   | :---- |
-         * |[0:31]  |DAT       |Control-Endpoint Data Buffer
+         * |[0:7]   |DAT       |Control-Endpoint Data Buffer
          * |        |          |Control endpoint data buffer for the buffer transaction (read or write).
-         * |        |          |Note: Only word or byte access are supported.
+         * |        |          |Only word or byte access is supported.
         */
-        __IO uint32_t CEPDAT;
-        /** Control-Endpoint Data Buffer for Byte Access */
-        __IO uint8_t  CEPDAT_BYTE;
-
-    };///< Define Control-Endpoint Data Register 32-bit or 8-bit access
+    __IO uint8_t  CEPDAT_BYTE;    
+    };///< Define Control-Endpoint Data Register 32-bit or 8-bit access  
 
     /**
      * CEPCTL
      * ===================================================================================================
-     * Offset: 0x2C  Control-Endpoint Control and Status
+     * Offset: 0x2C  Control-Endpoint Control Register
      * ---------------------------------------------------------------------------------------------------
      * |Bits    |Field     |Descriptions
      * | :----: | :----:   | :---- |
      * |[0]     |NAKCLR    |No Acknowledge Control
      * |        |          |This bit plays a crucial role in any control transfer.
      * |        |          |0 = The bit is being cleared by the local CPU by writing zero, the USB device controller will be responding with NAKs for the subsequent status phase.
-     * |        |          |This mechanism holds the host from moving to the next request, until the local CPU is also ready to process the next request.
+     * |        |          |This mechanism holds the host from moving to the next request, until the local CPU is also ready to process the next reques.
      * |        |          |1 = This bit is set to one by the USB device controller, whenever a setup token is received.
-     * |        |          |The local CPU can take its own time to finish off any house-keeping work based on the request and then clear this bit.
-     * |        |          |Note: Only when CPU writes data[1:0] is 2'b10 or 2'b00, this bit can be updated.
+     * |        |          |The local CPU can take its own time to finish off any house-keeping work based on the request and then clear this bi.
+     * |        |          |Note: This bit can be updated only when CPU writes data[1:0] is 0x2 or 0x0.
      * |[1]     |STALLEN   |Stall Enable Control
      * |        |          |When this stall bit is set, the control endpoint sends a stall handshake in response to any in or out token thereafter.
      * |        |          |This is typically used for response to invalid/unsupported requests.
      * |        |          |When this bit is being set the NAK clear bit has to be cleared at the same time since the NAK clear bit has highest priority than STALL.
      * |        |          |It is automatically cleared on receipt of a next setup-token.
-     * |        |          |So, the local CPU need not write again to clear this bit.
+     * |        |          |Thus, the local CPU does not need to write again to clear this bi.
      * |        |          |0 = No sends a stall handshake in response to any in or out token thereafter.
      * |        |          |1 = The control endpoint sends a stall handshake in response to any in or out token thereafter.
-     * |        |          |Note: Only when CPU writes data[1:0] is 2'b10 or 2'b00, this bit can be updated.
+     * |        |          |Note: This bit can be updated only when CPU writes data[1:0] 0x2 or 0x0.
      * |[2]     |ZEROLEN   |Zero Packet Length
      * |        |          |This bit is valid for Auto Validation mode only.
      * |        |          |0 = No zero length packet to the host during Data stage to an IN token.
      * |        |          |1 = USB device controller can send a zero length packet to the host during Data stage to an IN token.
      * |        |          |This bit gets cleared once the zero length data packet is sent.
-     * |        |          |So, the local CPU need not write again to clear this bit.
+     * |        |          |Thus, the local CPU does not need to write again to clear this bi.
      * |[3]     |FLUSH     |CEP-FLUSH Bit
-     * |        |          |0 = No the packet buffer and its corresponding USBD_CEPDATCNT register to be cleared.
+     * |        |          |0 = No packet buffer and its corresponding USBD_CEPDATCNT register to be cleared.
      * |        |          |1 = The packet buffer and its corresponding USBD_CEPDATCNT register to be cleared.
-     * |        |          |This bit is self-cleaning.
-    */
-    __IO uint32_t CEPCTL;
+     * |        |          |This bit is self-cleare.
+ */
+    __IO uint32_t CEPCTL;                
 
     /**
      * CEPINTEN
      * ===================================================================================================
-     * Offset: 0x30  Control-Endpoint Interrupt Enable
+     * Offset: 0x30  Control-Endpoint Interrupt Enable Control Register
      * ---------------------------------------------------------------------------------------------------
      * |Bits    |Field     |Descriptions
      * | :----: | :----:   | :---- |
-     * |[0]     |SETUPTKIEN|Setup Token Interrupt Enable Control
+     * |[0]     |SETUPTKIEN|Setup Token Interrupt Enable Bit
      * |        |          |0 = The SETUP token interrupt in Control Endpoint Disabled.
      * |        |          |1 = The SETUP token interrupt in Control Endpoint Enabled.
      * |[1]     |SETUPPKIEN|Setup Packet Interrupt
@@ -27885,8 +28197,8 @@ typedef struct {
      * |[12]    |BUFEMPTYIEN|Buffer Empty Interrupt
      * |        |          |0 = The buffer empty interrupt in Control Endpoint Disabled.
      * |        |          |1= The buffer empty interrupt in Control Endpoint Enabled.
-    */
-    __IO uint32_t CEPINTEN;
+ */
+    __IO uint32_t CEPINTEN;              
 
     /**
      * CEPINTSTS
@@ -27896,41 +28208,41 @@ typedef struct {
      * |Bits    |Field     |Descriptions
      * | :----: | :----:   | :---- |
      * |[0]     |SETUPTKIF |Setup Token Interrupt
-     * |        |          |0 = Not a Setup token is received.
-     * |        |          |1 = A Setup token is received. Writing 1 clears this status bit
+     * |        |          |0 = No setup token is received.
+     * |        |          |1 = A setup token is received. Writing 1 clears this status bit
      * |        |          |Note: Write 1 to clear this bit to 0.
      * |[1]     |SETUPPKIF |Setup Packet Interrupt
      * |        |          |This bit must be cleared (by writing 1) before the next setup packet can be received.
-     * |        |          |If the bit is not cleared, then the successive setup packets will be overwritten in the setup packet buffer.
-     * |        |          |0 = Not a Setup packet has been received from the host.
-     * |        |          |1 = A Setup packet has been received from the host.
+     * |        |          |If the bit is not cleared, then the successive setup packets will be overwritten in the setup packet buffe.
+     * |        |          |0 = No setup packet has been received from the host.
+     * |        |          |1 = A setup packet has been received from the host.
      * |        |          |Note: Write 1 to clear this bit to 0.
      * |[2]     |OUTTKIF   |Out Token Interrupt
-     * |        |          |0 = The control-endpoint does not received an OUT token from the host.
+     * |        |          |0 = The control-endpoint does not receive an OUT token from the host.
      * |        |          |1 = The control-endpoint receives an OUT token from the host.
      * |        |          |Note: Write 1 to clear this bit to 0.
      * |[3]     |INTKIF    |In Token Interrupt
-     * |        |          |0 = The control-endpoint does not received an IN token from the host.
+     * |        |          |0 = The control-endpoint does not receive an IN token from the host.
      * |        |          |1 = The control-endpoint receives an IN token from the host.
-     * |        |          |Note: Write 1 to clear this bit to 0.
+     * |        |          |Write 1 to clear this bit to 0.
      * |[4]     |PINGIF    |Ping Token Interrupt
-     * |        |          |0 = The control-endpoint does not received a ping token from the host.
+     * |        |          |0 = The control-endpoint does not receive a ping token from the host.
      * |        |          |1 = The control-endpoint receives a ping token from the host.
      * |        |          |Note: Write 1 to clear this bit to 0.
      * |[5]     |TXPKIF    |Data Packet Transmitted Interrupt
-     * |        |          |0 = Not a data packet is successfully transmitted to the host in response to an IN-token and an ACK-token is received for the same.
+     * |        |          |0 = No data packet is successfully transmitted to the host in response to an IN-token and an ACK-token is received for the same.
      * |        |          |1 = A data packet is successfully transmitted to the host in response to an IN-token and an ACK-token is received for the same.
      * |        |          |Note: Write 1 to clear this bit to 0.
      * |[6]     |RXPKIF    |Data Packet Received Interrupt
-     * |        |          |0 = Not a data packet is successfully received from the host for an OUT-token and an ACK is sent to the host.
+     * |        |          |0 = No data packet is successfully received from the host for an OUT-token and an ACK is sent to the host.
      * |        |          |1 = A data packet is successfully received from the host for an OUT-token and an ACK is sent to the host.
      * |        |          |Note: Write 1 to clear this bit to 0.
      * |[7]     |NAKIF     |NAK Sent Interrupt
-     * |        |          |0 = Not a NAK-token is sent in response to an IN/OUT token.
+     * |        |          |0 = No NAK-token is sent in response to an IN/OUT token.
      * |        |          |1 = A NAK-token is sent in response to an IN/OUT token.
      * |        |          |Note: Write 1 to clear this bit to 0.
      * |[8]     |STALLIF   |STALL Sent Interrupt
-     * |        |          |0 = Not a stall-token is sent in response to an IN/OUT token.
+     * |        |          |0 = No stall-token is sent in response to an IN/OUT token.
      * |        |          |1 = A stall-token is sent in response to an IN/OUT token.
      * |        |          |Note: Write 1 to clear this bit to 0.
      * |[9]     |ERRIF     |USB Error Interrupt
@@ -27938,7 +28250,7 @@ typedef struct {
      * |        |          |1 = An error had occurred during the transaction.
      * |        |          |Note: Write 1 to clear this bit to 0.
      * |[10]    |STSDONEIF |Status Completion Interrupt
-     * |        |          |0 = Not a USB transaction has completed successfully.
+     * |        |          |0 = No USB transaction has completed successfully.
      * |        |          |1 = The status stage of a USB transaction has completed successfully.
      * |        |          |Note: Write 1 to clear this bit to 0.
      * |[11]    |BUFFULLIF |Buffer Full Interrupt
@@ -27949,8 +28261,8 @@ typedef struct {
      * |        |          |0 = The control-endpoint buffer is not empty.
      * |        |          |1 = The control-endpoint buffer is empty.
      * |        |          |Note: Write 1 to clear this bit to 0.
-    */
-    __IO uint32_t CEPINTSTS;
+ */
+    __IO uint32_t CEPINTSTS;             
 
     /**
      * CEPTXCNT
@@ -27959,12 +28271,12 @@ typedef struct {
      * ---------------------------------------------------------------------------------------------------
      * |Bits    |Field     |Descriptions
      * | :----: | :----:   | :---- |
-     * |[0:7]   |TXCNT     |In-Transfer Data Count
+     * |[7:0]   |TXCNT     |In-Transfer Data Count
      * |        |          |There is no mode selection for the control endpoint (but it operates like manual mode).The local-CPU has to fill the control-endpoint buffer with the data to be sent for an in-token and to write the count of bytes in this register.
      * |        |          |When zero is written into this field, a zero length packet is sent to the host.
-     * |        |          |When the count written in the register is more than the MPS, the data sent will be of only MPS.
-    */
-    __IO uint32_t CEPTXCNT;
+     * |        |          |When the count written in the register is more than the MPS, the data sent will be of only MP.
+ */
+    __IO uint32_t CEPTXCNT;              
 
     /**
      * CEPRXCNT
@@ -27973,22 +28285,22 @@ typedef struct {
      * ---------------------------------------------------------------------------------------------------
      * |Bits    |Field     |Descriptions
      * | :----: | :----:   | :---- |
-     * |[0:7]   |RXCNT     |Out-Transfer Data Count
+     * |[7:0]   |RXCNT     |Out-Transfer Data Count
      * |        |          |The USB device controller maintains the count of the data received in case of an out transfer, during the control transfer.
-    */
-    __I  uint32_t CEPRXCNT;
+ */
+    __I  uint32_t CEPRXCNT;              
 
     /**
      * CEPDATCNT
      * ===================================================================================================
-     * Offset: 0x40  Control-Endpoint data count
+     * Offset: 0x40  Control-Endpoint Data Count
      * ---------------------------------------------------------------------------------------------------
      * |Bits    |Field     |Descriptions
      * | :----: | :----:   | :---- |
-     * |[0:15]  |DATCNT    |Control-Endpoint Data Count
+     * |[15:0]  |DATCNT    |Control-Endpoint Data Count
      * |        |          |The USB device controller maintains the count of the data of control-endpoint.
-    */
-    __I  uint32_t CEPDATCNT;
+ */
+    __I  uint32_t CEPDATCNT;             
 
     /**
      * SETUP1_0
@@ -27997,26 +28309,26 @@ typedef struct {
      * ---------------------------------------------------------------------------------------------------
      * |Bits    |Field     |Descriptions
      * | :----: | :----:   | :---- |
-     * |[0:7]   |SETUP0    |Setup Byte 0[7:0]
+     * |[7:0]   |SETUP0    |Setup Byte 0[7:0]
      * |        |          |This register provides byte 0 of the last setup packet received.
-     * |        |          |For a Standard Device Request, the following bmRequestType information is returned.
+     * |        |          |For a Standard Device Request, the following bmRequestType information is returne.
      * |        |          |Bit 7(Direction):
-     * |        |          | 0: Host to device
-     * |        |          | 1: Device to host
+     * |        |          |0 = Host to device.
+     * |        |          |1 = Device to host.
      * |        |          |Bit 6-5 (Type):
-     * |        |          | 00: Standard
-     * |        |          | 01: Class
-     * |        |          | 10: Vendor
-     * |        |          | 11: Reserved
+     * |        |          |00 = Standard.
+     * |        |          |01 = Class.
+     * |        |          |10 = Vendor.
+     * |        |          |11 = Reserved.
      * |        |          |Bit 4-0 (Recipient)
-     * |        |          | 00000: Device
-     * |        |          | 00001: Interface
-     * |        |          | 00010: Endpoint
-     * |        |          | 00011: Other
-     * |        |          | Others: Reserved
-     * |[8:15]  |SETUP1    |Setup Byte 1[15:8]
+     * |        |          |00000 = Device.
+     * |        |          |00001 = nterface.
+     * |        |          |00010 = Endpoint.
+     * |        |          |00011 =:Other.
+     * |        |          |Others =:Reserved.
+     * |[15:8]  |SETUP1    |Setup Byte 1[15:8]
      * |        |          |This register provides byte 1 of the last setup packet received.
-     * |        |          |For a Standard Device Request, the following bRequest Code information is returned.
+     * |        |          |For a Standard Device Request, the following bRequest Code information is returne.
      * |        |          |00000000 = Get Status.
      * |        |          |00000001 = Clear Feature.
      * |        |          |00000010 = Reserved.
@@ -28030,8 +28342,8 @@ typedef struct {
      * |        |          |00001010 = Get Interface.
      * |        |          |00001011 = Set Interface.
      * |        |          |00001100 = Synch Frame.
-    */
-    __I  uint32_t SETUP1_0;
+ */
+    __I  uint32_t SETUP1_0;              
 
     /**
      * SETUP3_2
@@ -28040,14 +28352,14 @@ typedef struct {
      * ---------------------------------------------------------------------------------------------------
      * |Bits    |Field     |Descriptions
      * | :----: | :----:   | :---- |
-     * |[0:7]   |SETUP2    |Setup Byte 2 [7:0]
+     * |[7:0]   |SETUP2    |Setup Byte 2 [7:0]
      * |        |          |This register provides byte 2 of the last setup packet received.
      * |        |          |For a Standard Device Request, the least significant byte of the wValue field is returned.
-     * |[8:15]  |SETUP3    |Setup Byte 3 [15:8]
+     * |[15:8]  |SETUP3    |Setup Byte 3 [15:8]
      * |        |          |This register provides byte 3 of the last setup packet received.
-     * |        |          |For a Standard Device Request, the most significant byte of the wValue field is returned.
-    */
-    __I  uint32_t SETUP3_2;
+     * |        |          |For a Standard Device Request, the most significant byte of the wValue field is returne.
+ */
+    __I  uint32_t SETUP3_2;              
 
     /**
      * SETUP5_4
@@ -28056,14 +28368,14 @@ typedef struct {
      * ---------------------------------------------------------------------------------------------------
      * |Bits    |Field     |Descriptions
      * | :----: | :----:   | :---- |
-     * |[0:7]   |SETUP4    |Setup Byte 4[7:0]
+     * |[7:0]   |SETUP4    |Setup Byte 4[7:0]
      * |        |          |This register provides byte 4 of the last setup packet received.
-     * |        |          |For a Standard Device Request, the least significant byte of the wIndex is returned.
-     * |[8:15]  |SETUP5    |Setup Byte 5[15:8]
+     * |        |          |For a Standard Device Request, the least significant byte of the wIndex is returne.
+     * |[15:8]  |SETUP5    |Setup Byte 5[15:8]
      * |        |          |This register provides byte 5 of the last setup packet received.
-     * |        |          |For a Standard Device Request, the most significant byte of the wIndex field is returned.
-    */
-    __I  uint32_t SETUP5_4;
+     * |        |          |For a Standard Device Request, the most significant byte of the wIndex field is returne.
+ */
+    __I  uint32_t SETUP5_4;              
 
     /**
      * SETUP7_6
@@ -28072,14 +28384,14 @@ typedef struct {
      * ---------------------------------------------------------------------------------------------------
      * |Bits    |Field     |Descriptions
      * | :----: | :----:   | :---- |
-     * |[0:7]   |SETUP6    |Setup Byte 6[7:0]
+     * |[7:0]   |SETUP6    |Setup Byte 6[7:0]
      * |        |          |This register provides byte 6 of the last setup packet received.
-     * |        |          |For a Standard Device Request, the least significant byte of the wLength field is returned.
-     * |[8:15]  |SETUP7    |Setup Byte 7[15:8]
+     * |        |          |For a Standard Device Request, the least significant byte of the wLength field is returne.
+     * |[15:8]  |SETUP7    |Setup Byte 7[15:8]
      * |        |          |This register provides byte 7 of the last setup packet received.
-     * |        |          |For a Standard Device Request, the most significant byte of the wLength field is returned.
-    */
-    __I  uint32_t SETUP7_6;
+     * |        |          |For a Standard Device Request, the most significant byte of the wLength field is returne.
+ */
+    __I  uint32_t SETUP7_6;              
 
     /**
      * CEPBUFSTART
@@ -28088,10 +28400,10 @@ typedef struct {
      * ---------------------------------------------------------------------------------------------------
      * |Bits    |Field     |Descriptions
      * | :----: | :----:   | :---- |
-     * |[0:11]  |SADDR     |Control-Endpoint Start Address
+     * |[11:0]  |SADDR     |Control-Endpoint Start Address
      * |        |          |This is the start-address of the RAM space allocated for the control-endpoint.
-    */
-    __IO uint32_t CEPBUFSTART;
+ */
+    __IO uint32_t CEPBUFSTART;           
 
     /**
      * CEPBUFEND
@@ -28100,10 +28412,10 @@ typedef struct {
      * ---------------------------------------------------------------------------------------------------
      * |Bits    |Field     |Descriptions
      * | :----: | :----:   | :---- |
-     * |[0:11]  |EADDR     |Control-Endpoint End Address
+     * |[11:0]  |EADDR     |Control-Endpoint End Address
      * |        |          |This is the end-address of the RAM space allocated for the control-endpoint.
-    */
-    __IO uint32_t CEPBUFEND;
+ */
+    __IO uint32_t CEPBUFEND;             
 
     /**
      * DMACTL
@@ -28112,23 +28424,24 @@ typedef struct {
      * ---------------------------------------------------------------------------------------------------
      * |Bits    |Field     |Descriptions
      * | :----: | :----:   | :---- |
-     * |[0:3]   |EPNUM     |DMA Endpoint Address Bits
+     * |[3:0]   |EPNUM     |DMA Endpoint Address Bits
      * |        |          |Used to define the Endpoint Address
      * |[4]     |DMARD     |DMA Operation
-     * |        |          |0 = the operation is a DMA write.
-     * |        |          |1 = the operation is a DMA read.
-     * |[5]     |DMAEN     |DMA Enable Control
+     * |        |          |0 = The operation is a DMA write (read from USB buffer).
+     * |        |          |DMA will check endpoint data available count (USBD_EPxDATCNT) according to EPNM setting before to perform DMA write operatio.
+     * |        |          |1 = The operation is a DMA read (write to USB buffer).
+     * |[5]     |DMAEN     |DMA Enable Bit
      * |        |          |0 = DMA function Disabled.
      * |        |          |1 = DMA function Enabled.
-     * |[6]     |SGEN      |Scatter Gather Function Enable Control
+     * |[6]     |SGEN      |Scatter Gather Function Enable Bit
      * |        |          |0 = Scatter gather function Disabled.
      * |        |          |1 = Scatter gather function Enabled.
      * |[7]     |DMARST    |Reset DMA State Machine
      * |        |          |0 = No reset the DMA state machine.
      * |        |          |1 = Reset the DMA state machine.
-    */
-    __IO uint32_t DMACTL;
-
+ */
+    __IO uint32_t DMACTL;     
+    
     /**
      * DMACNT
      * ===================================================================================================
@@ -28136,3492 +28449,179 @@ typedef struct {
      * ---------------------------------------------------------------------------------------------------
      * |Bits    |Field     |Descriptions
      * | :----: | :----:   | :---- |
-     * |[0:19]  |DMACNT    |DMA Transfer Count
+     * |[19:0]  |DMACNT    |DMA Transfer Count
      * |        |          |The transfer count of the DMA operation to be performed is written to this register.
-    */
-    __IO uint32_t DMACNT;
+ */
+    __IO uint32_t DMACNT;                  
 
-    union {
-
-        /**
-         * EPADAT
-         * ===================================================================================================
-         * Offset: 0x64  Endpoint A Data Register
-         * ---------------------------------------------------------------------------------------------------
-         * |Bits    |Field     |Descriptions
-         * | :----: | :----:   | :---- |
-         * |[0:31]  |EPDAT     |Endpoint A~L Data Register
-         * |        |          |Endpoint A~L data buffer for the buffer transaction (read or write).
-         * |        |          |Note: Only word or byte access are supported.
-        */
-        __IO uint32_t EPADAT;
-        /** Endpoint A Data Buffer for Byte Access */
-        __IO uint8_t  EPADAT_BYTE;
-
-    }; ///< Define EPA Data Register 32-bit or 8-bit access
-
-    /**
-     * EPAINTSTS
-     * ===================================================================================================
-     * Offset: 0x68  Endpoint A Interrupt Status Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0]     |BUFFULLIF |Buffer Full
-     * |        |          |For an IN endpoint, the currently selected buffer is full, or no buffer is available to the local side for writing (no space to write).
-     * |        |          |For an OUT endpoint, there is a buffer available on the local side, and there are FIFO full of bytes available to be read (entire packet is available for reading).
-     * |        |          |0 = The endpoint packet buffer is not full.
-     * |        |          |1 = The endpoint packet buffer is full.
-     * |        |          |Note: This bit is read-only.
-     * |[1]     |BUFEMPTYIF|Buffer Empty
-     * |        |          |For an IN endpoint, a buffer is available to the local side for writing up to FIFO full of bytes.
-     * |        |          |0 = The endpoint buffer is not empty.
-     * |        |          |1 = The endpoint buffer is empty.
-     * |        |          |For an OUT endpoint:
-     * |        |          |0 = The currently selected buffer has not a count of 0.
-     * |        |          |1 = The currently selected buffer has a count of 0, or no buffer is available on the local side (nothing to read).
-     * |        |          |Note: This bit is read-only.
-     * |[2]     |SHORTTXIF |Short Packet Transferred Interrupt
-     * |        |          |0 = The length of the last packet was not less than the Maximum Packet Size (EPMPS).
-     * |        |          |1 = The length of the last packet was less than the Maximum Packet Size (EPMPS).
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[3]     |TXPKIF    |Data Packet Transmitted Interrupt
-     * |        |          |0 = Not a data packet is transmitted from the endpoint to the host.
-     * |        |          |1 = A data packet is transmitted from the endpoint to the host.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[4]     |RXPKIF    |Data Packet Received Interrupt
-     * |        |          |0 = No data packet is received from the host by the endpoint.
-     * |        |          |1 = A data packet is received from the host by the endpoint.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[5]     |OUTTKIF   |Data OUT Token Interrupt
-     * |        |          |0 = A Data OUT token has not been received from the host.
-     * |        |          |1 = A Data OUT token has been received from the host.
-     * |        |          |This bit also set by PING tokens(in high-speed only).
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[6]     |INTKIF    |Data IN Token Interrupt
-     * |        |          |0 = Not Data IN token has been received from the host.
-     * |        |          |1 = A Data IN token has been received from the host.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[7]     |PINGIF    |PING Token Interrupt
-     * |        |          |0 = A Data PING token has not been received from the host.
-     * |        |          |1 = A Data PING token has been received from the host.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[8]     |NAKIF     |USB NAK Sent
-     * |        |          |0 = The last USB IN packet could be provided, and was acknowledged with a ACK.
-     * |        |          |1 = The last USB IN packet could not be provided, and was acknowledged with a NAK.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[9]     |STALLIF   |USB STALL Sent
-     * |        |          |0 = The last USB packet could be accepted or provided because the endpoint was stalled, and was acknowledged with a STALL.
-     * |        |          |1 = The last USB packet could not be accepted or provided because the endpoint was stalled, and was acknowledged with a STALL.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[10]    |NYETIF    |NYET Sent
-     * |        |          |0 = The space available in the RAM is sufficient to accommodate the next on coming data packet.
-     * |        |          |1 = The space available in the RAM is not sufficient to accommodate the next on coming data packet.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[11]    |ERRIF     |ERR Sent
-     * |        |          |0 = No any error in the transaction.
-     * |        |          |1 = There occurs any error in the transaction.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[12]    |SHORTRXIF |Bulk Out Short Packet Received
-     * |        |          |0 = No bulk out short packet is received.
-     * |        |          |1 = Received bulk out short packet (including zero length packet ).
-     * |        |          |Note: Write 1 to clear this bit to 0.
-    */
-    __IO uint32_t EPAINTSTS;
-
-    /**
-     * EPAINTEN
-     * ===================================================================================================
-     * Offset: 0x6C  Endpoint A Interrupt Enable Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0]     |BUFFULLIEN|Buffer Full Interrupt
-     * |        |          |When set, this bit enables a local interrupt to be set when a buffer full condition is detected on the bus.
-     * |        |          |0 = Buffer full interrupt Disabled.
-     * |        |          |1 = Buffer full interrupt Enabled.
-     * |[1]     |BUFEMPTYIEN|Buffer Empty Interrupt
-     * |        |          |When set, this bit enables a local interrupt to be set when a buffer empty condition is detected on the bus.
-     * |        |          |0 = Buffer empty interrupt Disabled.
-     * |        |          |1 = Buffer empty interrupt Enabled.
-     * |[2]     |SHORTTXIEN|Short Packet Transferred Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a short data packet has been transferred to/from the host.
-     * |        |          |0 = Short data packet interrupt Disabled.
-     * |        |          |1 = Short data packet interrupt Enabled.
-     * |[3]     |TXPKIEN   |Data Packet Transmitted Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a data packet has been received from the host.
-     * |        |          |0 = Data packet has been received from the host interrupt Disabled.
-     * |        |          |1 = Data packet has been received from the host interrupt Enabled.
-     * |[4]     |RXPKIEN   |Data Packet Received Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a data packet has been transmitted to the host.
-     * |        |          |0 = Data packet has been transmitted to the host interrupt Disabled.
-     * |        |          |1 = Data packet has been transmitted to the host interrupt Enabled.
-     * |[5]     |OUTTKIEN  |Data OUT Token Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a Data OUT token has been received from the host.
-     * |        |          |0 = Data OUT token interrupt Disabled.
-     * |        |          |1 = Data OUT token interrupt Enabled.
-     * |[6]     |INTKIEN   |Data IN Token Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a Data IN token has been received from the host.
-     * |        |          |0 = Data IN token interrupt Disabled.
-     * |        |          |1 = Data IN token interrupt Enabled.
-     * |[7]     |PINGIEN   |PING Token Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a PING token has been received from the host.
-     * |        |          |0 = PING token interrupt Disabled.
-     * |        |          |1 = PING token interrupt Enabled.
-     * |[8]     |NAKIEN    |USB NAK Sent Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a NAK token is sent to the host.
-     * |        |          |0 = NAK token interrupt Disabled.
-     * |        |          |1 = NAK token interrupt Enabled.
-     * |[9]     |STALLIEN  |USB STALL Sent Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a stall token is sent to the host.
-     * |        |          |0 = STALL token interrupt Disabled.
-     * |        |          |1 = STALL token interrupt Enabled.
-     * |[10]    |NYETIEN   |NYET Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set whenever NYET condition occurs on the bus for this endpoint.
-     * |        |          |0 = NYET condition interrupt Disabled.
-     * |        |          |1 = NYET condition interrupt Enabled.
-     * |[11]    |ERRIEN    |ERR Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set whenever ERR condition occurs on the bus for this endpoint.
-     * |        |          |0 = Error event interrupt Disabled.
-     * |        |          |1 = Error event interrupt Enabled.
-     * |[12]    |SHORTRXIEN|Bulk Out Short Packet Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set whenever bulk out short packet occurs on the bus for this endpoint.
-     * |        |          |0 = Bulk out interrupt Disabled.
-     * |        |          |1 = Bulk out interrupt Enabled.
-    */
-    __IO uint32_t EPAINTEN;
-
-    /**
-     * EPADATCNT
-     * ===================================================================================================
-     * Offset: 0x70  Endpoint A Data Available Count Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:15]  |DATCNT    |Data Count
-     * |        |          |For an OUT/IN endpoint, this register returns the number of valid bytes in the endpoint packet buffer.
-     * |[16:30] |DMALOOP   |DMA Loop
-     * |        |          |This register is the remaining DMA loop to complete. Each loop means 32-byte transfer.
-    */
-    __I  uint32_t EPADATCNT;
-
-    /**
-     * EPARSPCTL
-     * ===================================================================================================
-     * Offset: 0x74  Endpoint A Response Control Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0]     |FLUSH     |Buffer Flush
-     * |        |          |Writing 1 to this bit causes the packet buffer to be flushed and the corresponding EP_AVAIL register to be cleared.
-     * |        |          |This bit is self-clearing.
-     * |        |          |This bit should always be written after an configuration event.
-     * |        |          |0 = The packet buffer is not flushed.
-     * |        |          |1 = The packet buffer is flushed by user.
-     * |[1:2]   |MODE      |Mode Control
-     * |        |          |The two bits decide the operation mode of the in-endpoint.
-     * |        |          |00: Auto-Validate Mode
-     * |        |          |01: Manual-Validate Mode
-     * |        |          |10: Fly Mode
-     * |        |          |11: Reserved
-     * |        |          |These bits are not valid for an out-endpoint.
-     * |        |          |The auto validate mode will be activated when the reserved mode is selected.
-     * |[3]     |TOGGLE    |Endpoint Toggle
-     * |        |          |This bit is used to clear the endpoint data toggle bit.
-     * |        |          |Reading this bit returns the current state of the endpoint data toggle bit.
-     * |        |          |The local CPU may use this bit to initialize the end-point's toggle in case of reception of a Set Interface request or a Clear Feature (ep_halt) request from the host.
-     * |        |          |Only when toggle bit is "1", this bit can be written into the inversed write data bit[3].
-     * |        |          |0 = Not clear the endpoint data toggle bit.
-     * |        |          |1 = Clear the endpoint data toggle bit.
-     * |[4]     |HALT      |Endpoint Halt
-     * |        |          |This bit is used to send a STALL handshake as response to the token from the host.
-     * |        |          |When an Endpoint Set Feature (Endpoin_halt) is detected by the local CPU, it must write a '1' to this bit.
-     * |        |          |0 = Not send a STALL handshake as response to the token from the host.
-     * |        |          |1 = Send a STALL handshake as response to the token from the host.
-     * |[5]     |ZEROLEN   |Zero Length
-     * |        |          |This bit is used to send a zero-length packet n response to an IN-token.
-     * |        |          |When this bit is set, a zero packet is sent to the host on reception of an IN-token.
-     * |        |          |0 = A zero packet is not sent to the host on reception of an IN-token.
-     * |        |          |1 = A zero packet is sent to the host on reception of an IN-token.
-     * |[6]     |SHORTTXEN |Short Packet Transfer Enable
-     * |        |          |This bit is applicable only in case of Auto-Validate Method.
-     * |        |          |This bit is set to validate any remaining data in the buffer which is not equal to the MPS of the endpoint, and happens to be the last transfer.
-     * |        |          |0 = Not validate any remaining data in the buffer which is not equal to the MPS of the endpoint.
-     * |        |          |1 = Validate any remaining data in the buffer which is not equal to the MPS of the endpoint.
-     * |[7]     |DISBUF    |Buffer Disable Control
-     * |        |          |This bit is used to disable buffer (set buffer size to 1) when a Bulk-OUT short packet is received.
-     * |        |          |0 = Buffer Not Disabled when Bulk-OUT short packet is received.
-     * |        |          |1 = Buffer Disabled when Bulk-OUT short packet is received.
-    */
-    __IO uint32_t EPARSPCTL;
-
-    /**
-     * EPAMPS
-     * ===================================================================================================
-     * Offset: 0x78  Endpoint A Maximum Packet Size Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:10]  |EPMPS     |Endpoint Maximum Packet Size
-     * |        |          |This field determines the Maximum Packet Size of the Endpoint.
-    */
-    __IO uint32_t EPAMPS;
-
-    /**
-     * EPATXCNT
-     * ===================================================================================================
-     * Offset: 0x7C  Endpoint A Transfer Count Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:10]  |TXCNT     |Endpoint Transfer Count
-     * |        |          |For IN endpoints, this field determines the total number of bytes to be sent to the host in case of manual validation method.
-     * |        |          |For OUT endpoints, this field has no effect.
-    */
-    __IO uint32_t EPATXCNT;
-
-    /**
-     * EPACFG
-     * ===================================================================================================
-     * Offset: 0x80  Endpoint A Configuration Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0]     |EPEN      |Endpoint Valid
-     * |        |          |When set, this bit enables this endpoint.
-     * |        |          |This bit has no effect on Endpoint 0, which is always enabled.
-     * |        |          |0 = The endpoint Disabled.
-     * |        |          |1 = The endpoint Enabled.
-     * |[1:2]   |EPTYPE    |Endpoint Type
-     * |        |          |This field selects the type of this endpoint. Endpoint 0 is forced to a Control type.
-     * |        |          |00 = Reserved.
-     * |        |          |01 = Bulk.
-     * |        |          |10 = Interrupt.
-     * |        |          |11 = Isochronous.
-     * |[3]     |EPDIR     |Endpoint Direction
-     * |        |          |0 = out-endpoint (Host OUT to Device).
-     * |        |          |1 = in-endpoint (Host IN to Device).
-     * |        |          |Note: A maximum of one OUT and IN endpoint is allowed for each endpoint number.
-     * |[4:7]   |EPNUM     |Endpoint Number
-     * |        |          |This field selects the number of the endpoint. Valid numbers 1 to 15.
-    */
-    __IO uint32_t EPACFG;
-
-    /**
-     * EPABUFSTART
-     * ===================================================================================================
-     * Offset: 0x84  Endpoint A RAM Start Address Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:11]  |SADDR     |Endpoint Start Address
-     * |        |          |This is the start-address of the RAM space allocated for the endpoint A~L.
-    */
-    __IO uint32_t EPABUFSTART;
-
-    /**
-     * EPABUFEND
-     * ===================================================================================================
-     * Offset: 0x88  Endpoint A RAM End Address Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:11]  |EADDR     |Endpoint End Address
-     * |        |          |This is the end-address of the RAM space allocated for the endpoint A~L.
-    */
-    __IO uint32_t EPABUFEND;
-
-    union {
-
-        /**
-         * EPBDAT
-         * ===================================================================================================
-         * Offset: 0x8C  Endpoint B Data Register
-         * ---------------------------------------------------------------------------------------------------
-         * |Bits    |Field     |Descriptions
-         * | :----: | :----:   | :---- |
-         * |[0:31]  |EPDAT     |Endpoint A~L Data Register
-         * |        |          |Endpoint A~L data buffer for the buffer transaction (read or write).
-         * |        |          |Note: Only word or byte access are supported.
-        */
-        __IO uint32_t EPBDAT;
-        /** Endpoint B Data Buffer for Byte Access */
-        __IO uint8_t  EPBDAT_BYTE;
-
-    }; ///< Define EPB Data Register 32-bit or 8-bit access
-
-    /**
-     * EPBINTSTS
-     * ===================================================================================================
-     * Offset: 0x90  Endpoint B Interrupt Status Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0]     |BUFFULLIF |Buffer Full
-     * |        |          |For an IN endpoint, the currently selected buffer is full, or no buffer is available to the local side for writing (no space to write).
-     * |        |          |For an OUT endpoint, there is a buffer available on the local side, and there are FIFO full of bytes available to be read (entire packet is available for reading).
-     * |        |          |0 = The endpoint packet buffer is not full.
-     * |        |          |1 = The endpoint packet buffer is full.
-     * |        |          |Note: This bit is read-only.
-     * |[1]     |BUFEMPTYIF|Buffer Empty
-     * |        |          |For an IN endpoint, a buffer is available to the local side for writing up to FIFO full of bytes.
-     * |        |          |0 = The endpoint buffer is not empty.
-     * |        |          |1 = The endpoint buffer is empty.
-     * |        |          |For an OUT endpoint:
-     * |        |          |0 = The currently selected buffer has not a count of 0.
-     * |        |          |1 = The currently selected buffer has a count of 0, or no buffer is available on the local side (nothing to read).
-     * |        |          |Note: This bit is read-only.
-     * |[2]     |SHORTTXIF |Short Packet Transferred Interrupt
-     * |        |          |0 = The length of the last packet was not less than the Maximum Packet Size (EPMPS).
-     * |        |          |1 = The length of the last packet was less than the Maximum Packet Size (EPMPS).
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[3]     |TXPKIF    |Data Packet Transmitted Interrupt
-     * |        |          |0 = Not a data packet is transmitted from the endpoint to the host.
-     * |        |          |1 = A data packet is transmitted from the endpoint to the host.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[4]     |RXPKIF    |Data Packet Received Interrupt
-     * |        |          |0 = No data packet is received from the host by the endpoint.
-     * |        |          |1 = A data packet is received from the host by the endpoint.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[5]     |OUTTKIF   |Data OUT Token Interrupt
-     * |        |          |0 = A Data OUT token has not been received from the host.
-     * |        |          |1 = A Data OUT token has been received from the host.
-     * |        |          |This bit also set by PING tokens(in high-speed only).
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[6]     |INTKIF    |Data IN Token Interrupt
-     * |        |          |0 = Not Data IN token has been received from the host.
-     * |        |          |1 = A Data IN token has been received from the host.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[7]     |PINGIF    |PING Token Interrupt
-     * |        |          |0 = A Data PING token has not been received from the host.
-     * |        |          |1 = A Data PING token has been received from the host.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[8]     |NAKIF     |USB NAK Sent
-     * |        |          |0 = The last USB IN packet could be provided, and was acknowledged with a ACK.
-     * |        |          |1 = The last USB IN packet could not be provided, and was acknowledged with a NAK.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[9]     |STALLIF   |USB STALL Sent
-     * |        |          |0 = The last USB packet could be accepted or provided because the endpoint was stalled, and was acknowledged with a STALL.
-     * |        |          |1 = The last USB packet could not be accepted or provided because the endpoint was stalled, and was acknowledged with a STALL.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[10]    |NYETIF    |NYET Sent
-     * |        |          |0 = The space available in the RAM is sufficient to accommodate the next on coming data packet.
-     * |        |          |1 = The space available in the RAM is not sufficient to accommodate the next on coming data packet.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[11]    |ERRIF     |ERR Sent
-     * |        |          |0 = No any error in the transaction.
-     * |        |          |1 = There occurs any error in the transaction.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[12]    |SHORTRXIF |Bulk Out Short Packet Received
-     * |        |          |0 = No bulk out short packet is received.
-     * |        |          |1 = Received bulk out short packet (including zero length packet ).
-     * |        |          |Note: Write 1 to clear this bit to 0.
-    */
-    __IO uint32_t EPBINTSTS;
-
-    /**
-     * EPBINTEN
-     * ===================================================================================================
-     * Offset: 0x94  Endpoint B Interrupt Enable Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0]     |BUFFULLIEN|Buffer Full Interrupt
-     * |        |          |When set, this bit enables a local interrupt to be set when a buffer full condition is detected on the bus.
-     * |        |          |0 = Buffer full interrupt Disabled.
-     * |        |          |1 = Buffer full interrupt Enabled.
-     * |[1]     |BUFEMPTYIEN|Buffer Empty Interrupt
-     * |        |          |When set, this bit enables a local interrupt to be set when a buffer empty condition is detected on the bus.
-     * |        |          |0 = Buffer empty interrupt Disabled.
-     * |        |          |1 = Buffer empty interrupt Enabled.
-     * |[2]     |SHORTTXIEN|Short Packet Transferred Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a short data packet has been transferred to/from the host.
-     * |        |          |0 = Short data packet interrupt Disabled.
-     * |        |          |1 = Short data packet interrupt Enabled.
-     * |[3]     |TXPKIEN   |Data Packet Transmitted Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a data packet has been received from the host.
-     * |        |          |0 = Data packet has been received from the host interrupt Disabled.
-     * |        |          |1 = Data packet has been received from the host interrupt Enabled.
-     * |[4]     |RXPKIEN   |Data Packet Received Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a data packet has been transmitted to the host.
-     * |        |          |0 = Data packet has been transmitted to the host interrupt Disabled.
-     * |        |          |1 = Data packet has been transmitted to the host interrupt Enabled.
-     * |[5]     |OUTTKIEN  |Data OUT Token Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a Data OUT token has been received from the host.
-     * |        |          |0 = Data OUT token interrupt Disabled.
-     * |        |          |1 = Data OUT token interrupt Enabled.
-     * |[6]     |INTKIEN   |Data IN Token Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a Data IN token has been received from the host.
-     * |        |          |0 = Data IN token interrupt Disabled.
-     * |        |          |1 = Data IN token interrupt Enabled.
-     * |[7]     |PINGIEN   |PING Token Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a PING token has been received from the host.
-     * |        |          |0 = PING token interrupt Disabled.
-     * |        |          |1 = PING token interrupt Enabled.
-     * |[8]     |NAKIEN    |USB NAK Sent Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a NAK token is sent to the host.
-     * |        |          |0 = NAK token interrupt Disabled.
-     * |        |          |1 = NAK token interrupt Enabled.
-     * |[9]     |STALLIEN  |USB STALL Sent Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a stall token is sent to the host.
-     * |        |          |0 = STALL token interrupt Disabled.
-     * |        |          |1 = STALL token interrupt Enabled.
-     * |[10]    |NYETIEN   |NYET Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set whenever NYET condition occurs on the bus for this endpoint.
-     * |        |          |0 = NYET condition interrupt Disabled.
-     * |        |          |1 = NYET condition interrupt Enabled.
-     * |[11]    |ERRIEN    |ERR Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set whenever ERR condition occurs on the bus for this endpoint.
-     * |        |          |0 = Error event interrupt Disabled.
-     * |        |          |1 = Error event interrupt Enabled.
-     * |[12]    |SHORTRXIEN|Bulk Out Short Packet Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set whenever bulk out short packet occurs on the bus for this endpoint.
-     * |        |          |0 = Bulk out interrupt Disabled.
-     * |        |          |1 = Bulk out interrupt Enabled.
-    */
-    __IO uint32_t EPBINTEN;
-
-    /**
-     * EPBDATCNT
-     * ===================================================================================================
-     * Offset: 0x98  Endpoint B Data Available Count Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:15]  |DATCNT    |Data Count
-     * |        |          |For an OUT/IN endpoint, this register returns the number of valid bytes in the endpoint packet buffer.
-     * |[16:30] |DMALOOP   |DMA Loop
-     * |        |          |This register is the remaining DMA loop to complete. Each loop means 32-byte transfer.
-    */
-    __I  uint32_t EPBDATCNT;
-
-    /**
-     * EPBRSPCTL
-     * ===================================================================================================
-     * Offset: 0x9C  Endpoint B Response Control Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0]     |FLUSH     |Buffer Flush
-     * |        |          |Writing 1 to this bit causes the packet buffer to be flushed and the corresponding EP_AVAIL register to be cleared.
-     * |        |          |This bit is self-clearing.
-     * |        |          |This bit should always be written after an configuration event.
-     * |        |          |0 = The packet buffer is not flushed.
-     * |        |          |1 = The packet buffer is flushed by user.
-     * |[1:2]   |MODE      |Mode Control
-     * |        |          |The two bits decide the operation mode of the in-endpoint.
-     * |        |          |00: Auto-Validate Mode
-     * |        |          |01: Manual-Validate Mode
-     * |        |          |10: Fly Mode
-     * |        |          |11: Reserved
-     * |        |          |These bits are not valid for an out-endpoint.
-     * |        |          |The auto validate mode will be activated when the reserved mode is selected.
-     * |[3]     |TOGGLE    |Endpoint Toggle
-     * |        |          |This bit is used to clear the endpoint data toggle bit.
-     * |        |          |Reading this bit returns the current state of the endpoint data toggle bit.
-     * |        |          |The local CPU may use this bit to initialize the end-point's toggle in case of reception of a Set Interface request or a Clear Feature (ep_halt) request from the host.
-     * |        |          |Only when toggle bit is "1", this bit can be written into the inversed write data bit[3].
-     * |        |          |0 = Not clear the endpoint data toggle bit.
-     * |        |          |1 = Clear the endpoint data toggle bit.
-     * |[4]     |HALT      |Endpoint Halt
-     * |        |          |This bit is used to send a STALL handshake as response to the token from the host.
-     * |        |          |When an Endpoint Set Feature (Endpoin_halt) is detected by the local CPU, it must write a '1' to this bit.
-     * |        |          |0 = Not send a STALL handshake as response to the token from the host.
-     * |        |          |1 = Send a STALL handshake as response to the token from the host.
-     * |[5]     |ZEROLEN   |Zero Length
-     * |        |          |This bit is used to send a zero-length packet n response to an IN-token.
-     * |        |          |When this bit is set, a zero packet is sent to the host on reception of an IN-token.
-     * |        |          |0 = A zero packet is not sent to the host on reception of an IN-token.
-     * |        |          |1 = A zero packet is sent to the host on reception of an IN-token.
-     * |[6]     |SHORTTXEN |Short Packet Transfer Enable
-     * |        |          |This bit is applicable only in case of Auto-Validate Method.
-     * |        |          |This bit is set to validate any remaining data in the buffer which is not equal to the MPS of the endpoint, and happens to be the last transfer.
-     * |        |          |0 = Not validate any remaining data in the buffer which is not equal to the MPS of the endpoint.
-     * |        |          |1 = Validate any remaining data in the buffer which is not equal to the MPS of the endpoint.
-     * |[7]     |DISBUF    |Buffer Disable Control
-     * |        |          |This bit is used to disable buffer (set buffer size to 1) when a Bulk-OUT short packet is received.
-     * |        |          |0 = Buffer Not Disabled when Bulk-OUT short packet is received.
-     * |        |          |1 = Buffer Disabled when Bulk-OUT short packet is received.
-    */
-    __IO uint32_t EPBRSPCTL;
-
-    /**
-     * EPBMPS
-     * ===================================================================================================
-     * Offset: 0xA0  Endpoint B Maximum Packet Size Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:10]  |EPMPS     |Endpoint Maximum Packet Size
-     * |        |          |This field determines the Maximum Packet Size of the Endpoint.
-    */
-    __IO uint32_t EPBMPS;
-
-    /**
-     * EPBTXCNT
-     * ===================================================================================================
-     * Offset: 0xA4  Endpoint B Transfer Count Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:10]  |TXCNT     |Endpoint Transfer Count
-     * |        |          |For IN endpoints, this field determines the total number of bytes to be sent to the host in case of manual validation method.
-     * |        |          |For OUT endpoints, this field has no effect.
-    */
-    __IO uint32_t EPBTXCNT;
-
-    /**
-     * EPBCFG
-     * ===================================================================================================
-     * Offset: 0xA8  Endpoint B Configuration Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0]     |EPEN      |Endpoint Valid
-     * |        |          |When set, this bit enables this endpoint.
-     * |        |          |This bit has no effect on Endpoint 0, which is always enabled.
-     * |        |          |0 = The endpoint Disabled.
-     * |        |          |1 = The endpoint Enabled.
-     * |[1:2]   |EPTYPE    |Endpoint Type
-     * |        |          |This field selects the type of this endpoint. Endpoint 0 is forced to a Control type.
-     * |        |          |00 = Reserved.
-     * |        |          |01 = Bulk.
-     * |        |          |10 = Interrupt.
-     * |        |          |11 = Isochronous.
-     * |[3]     |EPDIR     |Endpoint Direction
-     * |        |          |0 = out-endpoint (Host OUT to Device).
-     * |        |          |1 = in-endpoint (Host IN to Device).
-     * |        |          |Note: A maximum of one OUT and IN endpoint is allowed for each endpoint number.
-     * |[4:7]   |EPNUM     |Endpoint Number
-     * |        |          |This field selects the number of the endpoint. Valid numbers 1 to 15.
-    */
-    __IO uint32_t EPBCFG;
-
-    /**
-     * EPBBUFSTART
-     * ===================================================================================================
-     * Offset: 0xAC  Endpoint B RAM Start Address Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:11]  |SADDR     |Endpoint Start Address
-     * |        |          |This is the start-address of the RAM space allocated for the endpoint A~L.
-    */
-    __IO uint32_t EPBBUFSTART;
-
-    /**
-     * EPBBUFEND
-     * ===================================================================================================
-     * Offset: 0xB0  Endpoint B RAM End Address Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:11]  |EADDR     |Endpoint End Address
-     * |        |          |This is the end-address of the RAM space allocated for the endpoint A~L.
-    */
-    __IO uint32_t EPBBUFEND;
-
-    union {
-
-        /**
-         * EPCDAT
-         * ===================================================================================================
-         * Offset: 0xB4  Endpoint C Data Register
-         * ---------------------------------------------------------------------------------------------------
-         * |Bits    |Field     |Descriptions
-         * | :----: | :----:   | :---- |
-         * |[0:31]  |EPDAT     |Endpoint A~L Data Register
-         * |        |          |Endpoint A~L data buffer for the buffer transaction (read or write).
-         * |        |          |Note: Only word or byte access are supported.
-        */
-        __IO uint32_t EPCDAT;
-        /** Endpoint C Data Buffer for Byte Access */
-        __IO uint8_t  EPCDAT_BYTE;
-
-    }; ///< Define EPC Data Register 32-bit or 8-bit access
-
-    /**
-     * EPCINTSTS
-     * ===================================================================================================
-     * Offset: 0xB8  Endpoint C Interrupt Status Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0]     |BUFFULLIF |Buffer Full
-     * |        |          |For an IN endpoint, the currently selected buffer is full, or no buffer is available to the local side for writing (no space to write).
-     * |        |          |For an OUT endpoint, there is a buffer available on the local side, and there are FIFO full of bytes available to be read (entire packet is available for reading).
-     * |        |          |0 = The endpoint packet buffer is not full.
-     * |        |          |1 = The endpoint packet buffer is full.
-     * |        |          |Note: This bit is read-only.
-     * |[1]     |BUFEMPTYIF|Buffer Empty
-     * |        |          |For an IN endpoint, a buffer is available to the local side for writing up to FIFO full of bytes.
-     * |        |          |0 = The endpoint buffer is not empty.
-     * |        |          |1 = The endpoint buffer is empty.
-     * |        |          |For an OUT endpoint:
-     * |        |          |0 = The currently selected buffer has not a count of 0.
-     * |        |          |1 = The currently selected buffer has a count of 0, or no buffer is available on the local side (nothing to read).
-     * |        |          |Note: This bit is read-only.
-     * |[2]     |SHORTTXIF |Short Packet Transferred Interrupt
-     * |        |          |0 = The length of the last packet was not less than the Maximum Packet Size (EPMPS).
-     * |        |          |1 = The length of the last packet was less than the Maximum Packet Size (EPMPS).
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[3]     |TXPKIF    |Data Packet Transmitted Interrupt
-     * |        |          |0 = Not a data packet is transmitted from the endpoint to the host.
-     * |        |          |1 = A data packet is transmitted from the endpoint to the host.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[4]     |RXPKIF    |Data Packet Received Interrupt
-     * |        |          |0 = No data packet is received from the host by the endpoint.
-     * |        |          |1 = A data packet is received from the host by the endpoint.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[5]     |OUTTKIF   |Data OUT Token Interrupt
-     * |        |          |0 = A Data OUT token has not been received from the host.
-     * |        |          |1 = A Data OUT token has been received from the host.
-     * |        |          |This bit also set by PING tokens(in high-speed only).
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[6]     |INTKIF    |Data IN Token Interrupt
-     * |        |          |0 = Not Data IN token has been received from the host.
-     * |        |          |1 = A Data IN token has been received from the host.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[7]     |PINGIF    |PING Token Interrupt
-     * |        |          |0 = A Data PING token has not been received from the host.
-     * |        |          |1 = A Data PING token has been received from the host.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[8]     |NAKIF     |USB NAK Sent
-     * |        |          |0 = The last USB IN packet could be provided, and was acknowledged with a ACK.
-     * |        |          |1 = The last USB IN packet could not be provided, and was acknowledged with a NAK.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[9]     |STALLIF   |USB STALL Sent
-     * |        |          |0 = The last USB packet could be accepted or provided because the endpoint was stalled, and was acknowledged with a STALL.
-     * |        |          |1 = The last USB packet could not be accepted or provided because the endpoint was stalled, and was acknowledged with a STALL.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[10]    |NYETIF    |NYET Sent
-     * |        |          |0 = The space available in the RAM is sufficient to accommodate the next on coming data packet.
-     * |        |          |1 = The space available in the RAM is not sufficient to accommodate the next on coming data packet.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[11]    |ERRIF     |ERR Sent
-     * |        |          |0 = No any error in the transaction.
-     * |        |          |1 = There occurs any error in the transaction.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[12]    |SHORTRXIF |Bulk Out Short Packet Received
-     * |        |          |0 = No bulk out short packet is received.
-     * |        |          |1 = Received bulk out short packet (including zero length packet ).
-     * |        |          |Note: Write 1 to clear this bit to 0.
-    */
-    __IO uint32_t EPCINTSTS;
-
-    /**
-     * EPCINTEN
-     * ===================================================================================================
-     * Offset: 0xBC  Endpoint C Interrupt Enable Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0]     |BUFFULLIEN|Buffer Full Interrupt
-     * |        |          |When set, this bit enables a local interrupt to be set when a buffer full condition is detected on the bus.
-     * |        |          |0 = Buffer full interrupt Disabled.
-     * |        |          |1 = Buffer full interrupt Enabled.
-     * |[1]     |BUFEMPTYIEN|Buffer Empty Interrupt
-     * |        |          |When set, this bit enables a local interrupt to be set when a buffer empty condition is detected on the bus.
-     * |        |          |0 = Buffer empty interrupt Disabled.
-     * |        |          |1 = Buffer empty interrupt Enabled.
-     * |[2]     |SHORTTXIEN|Short Packet Transferred Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a short data packet has been transferred to/from the host.
-     * |        |          |0 = Short data packet interrupt Disabled.
-     * |        |          |1 = Short data packet interrupt Enabled.
-     * |[3]     |TXPKIEN   |Data Packet Transmitted Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a data packet has been received from the host.
-     * |        |          |0 = Data packet has been received from the host interrupt Disabled.
-     * |        |          |1 = Data packet has been received from the host interrupt Enabled.
-     * |[4]     |RXPKIEN   |Data Packet Received Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a data packet has been transmitted to the host.
-     * |        |          |0 = Data packet has been transmitted to the host interrupt Disabled.
-     * |        |          |1 = Data packet has been transmitted to the host interrupt Enabled.
-     * |[5]     |OUTTKIEN  |Data OUT Token Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a Data OUT token has been received from the host.
-     * |        |          |0 = Data OUT token interrupt Disabled.
-     * |        |          |1 = Data OUT token interrupt Enabled.
-     * |[6]     |INTKIEN   |Data IN Token Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a Data IN token has been received from the host.
-     * |        |          |0 = Data IN token interrupt Disabled.
-     * |        |          |1 = Data IN token interrupt Enabled.
-     * |[7]     |PINGIEN   |PING Token Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a PING token has been received from the host.
-     * |        |          |0 = PING token interrupt Disabled.
-     * |        |          |1 = PING token interrupt Enabled.
-     * |[8]     |NAKIEN    |USB NAK Sent Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a NAK token is sent to the host.
-     * |        |          |0 = NAK token interrupt Disabled.
-     * |        |          |1 = NAK token interrupt Enabled.
-     * |[9]     |STALLIEN  |USB STALL Sent Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a stall token is sent to the host.
-     * |        |          |0 = STALL token interrupt Disabled.
-     * |        |          |1 = STALL token interrupt Enabled.
-     * |[10]    |NYETIEN   |NYET Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set whenever NYET condition occurs on the bus for this endpoint.
-     * |        |          |0 = NYET condition interrupt Disabled.
-     * |        |          |1 = NYET condition interrupt Enabled.
-     * |[11]    |ERRIEN    |ERR Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set whenever ERR condition occurs on the bus for this endpoint.
-     * |        |          |0 = Error event interrupt Disabled.
-     * |        |          |1 = Error event interrupt Enabled.
-     * |[12]    |SHORTRXIEN|Bulk Out Short Packet Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set whenever bulk out short packet occurs on the bus for this endpoint.
-     * |        |          |0 = Bulk out interrupt Disabled.
-     * |        |          |1 = Bulk out interrupt Enabled.
-    */
-    __IO uint32_t EPCINTEN;
-
-    /**
-     * EPCDATCNT
-     * ===================================================================================================
-     * Offset: 0xC0  Endpoint C Data Available Count Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:15]  |DATCNT    |Data Count
-     * |        |          |For an OUT/IN endpoint, this register returns the number of valid bytes in the endpoint packet buffer.
-     * |[16:30] |DMALOOP   |DMA Loop
-     * |        |          |This register is the remaining DMA loop to complete. Each loop means 32-byte transfer.
-    */
-    __I  uint32_t EPCDATCNT;
-
-    /**
-     * EPCRSPCTL
-     * ===================================================================================================
-     * Offset: 0xC4  Endpoint C Response Control Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0]     |FLUSH     |Buffer Flush
-     * |        |          |Writing 1 to this bit causes the packet buffer to be flushed and the corresponding EP_AVAIL register to be cleared.
-     * |        |          |This bit is self-clearing.
-     * |        |          |This bit should always be written after an configuration event.
-     * |        |          |0 = The packet buffer is not flushed.
-     * |        |          |1 = The packet buffer is flushed by user.
-     * |[1:2]   |MODE      |Mode Control
-     * |        |          |The two bits decide the operation mode of the in-endpoint.
-     * |        |          |00: Auto-Validate Mode
-     * |        |          |01: Manual-Validate Mode
-     * |        |          |10: Fly Mode
-     * |        |          |11: Reserved
-     * |        |          |These bits are not valid for an out-endpoint.
-     * |        |          |The auto validate mode will be activated when the reserved mode is selected.
-     * |[3]     |TOGGLE    |Endpoint Toggle
-     * |        |          |This bit is used to clear the endpoint data toggle bit.
-     * |        |          |Reading this bit returns the current state of the endpoint data toggle bit.
-     * |        |          |The local CPU may use this bit to initialize the end-point's toggle in case of reception of a Set Interface request or a Clear Feature (ep_halt) request from the host.
-     * |        |          |Only when toggle bit is "1", this bit can be written into the inversed write data bit[3].
-     * |        |          |0 = Not clear the endpoint data toggle bit.
-     * |        |          |1 = Clear the endpoint data toggle bit.
-     * |[4]     |HALT      |Endpoint Halt
-     * |        |          |This bit is used to send a STALL handshake as response to the token from the host.
-     * |        |          |When an Endpoint Set Feature (Endpoin_halt) is detected by the local CPU, it must write a '1' to this bit.
-     * |        |          |0 = Not send a STALL handshake as response to the token from the host.
-     * |        |          |1 = Send a STALL handshake as response to the token from the host.
-     * |[5]     |ZEROLEN   |Zero Length
-     * |        |          |This bit is used to send a zero-length packet n response to an IN-token.
-     * |        |          |When this bit is set, a zero packet is sent to the host on reception of an IN-token.
-     * |        |          |0 = A zero packet is not sent to the host on reception of an IN-token.
-     * |        |          |1 = A zero packet is sent to the host on reception of an IN-token.
-     * |[6]     |SHORTTXEN |Short Packet Transfer Enable
-     * |        |          |This bit is applicable only in case of Auto-Validate Method.
-     * |        |          |This bit is set to validate any remaining data in the buffer which is not equal to the MPS of the endpoint, and happens to be the last transfer.
-     * |        |          |0 = Not validate any remaining data in the buffer which is not equal to the MPS of the endpoint.
-     * |        |          |1 = Validate any remaining data in the buffer which is not equal to the MPS of the endpoint.
-     * |[7]     |DISBUF    |Buffer Disable Control
-     * |        |          |This bit is used to disable buffer (set buffer size to 1) when a Bulk-OUT short packet is received.
-     * |        |          |0 = Buffer Not Disabled when Bulk-OUT short packet is received.
-     * |        |          |1 = Buffer Disabled when Bulk-OUT short packet is received.
-    */
-    __IO uint32_t EPCRSPCTL;
-
-    /**
-     * EPCMPS
-     * ===================================================================================================
-     * Offset: 0xC8  Endpoint C Maximum Packet Size Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:10]  |EPMPS     |Endpoint Maximum Packet Size
-     * |        |          |This field determines the Maximum Packet Size of the Endpoint.
-    */
-    __IO uint32_t EPCMPS;
-
-    /**
-     * EPCTXCNT
-     * ===================================================================================================
-     * Offset: 0xCC  Endpoint C Transfer Count Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:10]  |TXCNT     |Endpoint Transfer Count
-     * |        |          |For IN endpoints, this field determines the total number of bytes to be sent to the host in case of manual validation method.
-     * |        |          |For OUT endpoints, this field has no effect.
-    */
-    __IO uint32_t EPCTXCNT;
-
-    /**
-     * EPCCFG
-     * ===================================================================================================
-     * Offset: 0xD0  Endpoint C Configuration Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0]     |EPEN      |Endpoint Valid
-     * |        |          |When set, this bit enables this endpoint.
-     * |        |          |This bit has no effect on Endpoint 0, which is always enabled.
-     * |        |          |0 = The endpoint Disabled.
-     * |        |          |1 = The endpoint Enabled.
-     * |[1:2]   |EPTYPE    |Endpoint Type
-     * |        |          |This field selects the type of this endpoint. Endpoint 0 is forced to a Control type.
-     * |        |          |00 = Reserved.
-     * |        |          |01 = Bulk.
-     * |        |          |10 = Interrupt.
-     * |        |          |11 = Isochronous.
-     * |[3]     |EPDIR     |Endpoint Direction
-     * |        |          |0 = out-endpoint (Host OUT to Device).
-     * |        |          |1 = in-endpoint (Host IN to Device).
-     * |        |          |Note: A maximum of one OUT and IN endpoint is allowed for each endpoint number.
-     * |[4:7]   |EPNUM     |Endpoint Number
-     * |        |          |This field selects the number of the endpoint. Valid numbers 1 to 15.
-    */
-    __IO uint32_t EPCCFG;
-
-    /**
-     * EPCBUFSTART
-     * ===================================================================================================
-     * Offset: 0xD4  Endpoint C RAM Start Address Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:11]  |SADDR     |Endpoint Start Address
-     * |        |          |This is the start-address of the RAM space allocated for the endpoint A~L.
-    */
-    __IO uint32_t EPCBUFSTART;
-
-    /**
-     * EPCBUFEND
-     * ===================================================================================================
-     * Offset: 0xD8  Endpoint C RAM End Address Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:11]  |EADDR     |Endpoint End Address
-     * |        |          |This is the end-address of the RAM space allocated for the endpoint A~L.
-    */
-    __IO uint32_t EPCBUFEND;
-
-    union {
-
-        /**
-         * EPDDAT
-         * ===================================================================================================
-         * Offset: 0xDC  Endpoint D Data Register
-         * ---------------------------------------------------------------------------------------------------
-         * |Bits    |Field     |Descriptions
-         * | :----: | :----:   | :---- |
-         * |[0:31]  |EPDAT     |Endpoint A~L Data Register
-         * |        |          |Endpoint A~L data buffer for the buffer transaction (read or write).
-         * |        |          |Note: Only word or byte access are supported.
-        */
-        __IO uint32_t EPDDAT;
-        /** Endpoint D Data Buffer for Byte Access */
-        __IO uint8_t  EPDDAT_BYTE;
-
-    }; ///< Define EPD Data Register 32-bit or 8-bit access
-
-    /**
-     * EPDINTSTS
-     * ===================================================================================================
-     * Offset: 0xE0  Endpoint D Interrupt Status Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0]     |BUFFULLIF |Buffer Full
-     * |        |          |For an IN endpoint, the currently selected buffer is full, or no buffer is available to the local side for writing (no space to write).
-     * |        |          |For an OUT endpoint, there is a buffer available on the local side, and there are FIFO full of bytes available to be read (entire packet is available for reading).
-     * |        |          |0 = The endpoint packet buffer is not full.
-     * |        |          |1 = The endpoint packet buffer is full.
-     * |        |          |Note: This bit is read-only.
-     * |[1]     |BUFEMPTYIF|Buffer Empty
-     * |        |          |For an IN endpoint, a buffer is available to the local side for writing up to FIFO full of bytes.
-     * |        |          |0 = The endpoint buffer is not empty.
-     * |        |          |1 = The endpoint buffer is empty.
-     * |        |          |For an OUT endpoint:
-     * |        |          |0 = The currently selected buffer has not a count of 0.
-     * |        |          |1 = The currently selected buffer has a count of 0, or no buffer is available on the local side (nothing to read).
-     * |        |          |Note: This bit is read-only.
-     * |[2]     |SHORTTXIF |Short Packet Transferred Interrupt
-     * |        |          |0 = The length of the last packet was not less than the Maximum Packet Size (EPMPS).
-     * |        |          |1 = The length of the last packet was less than the Maximum Packet Size (EPMPS).
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[3]     |TXPKIF    |Data Packet Transmitted Interrupt
-     * |        |          |0 = Not a data packet is transmitted from the endpoint to the host.
-     * |        |          |1 = A data packet is transmitted from the endpoint to the host.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[4]     |RXPKIF    |Data Packet Received Interrupt
-     * |        |          |0 = No data packet is received from the host by the endpoint.
-     * |        |          |1 = A data packet is received from the host by the endpoint.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[5]     |OUTTKIF   |Data OUT Token Interrupt
-     * |        |          |0 = A Data OUT token has not been received from the host.
-     * |        |          |1 = A Data OUT token has been received from the host.
-     * |        |          |This bit also set by PING tokens(in high-speed only).
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[6]     |INTKIF    |Data IN Token Interrupt
-     * |        |          |0 = Not Data IN token has been received from the host.
-     * |        |          |1 = A Data IN token has been received from the host.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[7]     |PINGIF    |PING Token Interrupt
-     * |        |          |0 = A Data PING token has not been received from the host.
-     * |        |          |1 = A Data PING token has been received from the host.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[8]     |NAKIF     |USB NAK Sent
-     * |        |          |0 = The last USB IN packet could be provided, and was acknowledged with a ACK.
-     * |        |          |1 = The last USB IN packet could not be provided, and was acknowledged with a NAK.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[9]     |STALLIF   |USB STALL Sent
-     * |        |          |0 = The last USB packet could be accepted or provided because the endpoint was stalled, and was acknowledged with a STALL.
-     * |        |          |1 = The last USB packet could not be accepted or provided because the endpoint was stalled, and was acknowledged with a STALL.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[10]    |NYETIF    |NYET Sent
-     * |        |          |0 = The space available in the RAM is sufficient to accommodate the next on coming data packet.
-     * |        |          |1 = The space available in the RAM is not sufficient to accommodate the next on coming data packet.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[11]    |ERRIF     |ERR Sent
-     * |        |          |0 = No any error in the transaction.
-     * |        |          |1 = There occurs any error in the transaction.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[12]    |SHORTRXIF |Bulk Out Short Packet Received
-     * |        |          |0 = No bulk out short packet is received.
-     * |        |          |1 = Received bulk out short packet (including zero length packet ).
-     * |        |          |Note: Write 1 to clear this bit to 0.
-    */
-    __IO uint32_t EPDINTSTS;
-
-    /**
-     * EPDINTEN
-     * ===================================================================================================
-     * Offset: 0xE4  Endpoint D Interrupt Enable Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0]     |BUFFULLIEN|Buffer Full Interrupt
-     * |        |          |When set, this bit enables a local interrupt to be set when a buffer full condition is detected on the bus.
-     * |        |          |0 = Buffer full interrupt Disabled.
-     * |        |          |1 = Buffer full interrupt Enabled.
-     * |[1]     |BUFEMPTYIEN|Buffer Empty Interrupt
-     * |        |          |When set, this bit enables a local interrupt to be set when a buffer empty condition is detected on the bus.
-     * |        |          |0 = Buffer empty interrupt Disabled.
-     * |        |          |1 = Buffer empty interrupt Enabled.
-     * |[2]     |SHORTTXIEN|Short Packet Transferred Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a short data packet has been transferred to/from the host.
-     * |        |          |0 = Short data packet interrupt Disabled.
-     * |        |          |1 = Short data packet interrupt Enabled.
-     * |[3]     |TXPKIEN   |Data Packet Transmitted Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a data packet has been received from the host.
-     * |        |          |0 = Data packet has been received from the host interrupt Disabled.
-     * |        |          |1 = Data packet has been received from the host interrupt Enabled.
-     * |[4]     |RXPKIEN   |Data Packet Received Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a data packet has been transmitted to the host.
-     * |        |          |0 = Data packet has been transmitted to the host interrupt Disabled.
-     * |        |          |1 = Data packet has been transmitted to the host interrupt Enabled.
-     * |[5]     |OUTTKIEN  |Data OUT Token Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a Data OUT token has been received from the host.
-     * |        |          |0 = Data OUT token interrupt Disabled.
-     * |        |          |1 = Data OUT token interrupt Enabled.
-     * |[6]     |INTKIEN   |Data IN Token Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a Data IN token has been received from the host.
-     * |        |          |0 = Data IN token interrupt Disabled.
-     * |        |          |1 = Data IN token interrupt Enabled.
-     * |[7]     |PINGIEN   |PING Token Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a PING token has been received from the host.
-     * |        |          |0 = PING token interrupt Disabled.
-     * |        |          |1 = PING token interrupt Enabled.
-     * |[8]     |NAKIEN    |USB NAK Sent Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a NAK token is sent to the host.
-     * |        |          |0 = NAK token interrupt Disabled.
-     * |        |          |1 = NAK token interrupt Enabled.
-     * |[9]     |STALLIEN  |USB STALL Sent Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a stall token is sent to the host.
-     * |        |          |0 = STALL token interrupt Disabled.
-     * |        |          |1 = STALL token interrupt Enabled.
-     * |[10]    |NYETIEN   |NYET Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set whenever NYET condition occurs on the bus for this endpoint.
-     * |        |          |0 = NYET condition interrupt Disabled.
-     * |        |          |1 = NYET condition interrupt Enabled.
-     * |[11]    |ERRIEN    |ERR Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set whenever ERR condition occurs on the bus for this endpoint.
-     * |        |          |0 = Error event interrupt Disabled.
-     * |        |          |1 = Error event interrupt Enabled.
-     * |[12]    |SHORTRXIEN|Bulk Out Short Packet Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set whenever bulk out short packet occurs on the bus for this endpoint.
-     * |        |          |0 = Bulk out interrupt Disabled.
-     * |        |          |1 = Bulk out interrupt Enabled.
-    */
-    __IO uint32_t EPDINTEN;
-
-    /**
-     * EPDDATCNT
-     * ===================================================================================================
-     * Offset: 0xE8  Endpoint D Data Available Count Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:15]  |DATCNT    |Data Count
-     * |        |          |For an OUT/IN endpoint, this register returns the number of valid bytes in the endpoint packet buffer.
-     * |[16:30] |DMALOOP   |DMA Loop
-     * |        |          |This register is the remaining DMA loop to complete. Each loop means 32-byte transfer.
-    */
-    __I  uint32_t EPDDATCNT;
-
-    /**
-     * EPDRSPCTL
-     * ===================================================================================================
-     * Offset: 0xEC  Endpoint D Response Control Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0]     |FLUSH     |Buffer Flush
-     * |        |          |Writing 1 to this bit causes the packet buffer to be flushed and the corresponding EP_AVAIL register to be cleared.
-     * |        |          |This bit is self-clearing.
-     * |        |          |This bit should always be written after an configuration event.
-     * |        |          |0 = The packet buffer is not flushed.
-     * |        |          |1 = The packet buffer is flushed by user.
-     * |[1:2]   |MODE      |Mode Control
-     * |        |          |The two bits decide the operation mode of the in-endpoint.
-     * |        |          |00: Auto-Validate Mode
-     * |        |          |01: Manual-Validate Mode
-     * |        |          |10: Fly Mode
-     * |        |          |11: Reserved
-     * |        |          |These bits are not valid for an out-endpoint.
-     * |        |          |The auto validate mode will be activated when the reserved mode is selected.
-     * |[3]     |TOGGLE    |Endpoint Toggle
-     * |        |          |This bit is used to clear the endpoint data toggle bit.
-     * |        |          |Reading this bit returns the current state of the endpoint data toggle bit.
-     * |        |          |The local CPU may use this bit to initialize the end-point's toggle in case of reception of a Set Interface request or a Clear Feature (ep_halt) request from the host.
-     * |        |          |Only when toggle bit is "1", this bit can be written into the inversed write data bit[3].
-     * |        |          |0 = Not clear the endpoint data toggle bit.
-     * |        |          |1 = Clear the endpoint data toggle bit.
-     * |[4]     |HALT      |Endpoint Halt
-     * |        |          |This bit is used to send a STALL handshake as response to the token from the host.
-     * |        |          |When an Endpoint Set Feature (Endpoin_halt) is detected by the local CPU, it must write a '1' to this bit.
-     * |        |          |0 = Not send a STALL handshake as response to the token from the host.
-     * |        |          |1 = Send a STALL handshake as response to the token from the host.
-     * |[5]     |ZEROLEN   |Zero Length
-     * |        |          |This bit is used to send a zero-length packet n response to an IN-token.
-     * |        |          |When this bit is set, a zero packet is sent to the host on reception of an IN-token.
-     * |        |          |0 = A zero packet is not sent to the host on reception of an IN-token.
-     * |        |          |1 = A zero packet is sent to the host on reception of an IN-token.
-     * |[6]     |SHORTTXEN |Short Packet Transfer Enable
-     * |        |          |This bit is applicable only in case of Auto-Validate Method.
-     * |        |          |This bit is set to validate any remaining data in the buffer which is not equal to the MPS of the endpoint, and happens to be the last transfer.
-     * |        |          |0 = Not validate any remaining data in the buffer which is not equal to the MPS of the endpoint.
-     * |        |          |1 = Validate any remaining data in the buffer which is not equal to the MPS of the endpoint.
-     * |[7]     |DISBUF    |Buffer Disable Control
-     * |        |          |This bit is used to disable buffer (set buffer size to 1) when a Bulk-OUT short packet is received.
-     * |        |          |0 = Buffer Not Disabled when Bulk-OUT short packet is received.
-     * |        |          |1 = Buffer Disabled when Bulk-OUT short packet is received.
-    */
-    __IO uint32_t EPDRSPCTL;
-
-    /**
-     * EPDMPS
-     * ===================================================================================================
-     * Offset: 0xF0  Endpoint D Maximum Packet Size Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:10]  |EPMPS     |Endpoint Maximum Packet Size
-     * |        |          |This field determines the Maximum Packet Size of the Endpoint.
-    */
-    __IO uint32_t EPDMPS;
-
-    /**
-     * EPDTXCNT
-     * ===================================================================================================
-     * Offset: 0xF4  Endpoint D Transfer Count Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:10]  |TXCNT     |Endpoint Transfer Count
-     * |        |          |For IN endpoints, this field determines the total number of bytes to be sent to the host in case of manual validation method.
-     * |        |          |For OUT endpoints, this field has no effect.
-    */
-    __IO uint32_t EPDTXCNT;
-
-    /**
-     * EPDCFG
-     * ===================================================================================================
-     * Offset: 0xF8  Endpoint D Configuration Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0]     |EPEN      |Endpoint Valid
-     * |        |          |When set, this bit enables this endpoint.
-     * |        |          |This bit has no effect on Endpoint 0, which is always enabled.
-     * |        |          |0 = The endpoint Disabled.
-     * |        |          |1 = The endpoint Enabled.
-     * |[1:2]   |EPTYPE    |Endpoint Type
-     * |        |          |This field selects the type of this endpoint. Endpoint 0 is forced to a Control type.
-     * |        |          |00 = Reserved.
-     * |        |          |01 = Bulk.
-     * |        |          |10 = Interrupt.
-     * |        |          |11 = Isochronous.
-     * |[3]     |EPDIR     |Endpoint Direction
-     * |        |          |0 = out-endpoint (Host OUT to Device).
-     * |        |          |1 = in-endpoint (Host IN to Device).
-     * |        |          |Note: A maximum of one OUT and IN endpoint is allowed for each endpoint number.
-     * |[4:7]   |EPNUM     |Endpoint Number
-     * |        |          |This field selects the number of the endpoint. Valid numbers 1 to 15.
-    */
-    __IO uint32_t EPDCFG;
-
-    /**
-     * EPDBUFSTART
-     * ===================================================================================================
-     * Offset: 0xFC  Endpoint D RAM Start Address Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:11]  |SADDR     |Endpoint Start Address
-     * |        |          |This is the start-address of the RAM space allocated for the endpoint A~L.
-    */
-    __IO uint32_t EPDBUFSTART;
-
-    /**
-     * EPDBUFEND
-     * ===================================================================================================
-     * Offset: 0x100  Endpoint D RAM End Address Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:11]  |EADDR     |Endpoint End Address
-     * |        |          |This is the end-address of the RAM space allocated for the endpoint A~L.
-    */
-    __IO uint32_t EPDBUFEND;
-
-    union {
-
-        /**
-         * EPEDAT
-         * ===================================================================================================
-         * Offset: 0x104  Endpoint E Data Register
-         * ---------------------------------------------------------------------------------------------------
-         * |Bits    |Field     |Descriptions
-         * | :----: | :----:   | :---- |
-         * |[0:31]  |EPDAT     |Endpoint A~L Data Register
-         * |        |          |Endpoint A~L data buffer for the buffer transaction (read or write).
-         * |        |          |Note: Only word or byte access are supported.
-        */
-        __IO uint32_t EPEDAT;
-        /** Endpoint E Data Buffer for Byte Access */
-        __IO uint8_t  EPEDAT_BYTE;
-
-    }; ///< Define EPE Data Register 32-bit or 8-bit access
-
-    /**
-     * EPEINTSTS
-     * ===================================================================================================
-     * Offset: 0x108  Endpoint E Interrupt Status Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0]     |BUFFULLIF |Buffer Full
-     * |        |          |For an IN endpoint, the currently selected buffer is full, or no buffer is available to the local side for writing (no space to write).
-     * |        |          |For an OUT endpoint, there is a buffer available on the local side, and there are FIFO full of bytes available to be read (entire packet is available for reading).
-     * |        |          |0 = The endpoint packet buffer is not full.
-     * |        |          |1 = The endpoint packet buffer is full.
-     * |        |          |Note: This bit is read-only.
-     * |[1]     |BUFEMPTYIF|Buffer Empty
-     * |        |          |For an IN endpoint, a buffer is available to the local side for writing up to FIFO full of bytes.
-     * |        |          |0 = The endpoint buffer is not empty.
-     * |        |          |1 = The endpoint buffer is empty.
-     * |        |          |For an OUT endpoint:
-     * |        |          |0 = The currently selected buffer has not a count of 0.
-     * |        |          |1 = The currently selected buffer has a count of 0, or no buffer is available on the local side (nothing to read).
-     * |        |          |Note: This bit is read-only.
-     * |[2]     |SHORTTXIF |Short Packet Transferred Interrupt
-     * |        |          |0 = The length of the last packet was not less than the Maximum Packet Size (EPMPS).
-     * |        |          |1 = The length of the last packet was less than the Maximum Packet Size (EPMPS).
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[3]     |TXPKIF    |Data Packet Transmitted Interrupt
-     * |        |          |0 = Not a data packet is transmitted from the endpoint to the host.
-     * |        |          |1 = A data packet is transmitted from the endpoint to the host.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[4]     |RXPKIF    |Data Packet Received Interrupt
-     * |        |          |0 = No data packet is received from the host by the endpoint.
-     * |        |          |1 = A data packet is received from the host by the endpoint.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[5]     |OUTTKIF   |Data OUT Token Interrupt
-     * |        |          |0 = A Data OUT token has not been received from the host.
-     * |        |          |1 = A Data OUT token has been received from the host.
-     * |        |          |This bit also set by PING tokens(in high-speed only).
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[6]     |INTKIF    |Data IN Token Interrupt
-     * |        |          |0 = Not Data IN token has been received from the host.
-     * |        |          |1 = A Data IN token has been received from the host.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[7]     |PINGIF    |PING Token Interrupt
-     * |        |          |0 = A Data PING token has not been received from the host.
-     * |        |          |1 = A Data PING token has been received from the host.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[8]     |NAKIF     |USB NAK Sent
-     * |        |          |0 = The last USB IN packet could be provided, and was acknowledged with a ACK.
-     * |        |          |1 = The last USB IN packet could not be provided, and was acknowledged with a NAK.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[9]     |STALLIF   |USB STALL Sent
-     * |        |          |0 = The last USB packet could be accepted or provided because the endpoint was stalled, and was acknowledged with a STALL.
-     * |        |          |1 = The last USB packet could not be accepted or provided because the endpoint was stalled, and was acknowledged with a STALL.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[10]    |NYETIF    |NYET Sent
-     * |        |          |0 = The space available in the RAM is sufficient to accommodate the next on coming data packet.
-     * |        |          |1 = The space available in the RAM is not sufficient to accommodate the next on coming data packet.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[11]    |ERRIF     |ERR Sent
-     * |        |          |0 = No any error in the transaction.
-     * |        |          |1 = There occurs any error in the transaction.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[12]    |SHORTRXIF |Bulk Out Short Packet Received
-     * |        |          |0 = No bulk out short packet is received.
-     * |        |          |1 = Received bulk out short packet (including zero length packet ).
-     * |        |          |Note: Write 1 to clear this bit to 0.
-    */
-    __IO uint32_t EPEINTSTS;
-
-    /**
-     * EPEINTEN
-     * ===================================================================================================
-     * Offset: 0x10C  Endpoint E Interrupt Enable Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0]     |BUFFULLIEN|Buffer Full Interrupt
-     * |        |          |When set, this bit enables a local interrupt to be set when a buffer full condition is detected on the bus.
-     * |        |          |0 = Buffer full interrupt Disabled.
-     * |        |          |1 = Buffer full interrupt Enabled.
-     * |[1]     |BUFEMPTYIEN|Buffer Empty Interrupt
-     * |        |          |When set, this bit enables a local interrupt to be set when a buffer empty condition is detected on the bus.
-     * |        |          |0 = Buffer empty interrupt Disabled.
-     * |        |          |1 = Buffer empty interrupt Enabled.
-     * |[2]     |SHORTTXIEN|Short Packet Transferred Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a short data packet has been transferred to/from the host.
-     * |        |          |0 = Short data packet interrupt Disabled.
-     * |        |          |1 = Short data packet interrupt Enabled.
-     * |[3]     |TXPKIEN   |Data Packet Transmitted Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a data packet has been received from the host.
-     * |        |          |0 = Data packet has been received from the host interrupt Disabled.
-     * |        |          |1 = Data packet has been received from the host interrupt Enabled.
-     * |[4]     |RXPKIEN   |Data Packet Received Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a data packet has been transmitted to the host.
-     * |        |          |0 = Data packet has been transmitted to the host interrupt Disabled.
-     * |        |          |1 = Data packet has been transmitted to the host interrupt Enabled.
-     * |[5]     |OUTTKIEN  |Data OUT Token Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a Data OUT token has been received from the host.
-     * |        |          |0 = Data OUT token interrupt Disabled.
-     * |        |          |1 = Data OUT token interrupt Enabled.
-     * |[6]     |INTKIEN   |Data IN Token Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a Data IN token has been received from the host.
-     * |        |          |0 = Data IN token interrupt Disabled.
-     * |        |          |1 = Data IN token interrupt Enabled.
-     * |[7]     |PINGIEN   |PING Token Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a PING token has been received from the host.
-     * |        |          |0 = PING token interrupt Disabled.
-     * |        |          |1 = PING token interrupt Enabled.
-     * |[8]     |NAKIEN    |USB NAK Sent Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a NAK token is sent to the host.
-     * |        |          |0 = NAK token interrupt Disabled.
-     * |        |          |1 = NAK token interrupt Enabled.
-     * |[9]     |STALLIEN  |USB STALL Sent Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a stall token is sent to the host.
-     * |        |          |0 = STALL token interrupt Disabled.
-     * |        |          |1 = STALL token interrupt Enabled.
-     * |[10]    |NYETIEN   |NYET Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set whenever NYET condition occurs on the bus for this endpoint.
-     * |        |          |0 = NYET condition interrupt Disabled.
-     * |        |          |1 = NYET condition interrupt Enabled.
-     * |[11]    |ERRIEN    |ERR Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set whenever ERR condition occurs on the bus for this endpoint.
-     * |        |          |0 = Error event interrupt Disabled.
-     * |        |          |1 = Error event interrupt Enabled.
-     * |[12]    |SHORTRXIEN|Bulk Out Short Packet Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set whenever bulk out short packet occurs on the bus for this endpoint.
-     * |        |          |0 = Bulk out interrupt Disabled.
-     * |        |          |1 = Bulk out interrupt Enabled.
-    */
-    __IO uint32_t EPEINTEN;
-
-    /**
-     * EPEDATCNT
-     * ===================================================================================================
-     * Offset: 0x110  Endpoint E Data Available Count Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:15]  |DATCNT    |Data Count
-     * |        |          |For an OUT/IN endpoint, this register returns the number of valid bytes in the endpoint packet buffer.
-     * |[16:30] |DMALOOP   |DMA Loop
-     * |        |          |This register is the remaining DMA loop to complete. Each loop means 32-byte transfer.
-    */
-    __I  uint32_t EPEDATCNT;
-
-    /**
-     * EPERSPCTL
-     * ===================================================================================================
-     * Offset: 0x114  Endpoint E Response Control Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0]     |FLUSH     |Buffer Flush
-     * |        |          |Writing 1 to this bit causes the packet buffer to be flushed and the corresponding EP_AVAIL register to be cleared.
-     * |        |          |This bit is self-clearing.
-     * |        |          |This bit should always be written after an configuration event.
-     * |        |          |0 = The packet buffer is not flushed.
-     * |        |          |1 = The packet buffer is flushed by user.
-     * |[1:2]   |MODE      |Mode Control
-     * |        |          |The two bits decide the operation mode of the in-endpoint.
-     * |        |          |00: Auto-Validate Mode
-     * |        |          |01: Manual-Validate Mode
-     * |        |          |10: Fly Mode
-     * |        |          |11: Reserved
-     * |        |          |These bits are not valid for an out-endpoint.
-     * |        |          |The auto validate mode will be activated when the reserved mode is selected.
-     * |[3]     |TOGGLE    |Endpoint Toggle
-     * |        |          |This bit is used to clear the endpoint data toggle bit.
-     * |        |          |Reading this bit returns the current state of the endpoint data toggle bit.
-     * |        |          |The local CPU may use this bit to initialize the end-point's toggle in case of reception of a Set Interface request or a Clear Feature (ep_halt) request from the host.
-     * |        |          |Only when toggle bit is "1", this bit can be written into the inversed write data bit[3].
-     * |        |          |0 = Not clear the endpoint data toggle bit.
-     * |        |          |1 = Clear the endpoint data toggle bit.
-     * |[4]     |HALT      |Endpoint Halt
-     * |        |          |This bit is used to send a STALL handshake as response to the token from the host.
-     * |        |          |When an Endpoint Set Feature (Endpoin_halt) is detected by the local CPU, it must write a '1' to this bit.
-     * |        |          |0 = Not send a STALL handshake as response to the token from the host.
-     * |        |          |1 = Send a STALL handshake as response to the token from the host.
-     * |[5]     |ZEROLEN   |Zero Length
-     * |        |          |This bit is used to send a zero-length packet n response to an IN-token.
-     * |        |          |When this bit is set, a zero packet is sent to the host on reception of an IN-token.
-     * |        |          |0 = A zero packet is not sent to the host on reception of an IN-token.
-     * |        |          |1 = A zero packet is sent to the host on reception of an IN-token.
-     * |[6]     |SHORTTXEN |Short Packet Transfer Enable
-     * |        |          |This bit is applicable only in case of Auto-Validate Method.
-     * |        |          |This bit is set to validate any remaining data in the buffer which is not equal to the MPS of the endpoint, and happens to be the last transfer.
-     * |        |          |0 = Not validate any remaining data in the buffer which is not equal to the MPS of the endpoint.
-     * |        |          |1 = Validate any remaining data in the buffer which is not equal to the MPS of the endpoint.
-     * |[7]     |DISBUF    |Buffer Disable Control
-     * |        |          |This bit is used to disable buffer (set buffer size to 1) when a Bulk-OUT short packet is received.
-     * |        |          |0 = Buffer Not Disabled when Bulk-OUT short packet is received.
-     * |        |          |1 = Buffer Disabled when Bulk-OUT short packet is received.
-    */
-    __IO uint32_t EPERSPCTL;
-
-    /**
-     * EPEMPS
-     * ===================================================================================================
-     * Offset: 0x118  Endpoint E Maximum Packet Size Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:10]  |EPMPS     |Endpoint Maximum Packet Size
-     * |        |          |This field determines the Maximum Packet Size of the Endpoint.
-    */
-    __IO uint32_t EPEMPS;
-
-    /**
-     * EPETXCNT
-     * ===================================================================================================
-     * Offset: 0x11C  Endpoint E Transfer Count Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:10]  |TXCNT     |Endpoint Transfer Count
-     * |        |          |For IN endpoints, this field determines the total number of bytes to be sent to the host in case of manual validation method.
-     * |        |          |For OUT endpoints, this field has no effect.
-    */
-    __IO uint32_t EPETXCNT;
-
-    /**
-     * EPECFG
-     * ===================================================================================================
-     * Offset: 0x120  Endpoint E Configuration Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0]     |EPEN      |Endpoint Valid
-     * |        |          |When set, this bit enables this endpoint.
-     * |        |          |This bit has no effect on Endpoint 0, which is always enabled.
-     * |        |          |0 = The endpoint Disabled.
-     * |        |          |1 = The endpoint Enabled.
-     * |[1:2]   |EPTYPE    |Endpoint Type
-     * |        |          |This field selects the type of this endpoint. Endpoint 0 is forced to a Control type.
-     * |        |          |00 = Reserved.
-     * |        |          |01 = Bulk.
-     * |        |          |10 = Interrupt.
-     * |        |          |11 = Isochronous.
-     * |[3]     |EPDIR     |Endpoint Direction
-     * |        |          |0 = out-endpoint (Host OUT to Device).
-     * |        |          |1 = in-endpoint (Host IN to Device).
-     * |        |          |Note: A maximum of one OUT and IN endpoint is allowed for each endpoint number.
-     * |[4:7]   |EPNUM     |Endpoint Number
-     * |        |          |This field selects the number of the endpoint. Valid numbers 1 to 15.
-    */
-    __IO uint32_t EPECFG;
-
-    /**
-     * EPEBUFSTART
-     * ===================================================================================================
-     * Offset: 0x124  Endpoint E RAM Start Address Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:11]  |SADDR     |Endpoint Start Address
-     * |        |          |This is the start-address of the RAM space allocated for the endpoint A~L.
-    */
-    __IO uint32_t EPEBUFSTART;
-
-    /**
-     * EPEBUFEND
-     * ===================================================================================================
-     * Offset: 0x128  Endpoint E RAM End Address Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:11]  |EADDR     |Endpoint End Address
-     * |        |          |This is the end-address of the RAM space allocated for the endpoint A~L.
-    */
-    __IO uint32_t EPEBUFEND;
-
-    union {
-
-        /**
-         * EPFDAT
-         * ===================================================================================================
-         * Offset: 0x12C  Endpoint F Data Register
-         * ---------------------------------------------------------------------------------------------------
-         * |Bits    |Field     |Descriptions
-         * | :----: | :----:   | :---- |
-         * |[0:31]  |EPDAT     |Endpoint A~L Data Register
-         * |        |          |Endpoint A~L data buffer for the buffer transaction (read or write).
-         * |        |          |Note: Only word or byte access are supported.
-        */
-        __IO uint32_t EPFDAT;
-        /** Endpoint F Data Buffer for Byte Access */
-        __IO uint8_t  EPFDAT_BYTE;
-
-    }; ///< Define EPF Data Register 32-bit or 8-bit access
-
-    /**
-     * EPFINTSTS
-     * ===================================================================================================
-     * Offset: 0x130  Endpoint F Interrupt Status Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0]     |BUFFULLIF |Buffer Full
-     * |        |          |For an IN endpoint, the currently selected buffer is full, or no buffer is available to the local side for writing (no space to write).
-     * |        |          |For an OUT endpoint, there is a buffer available on the local side, and there are FIFO full of bytes available to be read (entire packet is available for reading).
-     * |        |          |0 = The endpoint packet buffer is not full.
-     * |        |          |1 = The endpoint packet buffer is full.
-     * |        |          |Note: This bit is read-only.
-     * |[1]     |BUFEMPTYIF|Buffer Empty
-     * |        |          |For an IN endpoint, a buffer is available to the local side for writing up to FIFO full of bytes.
-     * |        |          |0 = The endpoint buffer is not empty.
-     * |        |          |1 = The endpoint buffer is empty.
-     * |        |          |For an OUT endpoint:
-     * |        |          |0 = The currently selected buffer has not a count of 0.
-     * |        |          |1 = The currently selected buffer has a count of 0, or no buffer is available on the local side (nothing to read).
-     * |        |          |Note: This bit is read-only.
-     * |[2]     |SHORTTXIF |Short Packet Transferred Interrupt
-     * |        |          |0 = The length of the last packet was not less than the Maximum Packet Size (EPMPS).
-     * |        |          |1 = The length of the last packet was less than the Maximum Packet Size (EPMPS).
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[3]     |TXPKIF    |Data Packet Transmitted Interrupt
-     * |        |          |0 = Not a data packet is transmitted from the endpoint to the host.
-     * |        |          |1 = A data packet is transmitted from the endpoint to the host.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[4]     |RXPKIF    |Data Packet Received Interrupt
-     * |        |          |0 = No data packet is received from the host by the endpoint.
-     * |        |          |1 = A data packet is received from the host by the endpoint.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[5]     |OUTTKIF   |Data OUT Token Interrupt
-     * |        |          |0 = A Data OUT token has not been received from the host.
-     * |        |          |1 = A Data OUT token has been received from the host.
-     * |        |          |This bit also set by PING tokens(in high-speed only).
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[6]     |INTKIF    |Data IN Token Interrupt
-     * |        |          |0 = Not Data IN token has been received from the host.
-     * |        |          |1 = A Data IN token has been received from the host.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[7]     |PINGIF    |PING Token Interrupt
-     * |        |          |0 = A Data PING token has not been received from the host.
-     * |        |          |1 = A Data PING token has been received from the host.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[8]     |NAKIF     |USB NAK Sent
-     * |        |          |0 = The last USB IN packet could be provided, and was acknowledged with a ACK.
-     * |        |          |1 = The last USB IN packet could not be provided, and was acknowledged with a NAK.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[9]     |STALLIF   |USB STALL Sent
-     * |        |          |0 = The last USB packet could be accepted or provided because the endpoint was stalled, and was acknowledged with a STALL.
-     * |        |          |1 = The last USB packet could not be accepted or provided because the endpoint was stalled, and was acknowledged with a STALL.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[10]    |NYETIF    |NYET Sent
-     * |        |          |0 = The space available in the RAM is sufficient to accommodate the next on coming data packet.
-     * |        |          |1 = The space available in the RAM is not sufficient to accommodate the next on coming data packet.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[11]    |ERRIF     |ERR Sent
-     * |        |          |0 = No any error in the transaction.
-     * |        |          |1 = There occurs any error in the transaction.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[12]    |SHORTRXIF |Bulk Out Short Packet Received
-     * |        |          |0 = No bulk out short packet is received.
-     * |        |          |1 = Received bulk out short packet (including zero length packet ).
-     * |        |          |Note: Write 1 to clear this bit to 0.
-    */
-    __IO uint32_t EPFINTSTS;
-
-    /**
-     * EPFINTEN
-     * ===================================================================================================
-     * Offset: 0x134  Endpoint F Interrupt Enable Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0]     |BUFFULLIEN|Buffer Full Interrupt
-     * |        |          |When set, this bit enables a local interrupt to be set when a buffer full condition is detected on the bus.
-     * |        |          |0 = Buffer full interrupt Disabled.
-     * |        |          |1 = Buffer full interrupt Enabled.
-     * |[1]     |BUFEMPTYIEN|Buffer Empty Interrupt
-     * |        |          |When set, this bit enables a local interrupt to be set when a buffer empty condition is detected on the bus.
-     * |        |          |0 = Buffer empty interrupt Disabled.
-     * |        |          |1 = Buffer empty interrupt Enabled.
-     * |[2]     |SHORTTXIEN|Short Packet Transferred Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a short data packet has been transferred to/from the host.
-     * |        |          |0 = Short data packet interrupt Disabled.
-     * |        |          |1 = Short data packet interrupt Enabled.
-     * |[3]     |TXPKIEN   |Data Packet Transmitted Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a data packet has been received from the host.
-     * |        |          |0 = Data packet has been received from the host interrupt Disabled.
-     * |        |          |1 = Data packet has been received from the host interrupt Enabled.
-     * |[4]     |RXPKIEN   |Data Packet Received Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a data packet has been transmitted to the host.
-     * |        |          |0 = Data packet has been transmitted to the host interrupt Disabled.
-     * |        |          |1 = Data packet has been transmitted to the host interrupt Enabled.
-     * |[5]     |OUTTKIEN  |Data OUT Token Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a Data OUT token has been received from the host.
-     * |        |          |0 = Data OUT token interrupt Disabled.
-     * |        |          |1 = Data OUT token interrupt Enabled.
-     * |[6]     |INTKIEN   |Data IN Token Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a Data IN token has been received from the host.
-     * |        |          |0 = Data IN token interrupt Disabled.
-     * |        |          |1 = Data IN token interrupt Enabled.
-     * |[7]     |PINGIEN   |PING Token Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a PING token has been received from the host.
-     * |        |          |0 = PING token interrupt Disabled.
-     * |        |          |1 = PING token interrupt Enabled.
-     * |[8]     |NAKIEN    |USB NAK Sent Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a NAK token is sent to the host.
-     * |        |          |0 = NAK token interrupt Disabled.
-     * |        |          |1 = NAK token interrupt Enabled.
-     * |[9]     |STALLIEN  |USB STALL Sent Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a stall token is sent to the host.
-     * |        |          |0 = STALL token interrupt Disabled.
-     * |        |          |1 = STALL token interrupt Enabled.
-     * |[10]    |NYETIEN   |NYET Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set whenever NYET condition occurs on the bus for this endpoint.
-     * |        |          |0 = NYET condition interrupt Disabled.
-     * |        |          |1 = NYET condition interrupt Enabled.
-     * |[11]    |ERRIEN    |ERR Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set whenever ERR condition occurs on the bus for this endpoint.
-     * |        |          |0 = Error event interrupt Disabled.
-     * |        |          |1 = Error event interrupt Enabled.
-     * |[12]    |SHORTRXIEN|Bulk Out Short Packet Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set whenever bulk out short packet occurs on the bus for this endpoint.
-     * |        |          |0 = Bulk out interrupt Disabled.
-     * |        |          |1 = Bulk out interrupt Enabled.
-    */
-    __IO uint32_t EPFINTEN;
-
-    /**
-     * EPFDATCNT
-     * ===================================================================================================
-     * Offset: 0x138  Endpoint F Data Available Count Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:15]  |DATCNT    |Data Count
-     * |        |          |For an OUT/IN endpoint, this register returns the number of valid bytes in the endpoint packet buffer.
-     * |[16:30] |DMALOOP   |DMA Loop
-     * |        |          |This register is the remaining DMA loop to complete. Each loop means 32-byte transfer.
-    */
-    __I  uint32_t EPFDATCNT;
-
-    /**
-     * EPFRSPCTL
-     * ===================================================================================================
-     * Offset: 0x13C  Endpoint F Response Control Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0]     |FLUSH     |Buffer Flush
-     * |        |          |Writing 1 to this bit causes the packet buffer to be flushed and the corresponding EP_AVAIL register to be cleared.
-     * |        |          |This bit is self-clearing.
-     * |        |          |This bit should always be written after an configuration event.
-     * |        |          |0 = The packet buffer is not flushed.
-     * |        |          |1 = The packet buffer is flushed by user.
-     * |[1:2]   |MODE      |Mode Control
-     * |        |          |The two bits decide the operation mode of the in-endpoint.
-     * |        |          |00: Auto-Validate Mode
-     * |        |          |01: Manual-Validate Mode
-     * |        |          |10: Fly Mode
-     * |        |          |11: Reserved
-     * |        |          |These bits are not valid for an out-endpoint.
-     * |        |          |The auto validate mode will be activated when the reserved mode is selected.
-     * |[3]     |TOGGLE    |Endpoint Toggle
-     * |        |          |This bit is used to clear the endpoint data toggle bit.
-     * |        |          |Reading this bit returns the current state of the endpoint data toggle bit.
-     * |        |          |The local CPU may use this bit to initialize the end-point's toggle in case of reception of a Set Interface request or a Clear Feature (ep_halt) request from the host.
-     * |        |          |Only when toggle bit is "1", this bit can be written into the inversed write data bit[3].
-     * |        |          |0 = Not clear the endpoint data toggle bit.
-     * |        |          |1 = Clear the endpoint data toggle bit.
-     * |[4]     |HALT      |Endpoint Halt
-     * |        |          |This bit is used to send a STALL handshake as response to the token from the host.
-     * |        |          |When an Endpoint Set Feature (Endpoin_halt) is detected by the local CPU, it must write a '1' to this bit.
-     * |        |          |0 = Not send a STALL handshake as response to the token from the host.
-     * |        |          |1 = Send a STALL handshake as response to the token from the host.
-     * |[5]     |ZEROLEN   |Zero Length
-     * |        |          |This bit is used to send a zero-length packet n response to an IN-token.
-     * |        |          |When this bit is set, a zero packet is sent to the host on reception of an IN-token.
-     * |        |          |0 = A zero packet is not sent to the host on reception of an IN-token.
-     * |        |          |1 = A zero packet is sent to the host on reception of an IN-token.
-     * |[6]     |SHORTTXEN |Short Packet Transfer Enable
-     * |        |          |This bit is applicable only in case of Auto-Validate Method.
-     * |        |          |This bit is set to validate any remaining data in the buffer which is not equal to the MPS of the endpoint, and happens to be the last transfer.
-     * |        |          |0 = Not validate any remaining data in the buffer which is not equal to the MPS of the endpoint.
-     * |        |          |1 = Validate any remaining data in the buffer which is not equal to the MPS of the endpoint.
-     * |[7]     |DISBUF    |Buffer Disable Control
-     * |        |          |This bit is used to disable buffer (set buffer size to 1) when a Bulk-OUT short packet is received.
-     * |        |          |0 = Buffer Not Disabled when Bulk-OUT short packet is received.
-     * |        |          |1 = Buffer Disabled when Bulk-OUT short packet is received.
-    */
-    __IO uint32_t EPFRSPCTL;
-
-    /**
-     * EPFMPS
-     * ===================================================================================================
-     * Offset: 0x140  Endpoint F Maximum Packet Size Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:10]  |EPMPS     |Endpoint Maximum Packet Size
-     * |        |          |This field determines the Maximum Packet Size of the Endpoint.
-    */
-    __IO uint32_t EPFMPS;
-
-    /**
-     * EPFTXCNT
-     * ===================================================================================================
-     * Offset: 0x144  Endpoint F Transfer Count Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:10]  |TXCNT     |Endpoint Transfer Count
-     * |        |          |For IN endpoints, this field determines the total number of bytes to be sent to the host in case of manual validation method.
-     * |        |          |For OUT endpoints, this field has no effect.
-    */
-    __IO uint32_t EPFTXCNT;
-
-    /**
-     * EPFCFG
-     * ===================================================================================================
-     * Offset: 0x148  Endpoint F Configuration Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0]     |EPEN      |Endpoint Valid
-     * |        |          |When set, this bit enables this endpoint.
-     * |        |          |This bit has no effect on Endpoint 0, which is always enabled.
-     * |        |          |0 = The endpoint Disabled.
-     * |        |          |1 = The endpoint Enabled.
-     * |[1:2]   |EPTYPE    |Endpoint Type
-     * |        |          |This field selects the type of this endpoint. Endpoint 0 is forced to a Control type.
-     * |        |          |00 = Reserved.
-     * |        |          |01 = Bulk.
-     * |        |          |10 = Interrupt.
-     * |        |          |11 = Isochronous.
-     * |[3]     |EPDIR     |Endpoint Direction
-     * |        |          |0 = out-endpoint (Host OUT to Device).
-     * |        |          |1 = in-endpoint (Host IN to Device).
-     * |        |          |Note: A maximum of one OUT and IN endpoint is allowed for each endpoint number.
-     * |[4:7]   |EPNUM     |Endpoint Number
-     * |        |          |This field selects the number of the endpoint. Valid numbers 1 to 15.
-    */
-    __IO uint32_t EPFCFG;
-
-    /**
-     * EPFBUFSTART
-     * ===================================================================================================
-     * Offset: 0x14C  Endpoint F RAM Start Address Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:11]  |SADDR     |Endpoint Start Address
-     * |        |          |This is the start-address of the RAM space allocated for the endpoint A~L.
-    */
-    __IO uint32_t EPFBUFSTART;
-
-    /**
-     * EPFBUFEND
-     * ===================================================================================================
-     * Offset: 0x150  Endpoint F RAM End Address Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:11]  |EADDR     |Endpoint End Address
-     * |        |          |This is the end-address of the RAM space allocated for the endpoint A~L.
-    */
-    __IO uint32_t EPFBUFEND;
-
-    union {
-
-        /**
-         * EPGDAT
-         * ===================================================================================================
-         * Offset: 0x154  Endpoint G Data Register
-         * ---------------------------------------------------------------------------------------------------
-         * |Bits    |Field     |Descriptions
-         * | :----: | :----:   | :---- |
-         * |[0:31]  |EPDAT     |Endpoint A~L Data Register
-         * |        |          |Endpoint A~L data buffer for the buffer transaction (read or write).
-         * |        |          |Note: Only word or byte access are supported.
-        */
-        __IO uint32_t EPGDAT;
-        /** Endpoint G Data Buffer for Byte Access */
-        __IO uint8_t  EPGDAT_BYTE;
-
-    }; ///< Define EPG Data Register 32-bit or 8-bit access
-
-    /**
-     * EPGINTSTS
-     * ===================================================================================================
-     * Offset: 0x158  Endpoint G Interrupt Status Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0]     |BUFFULLIF |Buffer Full
-     * |        |          |For an IN endpoint, the currently selected buffer is full, or no buffer is available to the local side for writing (no space to write).
-     * |        |          |For an OUT endpoint, there is a buffer available on the local side, and there are FIFO full of bytes available to be read (entire packet is available for reading).
-     * |        |          |0 = The endpoint packet buffer is not full.
-     * |        |          |1 = The endpoint packet buffer is full.
-     * |        |          |Note: This bit is read-only.
-     * |[1]     |BUFEMPTYIF|Buffer Empty
-     * |        |          |For an IN endpoint, a buffer is available to the local side for writing up to FIFO full of bytes.
-     * |        |          |0 = The endpoint buffer is not empty.
-     * |        |          |1 = The endpoint buffer is empty.
-     * |        |          |For an OUT endpoint:
-     * |        |          |0 = The currently selected buffer has not a count of 0.
-     * |        |          |1 = The currently selected buffer has a count of 0, or no buffer is available on the local side (nothing to read).
-     * |        |          |Note: This bit is read-only.
-     * |[2]     |SHORTTXIF |Short Packet Transferred Interrupt
-     * |        |          |0 = The length of the last packet was not less than the Maximum Packet Size (EPMPS).
-     * |        |          |1 = The length of the last packet was less than the Maximum Packet Size (EPMPS).
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[3]     |TXPKIF    |Data Packet Transmitted Interrupt
-     * |        |          |0 = Not a data packet is transmitted from the endpoint to the host.
-     * |        |          |1 = A data packet is transmitted from the endpoint to the host.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[4]     |RXPKIF    |Data Packet Received Interrupt
-     * |        |          |0 = No data packet is received from the host by the endpoint.
-     * |        |          |1 = A data packet is received from the host by the endpoint.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[5]     |OUTTKIF   |Data OUT Token Interrupt
-     * |        |          |0 = A Data OUT token has not been received from the host.
-     * |        |          |1 = A Data OUT token has been received from the host.
-     * |        |          |This bit also set by PING tokens(in high-speed only).
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[6]     |INTKIF    |Data IN Token Interrupt
-     * |        |          |0 = Not Data IN token has been received from the host.
-     * |        |          |1 = A Data IN token has been received from the host.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[7]     |PINGIF    |PING Token Interrupt
-     * |        |          |0 = A Data PING token has not been received from the host.
-     * |        |          |1 = A Data PING token has been received from the host.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[8]     |NAKIF     |USB NAK Sent
-     * |        |          |0 = The last USB IN packet could be provided, and was acknowledged with a ACK.
-     * |        |          |1 = The last USB IN packet could not be provided, and was acknowledged with a NAK.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[9]     |STALLIF   |USB STALL Sent
-     * |        |          |0 = The last USB packet could be accepted or provided because the endpoint was stalled, and was acknowledged with a STALL.
-     * |        |          |1 = The last USB packet could not be accepted or provided because the endpoint was stalled, and was acknowledged with a STALL.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[10]    |NYETIF    |NYET Sent
-     * |        |          |0 = The space available in the RAM is sufficient to accommodate the next on coming data packet.
-     * |        |          |1 = The space available in the RAM is not sufficient to accommodate the next on coming data packet.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[11]    |ERRIF     |ERR Sent
-     * |        |          |0 = No any error in the transaction.
-     * |        |          |1 = There occurs any error in the transaction.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[12]    |SHORTRXIF |Bulk Out Short Packet Received
-     * |        |          |0 = No bulk out short packet is received.
-     * |        |          |1 = Received bulk out short packet (including zero length packet ).
-     * |        |          |Note: Write 1 to clear this bit to 0.
-    */
-    __IO uint32_t EPGINTSTS;
-
-    /**
-     * EPGINTEN
-     * ===================================================================================================
-     * Offset: 0x15C  Endpoint G Interrupt Enable Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0]     |BUFFULLIEN|Buffer Full Interrupt
-     * |        |          |When set, this bit enables a local interrupt to be set when a buffer full condition is detected on the bus.
-     * |        |          |0 = Buffer full interrupt Disabled.
-     * |        |          |1 = Buffer full interrupt Enabled.
-     * |[1]     |BUFEMPTYIEN|Buffer Empty Interrupt
-     * |        |          |When set, this bit enables a local interrupt to be set when a buffer empty condition is detected on the bus.
-     * |        |          |0 = Buffer empty interrupt Disabled.
-     * |        |          |1 = Buffer empty interrupt Enabled.
-     * |[2]     |SHORTTXIEN|Short Packet Transferred Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a short data packet has been transferred to/from the host.
-     * |        |          |0 = Short data packet interrupt Disabled.
-     * |        |          |1 = Short data packet interrupt Enabled.
-     * |[3]     |TXPKIEN   |Data Packet Transmitted Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a data packet has been received from the host.
-     * |        |          |0 = Data packet has been received from the host interrupt Disabled.
-     * |        |          |1 = Data packet has been received from the host interrupt Enabled.
-     * |[4]     |RXPKIEN   |Data Packet Received Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a data packet has been transmitted to the host.
-     * |        |          |0 = Data packet has been transmitted to the host interrupt Disabled.
-     * |        |          |1 = Data packet has been transmitted to the host interrupt Enabled.
-     * |[5]     |OUTTKIEN  |Data OUT Token Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a Data OUT token has been received from the host.
-     * |        |          |0 = Data OUT token interrupt Disabled.
-     * |        |          |1 = Data OUT token interrupt Enabled.
-     * |[6]     |INTKIEN   |Data IN Token Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a Data IN token has been received from the host.
-     * |        |          |0 = Data IN token interrupt Disabled.
-     * |        |          |1 = Data IN token interrupt Enabled.
-     * |[7]     |PINGIEN   |PING Token Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a PING token has been received from the host.
-     * |        |          |0 = PING token interrupt Disabled.
-     * |        |          |1 = PING token interrupt Enabled.
-     * |[8]     |NAKIEN    |USB NAK Sent Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a NAK token is sent to the host.
-     * |        |          |0 = NAK token interrupt Disabled.
-     * |        |          |1 = NAK token interrupt Enabled.
-     * |[9]     |STALLIEN  |USB STALL Sent Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a stall token is sent to the host.
-     * |        |          |0 = STALL token interrupt Disabled.
-     * |        |          |1 = STALL token interrupt Enabled.
-     * |[10]    |NYETIEN   |NYET Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set whenever NYET condition occurs on the bus for this endpoint.
-     * |        |          |0 = NYET condition interrupt Disabled.
-     * |        |          |1 = NYET condition interrupt Enabled.
-     * |[11]    |ERRIEN    |ERR Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set whenever ERR condition occurs on the bus for this endpoint.
-     * |        |          |0 = Error event interrupt Disabled.
-     * |        |          |1 = Error event interrupt Enabled.
-     * |[12]    |SHORTRXIEN|Bulk Out Short Packet Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set whenever bulk out short packet occurs on the bus for this endpoint.
-     * |        |          |0 = Bulk out interrupt Disabled.
-     * |        |          |1 = Bulk out interrupt Enabled.
-    */
-    __IO uint32_t EPGINTEN;
-
-    /**
-     * EPGDATCNT
-     * ===================================================================================================
-     * Offset: 0x160  Endpoint G Data Available Count Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:15]  |DATCNT    |Data Count
-     * |        |          |For an OUT/IN endpoint, this register returns the number of valid bytes in the endpoint packet buffer.
-     * |[16:30] |DMALOOP   |DMA Loop
-     * |        |          |This register is the remaining DMA loop to complete. Each loop means 32-byte transfer.
-    */
-    __I  uint32_t EPGDATCNT;
-
-    /**
-     * EPGRSPCTL
-     * ===================================================================================================
-     * Offset: 0x164  Endpoint G Response Control Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0]     |FLUSH     |Buffer Flush
-     * |        |          |Writing 1 to this bit causes the packet buffer to be flushed and the corresponding EP_AVAIL register to be cleared.
-     * |        |          |This bit is self-clearing.
-     * |        |          |This bit should always be written after an configuration event.
-     * |        |          |0 = The packet buffer is not flushed.
-     * |        |          |1 = The packet buffer is flushed by user.
-     * |[1:2]   |MODE      |Mode Control
-     * |        |          |The two bits decide the operation mode of the in-endpoint.
-     * |        |          |00: Auto-Validate Mode
-     * |        |          |01: Manual-Validate Mode
-     * |        |          |10: Fly Mode
-     * |        |          |11: Reserved
-     * |        |          |These bits are not valid for an out-endpoint.
-     * |        |          |The auto validate mode will be activated when the reserved mode is selected.
-     * |[3]     |TOGGLE    |Endpoint Toggle
-     * |        |          |This bit is used to clear the endpoint data toggle bit.
-     * |        |          |Reading this bit returns the current state of the endpoint data toggle bit.
-     * |        |          |The local CPU may use this bit to initialize the end-point's toggle in case of reception of a Set Interface request or a Clear Feature (ep_halt) request from the host.
-     * |        |          |Only when toggle bit is "1", this bit can be written into the inversed write data bit[3].
-     * |        |          |0 = Not clear the endpoint data toggle bit.
-     * |        |          |1 = Clear the endpoint data toggle bit.
-     * |[4]     |HALT      |Endpoint Halt
-     * |        |          |This bit is used to send a STALL handshake as response to the token from the host.
-     * |        |          |When an Endpoint Set Feature (Endpoin_halt) is detected by the local CPU, it must write a '1' to this bit.
-     * |        |          |0 = Not send a STALL handshake as response to the token from the host.
-     * |        |          |1 = Send a STALL handshake as response to the token from the host.
-     * |[5]     |ZEROLEN   |Zero Length
-     * |        |          |This bit is used to send a zero-length packet n response to an IN-token.
-     * |        |          |When this bit is set, a zero packet is sent to the host on reception of an IN-token.
-     * |        |          |0 = A zero packet is not sent to the host on reception of an IN-token.
-     * |        |          |1 = A zero packet is sent to the host on reception of an IN-token.
-     * |[6]     |SHORTTXEN |Short Packet Transfer Enable
-     * |        |          |This bit is applicable only in case of Auto-Validate Method.
-     * |        |          |This bit is set to validate any remaining data in the buffer which is not equal to the MPS of the endpoint, and happens to be the last transfer.
-     * |        |          |0 = Not validate any remaining data in the buffer which is not equal to the MPS of the endpoint.
-     * |        |          |1 = Validate any remaining data in the buffer which is not equal to the MPS of the endpoint.
-     * |[7]     |DISBUF    |Buffer Disable Control
-     * |        |          |This bit is used to disable buffer (set buffer size to 1) when a Bulk-OUT short packet is received.
-     * |        |          |0 = Buffer Not Disabled when Bulk-OUT short packet is received.
-     * |        |          |1 = Buffer Disabled when Bulk-OUT short packet is received.
-    */
-    __IO uint32_t EPGRSPCTL;
-
-    /**
-     * EPGMPS
-     * ===================================================================================================
-     * Offset: 0x168  Endpoint G Maximum Packet Size Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:10]  |EPMPS     |Endpoint Maximum Packet Size
-     * |        |          |This field determines the Maximum Packet Size of the Endpoint.
-    */
-    __IO uint32_t EPGMPS;
-
-    /**
-     * EPGTXCNT
-     * ===================================================================================================
-     * Offset: 0x16C  Endpoint G Transfer Count Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:10]  |TXCNT     |Endpoint Transfer Count
-     * |        |          |For IN endpoints, this field determines the total number of bytes to be sent to the host in case of manual validation method.
-     * |        |          |For OUT endpoints, this field has no effect.
-    */
-    __IO uint32_t EPGTXCNT;
-
-    /**
-     * EPGCFG
-     * ===================================================================================================
-     * Offset: 0x170  Endpoint G Configuration Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0]     |EPEN      |Endpoint Valid
-     * |        |          |When set, this bit enables this endpoint.
-     * |        |          |This bit has no effect on Endpoint 0, which is always enabled.
-     * |        |          |0 = The endpoint Disabled.
-     * |        |          |1 = The endpoint Enabled.
-     * |[1:2]   |EPTYPE    |Endpoint Type
-     * |        |          |This field selects the type of this endpoint. Endpoint 0 is forced to a Control type.
-     * |        |          |00 = Reserved.
-     * |        |          |01 = Bulk.
-     * |        |          |10 = Interrupt.
-     * |        |          |11 = Isochronous.
-     * |[3]     |EPDIR     |Endpoint Direction
-     * |        |          |0 = out-endpoint (Host OUT to Device).
-     * |        |          |1 = in-endpoint (Host IN to Device).
-     * |        |          |Note: A maximum of one OUT and IN endpoint is allowed for each endpoint number.
-     * |[4:7]   |EPNUM     |Endpoint Number
-     * |        |          |This field selects the number of the endpoint. Valid numbers 1 to 15.
-    */
-    __IO uint32_t EPGCFG;
-
-    /**
-     * EPGBUFSTART
-     * ===================================================================================================
-     * Offset: 0x174  Endpoint G RAM Start Address Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:11]  |SADDR     |Endpoint Start Address
-     * |        |          |This is the start-address of the RAM space allocated for the endpoint A~L.
-    */
-    __IO uint32_t EPGBUFSTART;
-
-    /**
-     * EPGBUFEND
-     * ===================================================================================================
-     * Offset: 0x178  Endpoint G RAM End Address Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:11]  |EADDR     |Endpoint End Address
-     * |        |          |This is the end-address of the RAM space allocated for the endpoint A~L.
-    */
-    __IO uint32_t EPGBUFEND;
-
-    union {
-
-        /**
-         * EPHDAT
-         * ===================================================================================================
-         * Offset: 0x17C  Endpoint H Data Register
-         * ---------------------------------------------------------------------------------------------------
-         * |Bits    |Field     |Descriptions
-         * | :----: | :----:   | :---- |
-         * |[0:31]  |EPDAT     |Endpoint A~L Data Register
-         * |        |          |Endpoint A~L data buffer for the buffer transaction (read or write).
-         * |        |          |Note: Only word or byte access are supported.
-        */
-        __IO uint32_t EPHDAT;
-        /** Endpoint H Data Buffer for Byte Access */
-        __IO uint8_t  EPHDAT_BYTE;
-
-    }; ///< Define EPH Data Register 32-bit or 8-bit access
-
-    /**
-     * EPHINTSTS
-     * ===================================================================================================
-     * Offset: 0x180  Endpoint H Interrupt Status Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0]     |BUFFULLIF |Buffer Full
-     * |        |          |For an IN endpoint, the currently selected buffer is full, or no buffer is available to the local side for writing (no space to write).
-     * |        |          |For an OUT endpoint, there is a buffer available on the local side, and there are FIFO full of bytes available to be read (entire packet is available for reading).
-     * |        |          |0 = The endpoint packet buffer is not full.
-     * |        |          |1 = The endpoint packet buffer is full.
-     * |        |          |Note: This bit is read-only.
-     * |[1]     |BUFEMPTYIF|Buffer Empty
-     * |        |          |For an IN endpoint, a buffer is available to the local side for writing up to FIFO full of bytes.
-     * |        |          |0 = The endpoint buffer is not empty.
-     * |        |          |1 = The endpoint buffer is empty.
-     * |        |          |For an OUT endpoint:
-     * |        |          |0 = The currently selected buffer has not a count of 0.
-     * |        |          |1 = The currently selected buffer has a count of 0, or no buffer is available on the local side (nothing to read).
-     * |        |          |Note: This bit is read-only.
-     * |[2]     |SHORTTXIF |Short Packet Transferred Interrupt
-     * |        |          |0 = The length of the last packet was not less than the Maximum Packet Size (EPMPS).
-     * |        |          |1 = The length of the last packet was less than the Maximum Packet Size (EPMPS).
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[3]     |TXPKIF    |Data Packet Transmitted Interrupt
-     * |        |          |0 = Not a data packet is transmitted from the endpoint to the host.
-     * |        |          |1 = A data packet is transmitted from the endpoint to the host.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[4]     |RXPKIF    |Data Packet Received Interrupt
-     * |        |          |0 = No data packet is received from the host by the endpoint.
-     * |        |          |1 = A data packet is received from the host by the endpoint.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[5]     |OUTTKIF   |Data OUT Token Interrupt
-     * |        |          |0 = A Data OUT token has not been received from the host.
-     * |        |          |1 = A Data OUT token has been received from the host.
-     * |        |          |This bit also set by PING tokens(in high-speed only).
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[6]     |INTKIF    |Data IN Token Interrupt
-     * |        |          |0 = Not Data IN token has been received from the host.
-     * |        |          |1 = A Data IN token has been received from the host.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[7]     |PINGIF    |PING Token Interrupt
-     * |        |          |0 = A Data PING token has not been received from the host.
-     * |        |          |1 = A Data PING token has been received from the host.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[8]     |NAKIF     |USB NAK Sent
-     * |        |          |0 = The last USB IN packet could be provided, and was acknowledged with a ACK.
-     * |        |          |1 = The last USB IN packet could not be provided, and was acknowledged with a NAK.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[9]     |STALLIF   |USB STALL Sent
-     * |        |          |0 = The last USB packet could be accepted or provided because the endpoint was stalled, and was acknowledged with a STALL.
-     * |        |          |1 = The last USB packet could not be accepted or provided because the endpoint was stalled, and was acknowledged with a STALL.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[10]    |NYETIF    |NYET Sent
-     * |        |          |0 = The space available in the RAM is sufficient to accommodate the next on coming data packet.
-     * |        |          |1 = The space available in the RAM is not sufficient to accommodate the next on coming data packet.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[11]    |ERRIF     |ERR Sent
-     * |        |          |0 = No any error in the transaction.
-     * |        |          |1 = There occurs any error in the transaction.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[12]    |SHORTRXIF |Bulk Out Short Packet Received
-     * |        |          |0 = No bulk out short packet is received.
-     * |        |          |1 = Received bulk out short packet (including zero length packet ).
-     * |        |          |Note: Write 1 to clear this bit to 0.
-    */
-    __IO uint32_t EPHINTSTS;
-
-    /**
-     * EPHINTEN
-     * ===================================================================================================
-     * Offset: 0x184  Endpoint H Interrupt Enable Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0]     |BUFFULLIEN|Buffer Full Interrupt
-     * |        |          |When set, this bit enables a local interrupt to be set when a buffer full condition is detected on the bus.
-     * |        |          |0 = Buffer full interrupt Disabled.
-     * |        |          |1 = Buffer full interrupt Enabled.
-     * |[1]     |BUFEMPTYIEN|Buffer Empty Interrupt
-     * |        |          |When set, this bit enables a local interrupt to be set when a buffer empty condition is detected on the bus.
-     * |        |          |0 = Buffer empty interrupt Disabled.
-     * |        |          |1 = Buffer empty interrupt Enabled.
-     * |[2]     |SHORTTXIEN|Short Packet Transferred Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a short data packet has been transferred to/from the host.
-     * |        |          |0 = Short data packet interrupt Disabled.
-     * |        |          |1 = Short data packet interrupt Enabled.
-     * |[3]     |TXPKIEN   |Data Packet Transmitted Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a data packet has been received from the host.
-     * |        |          |0 = Data packet has been received from the host interrupt Disabled.
-     * |        |          |1 = Data packet has been received from the host interrupt Enabled.
-     * |[4]     |RXPKIEN   |Data Packet Received Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a data packet has been transmitted to the host.
-     * |        |          |0 = Data packet has been transmitted to the host interrupt Disabled.
-     * |        |          |1 = Data packet has been transmitted to the host interrupt Enabled.
-     * |[5]     |OUTTKIEN  |Data OUT Token Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a Data OUT token has been received from the host.
-     * |        |          |0 = Data OUT token interrupt Disabled.
-     * |        |          |1 = Data OUT token interrupt Enabled.
-     * |[6]     |INTKIEN   |Data IN Token Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a Data IN token has been received from the host.
-     * |        |          |0 = Data IN token interrupt Disabled.
-     * |        |          |1 = Data IN token interrupt Enabled.
-     * |[7]     |PINGIEN   |PING Token Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a PING token has been received from the host.
-     * |        |          |0 = PING token interrupt Disabled.
-     * |        |          |1 = PING token interrupt Enabled.
-     * |[8]     |NAKIEN    |USB NAK Sent Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a NAK token is sent to the host.
-     * |        |          |0 = NAK token interrupt Disabled.
-     * |        |          |1 = NAK token interrupt Enabled.
-     * |[9]     |STALLIEN  |USB STALL Sent Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a stall token is sent to the host.
-     * |        |          |0 = STALL token interrupt Disabled.
-     * |        |          |1 = STALL token interrupt Enabled.
-     * |[10]    |NYETIEN   |NYET Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set whenever NYET condition occurs on the bus for this endpoint.
-     * |        |          |0 = NYET condition interrupt Disabled.
-     * |        |          |1 = NYET condition interrupt Enabled.
-     * |[11]    |ERRIEN    |ERR Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set whenever ERR condition occurs on the bus for this endpoint.
-     * |        |          |0 = Error event interrupt Disabled.
-     * |        |          |1 = Error event interrupt Enabled.
-     * |[12]    |SHORTRXIEN|Bulk Out Short Packet Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set whenever bulk out short packet occurs on the bus for this endpoint.
-     * |        |          |0 = Bulk out interrupt Disabled.
-     * |        |          |1 = Bulk out interrupt Enabled.
-    */
-    __IO uint32_t EPHINTEN;
-
-    /**
-     * EPHDATCNT
-     * ===================================================================================================
-     * Offset: 0x188  Endpoint H Data Available Count Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:15]  |DATCNT    |Data Count
-     * |        |          |For an OUT/IN endpoint, this register returns the number of valid bytes in the endpoint packet buffer.
-     * |[16:30] |DMALOOP   |DMA Loop
-     * |        |          |This register is the remaining DMA loop to complete. Each loop means 32-byte transfer.
-    */
-    __I  uint32_t EPHDATCNT;
-
-    /**
-     * EPHRSPCTL
-     * ===================================================================================================
-     * Offset: 0x18C  Endpoint H Response Control Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0]     |FLUSH     |Buffer Flush
-     * |        |          |Writing 1 to this bit causes the packet buffer to be flushed and the corresponding EP_AVAIL register to be cleared.
-     * |        |          |This bit is self-clearing.
-     * |        |          |This bit should always be written after an configuration event.
-     * |        |          |0 = The packet buffer is not flushed.
-     * |        |          |1 = The packet buffer is flushed by user.
-     * |[1:2]   |MODE      |Mode Control
-     * |        |          |The two bits decide the operation mode of the in-endpoint.
-     * |        |          |00: Auto-Validate Mode
-     * |        |          |01: Manual-Validate Mode
-     * |        |          |10: Fly Mode
-     * |        |          |11: Reserved
-     * |        |          |These bits are not valid for an out-endpoint.
-     * |        |          |The auto validate mode will be activated when the reserved mode is selected.
-     * |[3]     |TOGGLE    |Endpoint Toggle
-     * |        |          |This bit is used to clear the endpoint data toggle bit.
-     * |        |          |Reading this bit returns the current state of the endpoint data toggle bit.
-     * |        |          |The local CPU may use this bit to initialize the end-point's toggle in case of reception of a Set Interface request or a Clear Feature (ep_halt) request from the host.
-     * |        |          |Only when toggle bit is "1", this bit can be written into the inversed write data bit[3].
-     * |        |          |0 = Not clear the endpoint data toggle bit.
-     * |        |          |1 = Clear the endpoint data toggle bit.
-     * |[4]     |HALT      |Endpoint Halt
-     * |        |          |This bit is used to send a STALL handshake as response to the token from the host.
-     * |        |          |When an Endpoint Set Feature (Endpoin_halt) is detected by the local CPU, it must write a '1' to this bit.
-     * |        |          |0 = Not send a STALL handshake as response to the token from the host.
-     * |        |          |1 = Send a STALL handshake as response to the token from the host.
-     * |[5]     |ZEROLEN   |Zero Length
-     * |        |          |This bit is used to send a zero-length packet n response to an IN-token.
-     * |        |          |When this bit is set, a zero packet is sent to the host on reception of an IN-token.
-     * |        |          |0 = A zero packet is not sent to the host on reception of an IN-token.
-     * |        |          |1 = A zero packet is sent to the host on reception of an IN-token.
-     * |[6]     |SHORTTXEN |Short Packet Transfer Enable
-     * |        |          |This bit is applicable only in case of Auto-Validate Method.
-     * |        |          |This bit is set to validate any remaining data in the buffer which is not equal to the MPS of the endpoint, and happens to be the last transfer.
-     * |        |          |0 = Not validate any remaining data in the buffer which is not equal to the MPS of the endpoint.
-     * |        |          |1 = Validate any remaining data in the buffer which is not equal to the MPS of the endpoint.
-     * |[7]     |DISBUF    |Buffer Disable Control
-     * |        |          |This bit is used to disable buffer (set buffer size to 1) when a Bulk-OUT short packet is received.
-     * |        |          |0 = Buffer Not Disabled when Bulk-OUT short packet is received.
-     * |        |          |1 = Buffer Disabled when Bulk-OUT short packet is received.
-    */
-    __IO uint32_t EPHRSPCTL;
-
-    /**
-     * EPHMPS
-     * ===================================================================================================
-     * Offset: 0x190  Endpoint H Maximum Packet Size Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:10]  |EPMPS     |Endpoint Maximum Packet Size
-     * |        |          |This field determines the Maximum Packet Size of the Endpoint.
-    */
-    __IO uint32_t EPHMPS;
-
-    /**
-     * EPHTXCNT
-     * ===================================================================================================
-     * Offset: 0x194  Endpoint H Transfer Count Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:10]  |TXCNT     |Endpoint Transfer Count
-     * |        |          |For IN endpoints, this field determines the total number of bytes to be sent to the host in case of manual validation method.
-     * |        |          |For OUT endpoints, this field has no effect.
-    */
-    __IO uint32_t EPHTXCNT;
-
-    /**
-     * EPHCFG
-     * ===================================================================================================
-     * Offset: 0x198  Endpoint H Configuration Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0]     |EPEN      |Endpoint Valid
-     * |        |          |When set, this bit enables this endpoint.
-     * |        |          |This bit has no effect on Endpoint 0, which is always enabled.
-     * |        |          |0 = The endpoint Disabled.
-     * |        |          |1 = The endpoint Enabled.
-     * |[1:2]   |EPTYPE    |Endpoint Type
-     * |        |          |This field selects the type of this endpoint. Endpoint 0 is forced to a Control type.
-     * |        |          |00 = Reserved.
-     * |        |          |01 = Bulk.
-     * |        |          |10 = Interrupt.
-     * |        |          |11 = Isochronous.
-     * |[3]     |EPDIR     |Endpoint Direction
-     * |        |          |0 = out-endpoint (Host OUT to Device).
-     * |        |          |1 = in-endpoint (Host IN to Device).
-     * |        |          |Note: A maximum of one OUT and IN endpoint is allowed for each endpoint number.
-     * |[4:7]   |EPNUM     |Endpoint Number
-     * |        |          |This field selects the number of the endpoint. Valid numbers 1 to 15.
-    */
-    __IO uint32_t EPHCFG;
-
-    /**
-     * EPHBUFSTART
-     * ===================================================================================================
-     * Offset: 0x19C  Endpoint H RAM Start Address Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:11]  |SADDR     |Endpoint Start Address
-     * |        |          |This is the start-address of the RAM space allocated for the endpoint A~L.
-    */
-    __IO uint32_t EPHBUFSTART;
-
-    /**
-     * EPHBUFEND
-     * ===================================================================================================
-     * Offset: 0x1A0  Endpoint H RAM End Address Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:11]  |EADDR     |Endpoint End Address
-     * |        |          |This is the end-address of the RAM space allocated for the endpoint A~L.
-    */
-    __IO uint32_t EPHBUFEND;
-
-    union {
-
-        /**
-         * EPIDAT
-         * ===================================================================================================
-         * Offset: 0x1A4  Endpoint I Data Register
-         * ---------------------------------------------------------------------------------------------------
-         * |Bits    |Field     |Descriptions
-         * | :----: | :----:   | :---- |
-         * |[0:31]  |EPDAT     |Endpoint A~L Data Register
-         * |        |          |Endpoint A~L data buffer for the buffer transaction (read or write).
-         * |        |          |Note: Only word or byte access are supported.
-        */
-        __IO uint32_t EPIDAT;
-        /** Endpoint I Data Buffer for Byte Access */
-        __IO uint8_t  EPIDAT_BYTE;
-
-    }; ///< Define EPI Data Register 32-bit or 8-bit access
-
-    /**
-     * EPIINTSTS
-     * ===================================================================================================
-     * Offset: 0x1A8  Endpoint I Interrupt Status Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0]     |BUFFULLIF |Buffer Full
-     * |        |          |For an IN endpoint, the currently selected buffer is full, or no buffer is available to the local side for writing (no space to write).
-     * |        |          |For an OUT endpoint, there is a buffer available on the local side, and there are FIFO full of bytes available to be read (entire packet is available for reading).
-     * |        |          |0 = The endpoint packet buffer is not full.
-     * |        |          |1 = The endpoint packet buffer is full.
-     * |        |          |Note: This bit is read-only.
-     * |[1]     |BUFEMPTYIF|Buffer Empty
-     * |        |          |For an IN endpoint, a buffer is available to the local side for writing up to FIFO full of bytes.
-     * |        |          |0 = The endpoint buffer is not empty.
-     * |        |          |1 = The endpoint buffer is empty.
-     * |        |          |For an OUT endpoint:
-     * |        |          |0 = The currently selected buffer has not a count of 0.
-     * |        |          |1 = The currently selected buffer has a count of 0, or no buffer is available on the local side (nothing to read).
-     * |        |          |Note: This bit is read-only.
-     * |[2]     |SHORTTXIF |Short Packet Transferred Interrupt
-     * |        |          |0 = The length of the last packet was not less than the Maximum Packet Size (EPMPS).
-     * |        |          |1 = The length of the last packet was less than the Maximum Packet Size (EPMPS).
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[3]     |TXPKIF    |Data Packet Transmitted Interrupt
-     * |        |          |0 = Not a data packet is transmitted from the endpoint to the host.
-     * |        |          |1 = A data packet is transmitted from the endpoint to the host.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[4]     |RXPKIF    |Data Packet Received Interrupt
-     * |        |          |0 = No data packet is received from the host by the endpoint.
-     * |        |          |1 = A data packet is received from the host by the endpoint.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[5]     |OUTTKIF   |Data OUT Token Interrupt
-     * |        |          |0 = A Data OUT token has not been received from the host.
-     * |        |          |1 = A Data OUT token has been received from the host.
-     * |        |          |This bit also set by PING tokens(in high-speed only).
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[6]     |INTKIF    |Data IN Token Interrupt
-     * |        |          |0 = Not Data IN token has been received from the host.
-     * |        |          |1 = A Data IN token has been received from the host.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[7]     |PINGIF    |PING Token Interrupt
-     * |        |          |0 = A Data PING token has not been received from the host.
-     * |        |          |1 = A Data PING token has been received from the host.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[8]     |NAKIF     |USB NAK Sent
-     * |        |          |0 = The last USB IN packet could be provided, and was acknowledged with a ACK.
-     * |        |          |1 = The last USB IN packet could not be provided, and was acknowledged with a NAK.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[9]     |STALLIF   |USB STALL Sent
-     * |        |          |0 = The last USB packet could be accepted or provided because the endpoint was stalled, and was acknowledged with a STALL.
-     * |        |          |1 = The last USB packet could not be accepted or provided because the endpoint was stalled, and was acknowledged with a STALL.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[10]    |NYETIF    |NYET Sent
-     * |        |          |0 = The space available in the RAM is sufficient to accommodate the next on coming data packet.
-     * |        |          |1 = The space available in the RAM is not sufficient to accommodate the next on coming data packet.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[11]    |ERRIF     |ERR Sent
-     * |        |          |0 = No any error in the transaction.
-     * |        |          |1 = There occurs any error in the transaction.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[12]    |SHORTRXIF |Bulk Out Short Packet Received
-     * |        |          |0 = No bulk out short packet is received.
-     * |        |          |1 = Received bulk out short packet (including zero length packet ).
-     * |        |          |Note: Write 1 to clear this bit to 0.
-    */
-    __IO uint32_t EPIINTSTS;
-
-    /**
-     * EPIINTEN
-     * ===================================================================================================
-     * Offset: 0x1AC  Endpoint I Interrupt Enable Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0]     |BUFFULLIEN|Buffer Full Interrupt
-     * |        |          |When set, this bit enables a local interrupt to be set when a buffer full condition is detected on the bus.
-     * |        |          |0 = Buffer full interrupt Disabled.
-     * |        |          |1 = Buffer full interrupt Enabled.
-     * |[1]     |BUFEMPTYIEN|Buffer Empty Interrupt
-     * |        |          |When set, this bit enables a local interrupt to be set when a buffer empty condition is detected on the bus.
-     * |        |          |0 = Buffer empty interrupt Disabled.
-     * |        |          |1 = Buffer empty interrupt Enabled.
-     * |[2]     |SHORTTXIEN|Short Packet Transferred Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a short data packet has been transferred to/from the host.
-     * |        |          |0 = Short data packet interrupt Disabled.
-     * |        |          |1 = Short data packet interrupt Enabled.
-     * |[3]     |TXPKIEN   |Data Packet Transmitted Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a data packet has been received from the host.
-     * |        |          |0 = Data packet has been received from the host interrupt Disabled.
-     * |        |          |1 = Data packet has been received from the host interrupt Enabled.
-     * |[4]     |RXPKIEN   |Data Packet Received Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a data packet has been transmitted to the host.
-     * |        |          |0 = Data packet has been transmitted to the host interrupt Disabled.
-     * |        |          |1 = Data packet has been transmitted to the host interrupt Enabled.
-     * |[5]     |OUTTKIEN  |Data OUT Token Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a Data OUT token has been received from the host.
-     * |        |          |0 = Data OUT token interrupt Disabled.
-     * |        |          |1 = Data OUT token interrupt Enabled.
-     * |[6]     |INTKIEN   |Data IN Token Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a Data IN token has been received from the host.
-     * |        |          |0 = Data IN token interrupt Disabled.
-     * |        |          |1 = Data IN token interrupt Enabled.
-     * |[7]     |PINGIEN   |PING Token Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a PING token has been received from the host.
-     * |        |          |0 = PING token interrupt Disabled.
-     * |        |          |1 = PING token interrupt Enabled.
-     * |[8]     |NAKIEN    |USB NAK Sent Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a NAK token is sent to the host.
-     * |        |          |0 = NAK token interrupt Disabled.
-     * |        |          |1 = NAK token interrupt Enabled.
-     * |[9]     |STALLIEN  |USB STALL Sent Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a stall token is sent to the host.
-     * |        |          |0 = STALL token interrupt Disabled.
-     * |        |          |1 = STALL token interrupt Enabled.
-     * |[10]    |NYETIEN   |NYET Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set whenever NYET condition occurs on the bus for this endpoint.
-     * |        |          |0 = NYET condition interrupt Disabled.
-     * |        |          |1 = NYET condition interrupt Enabled.
-     * |[11]    |ERRIEN    |ERR Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set whenever ERR condition occurs on the bus for this endpoint.
-     * |        |          |0 = Error event interrupt Disabled.
-     * |        |          |1 = Error event interrupt Enabled.
-     * |[12]    |SHORTRXIEN|Bulk Out Short Packet Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set whenever bulk out short packet occurs on the bus for this endpoint.
-     * |        |          |0 = Bulk out interrupt Disabled.
-     * |        |          |1 = Bulk out interrupt Enabled.
-    */
-    __IO uint32_t EPIINTEN;
-
-    /**
-     * EPIDATCNT
-     * ===================================================================================================
-     * Offset: 0x1B0  Endpoint I Data Available Count Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:15]  |DATCNT    |Data Count
-     * |        |          |For an OUT/IN endpoint, this register returns the number of valid bytes in the endpoint packet buffer.
-     * |[16:30] |DMALOOP   |DMA Loop
-     * |        |          |This register is the remaining DMA loop to complete. Each loop means 32-byte transfer.
-    */
-    __I  uint32_t EPIDATCNT;
-
-    /**
-     * EPIRSPCTL
-     * ===================================================================================================
-     * Offset: 0x1B4  Endpoint I Response Control Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0]     |FLUSH     |Buffer Flush
-     * |        |          |Writing 1 to this bit causes the packet buffer to be flushed and the corresponding EP_AVAIL register to be cleared.
-     * |        |          |This bit is self-clearing.
-     * |        |          |This bit should always be written after an configuration event.
-     * |        |          |0 = The packet buffer is not flushed.
-     * |        |          |1 = The packet buffer is flushed by user.
-     * |[1:2]   |MODE      |Mode Control
-     * |        |          |The two bits decide the operation mode of the in-endpoint.
-     * |        |          |00: Auto-Validate Mode
-     * |        |          |01: Manual-Validate Mode
-     * |        |          |10: Fly Mode
-     * |        |          |11: Reserved
-     * |        |          |These bits are not valid for an out-endpoint.
-     * |        |          |The auto validate mode will be activated when the reserved mode is selected.
-     * |[3]     |TOGGLE    |Endpoint Toggle
-     * |        |          |This bit is used to clear the endpoint data toggle bit.
-     * |        |          |Reading this bit returns the current state of the endpoint data toggle bit.
-     * |        |          |The local CPU may use this bit to initialize the end-point's toggle in case of reception of a Set Interface request or a Clear Feature (ep_halt) request from the host.
-     * |        |          |Only when toggle bit is "1", this bit can be written into the inversed write data bit[3].
-     * |        |          |0 = Not clear the endpoint data toggle bit.
-     * |        |          |1 = Clear the endpoint data toggle bit.
-     * |[4]     |HALT      |Endpoint Halt
-     * |        |          |This bit is used to send a STALL handshake as response to the token from the host.
-     * |        |          |When an Endpoint Set Feature (Endpoin_halt) is detected by the local CPU, it must write a '1' to this bit.
-     * |        |          |0 = Not send a STALL handshake as response to the token from the host.
-     * |        |          |1 = Send a STALL handshake as response to the token from the host.
-     * |[5]     |ZEROLEN   |Zero Length
-     * |        |          |This bit is used to send a zero-length packet n response to an IN-token.
-     * |        |          |When this bit is set, a zero packet is sent to the host on reception of an IN-token.
-     * |        |          |0 = A zero packet is not sent to the host on reception of an IN-token.
-     * |        |          |1 = A zero packet is sent to the host on reception of an IN-token.
-     * |[6]     |SHORTTXEN |Short Packet Transfer Enable
-     * |        |          |This bit is applicable only in case of Auto-Validate Method.
-     * |        |          |This bit is set to validate any remaining data in the buffer which is not equal to the MPS of the endpoint, and happens to be the last transfer.
-     * |        |          |0 = Not validate any remaining data in the buffer which is not equal to the MPS of the endpoint.
-     * |        |          |1 = Validate any remaining data in the buffer which is not equal to the MPS of the endpoint.
-     * |[7]     |DISBUF    |Buffer Disable Control
-     * |        |          |This bit is used to disable buffer (set buffer size to 1) when a Bulk-OUT short packet is received.
-     * |        |          |0 = Buffer Not Disabled when Bulk-OUT short packet is received.
-     * |        |          |1 = Buffer Disabled when Bulk-OUT short packet is received.
-    */
-    __IO uint32_t EPIRSPCTL;
-
-    /**
-     * EPIMPS
-     * ===================================================================================================
-     * Offset: 0x1B8  Endpoint I Maximum Packet Size Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:10]  |EPMPS     |Endpoint Maximum Packet Size
-     * |        |          |This field determines the Maximum Packet Size of the Endpoint.
-    */
-    __IO uint32_t EPIMPS;
-
-    /**
-     * EPITXCNT
-     * ===================================================================================================
-     * Offset: 0x1BC  Endpoint I Transfer Count Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:10]  |TXCNT     |Endpoint Transfer Count
-     * |        |          |For IN endpoints, this field determines the total number of bytes to be sent to the host in case of manual validation method.
-     * |        |          |For OUT endpoints, this field has no effect.
-    */
-    __IO uint32_t EPITXCNT;
-
-    /**
-     * EPICFG
-     * ===================================================================================================
-     * Offset: 0x1C0  Endpoint I Configuration Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0]     |EPEN      |Endpoint Valid
-     * |        |          |When set, this bit enables this endpoint.
-     * |        |          |This bit has no effect on Endpoint 0, which is always enabled.
-     * |        |          |0 = The endpoint Disabled.
-     * |        |          |1 = The endpoint Enabled.
-     * |[1:2]   |EPTYPE    |Endpoint Type
-     * |        |          |This field selects the type of this endpoint. Endpoint 0 is forced to a Control type.
-     * |        |          |00 = Reserved.
-     * |        |          |01 = Bulk.
-     * |        |          |10 = Interrupt.
-     * |        |          |11 = Isochronous.
-     * |[3]     |EPDIR     |Endpoint Direction
-     * |        |          |0 = out-endpoint (Host OUT to Device).
-     * |        |          |1 = in-endpoint (Host IN to Device).
-     * |        |          |Note: A maximum of one OUT and IN endpoint is allowed for each endpoint number.
-     * |[4:7]   |EPNUM     |Endpoint Number
-     * |        |          |This field selects the number of the endpoint. Valid numbers 1 to 15.
-    */
-    __IO uint32_t EPICFG;
-
-    /**
-     * EPIBUFSTART
-     * ===================================================================================================
-     * Offset: 0x1C4  Endpoint I RAM Start Address Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:11]  |SADDR     |Endpoint Start Address
-     * |        |          |This is the start-address of the RAM space allocated for the endpoint A~L.
-    */
-    __IO uint32_t EPIBUFSTART;
-
-    /**
-     * EPIBUFEND
-     * ===================================================================================================
-     * Offset: 0x1C8  Endpoint I RAM End Address Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:11]  |EADDR     |Endpoint End Address
-     * |        |          |This is the end-address of the RAM space allocated for the endpoint A~L.
-    */
-    __IO uint32_t EPIBUFEND;
-
-    union {
-
-        /**
-         * EPJDAT
-         * ===================================================================================================
-         * Offset: 0x1CC  Endpoint J Data Register
-         * ---------------------------------------------------------------------------------------------------
-         * |Bits    |Field     |Descriptions
-         * | :----: | :----:   | :---- |
-         * |[0:31]  |EPDAT     |Endpoint A~L Data Register
-         * |        |          |Endpoint A~L data buffer for the buffer transaction (read or write).
-         * |        |          |Note: Only word or byte access are supported.
-        */
-        __IO uint32_t EPJDAT;
-        /** Endpoint J Data Buffer for Byte Access */
-        __IO uint8_t  EPJDAT_BYTE;
-
-    }; ///< Define EPJ Data Register 32-bit or 8-bit access
-
-    /**
-     * EPJINTSTS
-     * ===================================================================================================
-     * Offset: 0x1D0  Endpoint J Interrupt Status Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0]     |BUFFULLIF |Buffer Full
-     * |        |          |For an IN endpoint, the currently selected buffer is full, or no buffer is available to the local side for writing (no space to write).
-     * |        |          |For an OUT endpoint, there is a buffer available on the local side, and there are FIFO full of bytes available to be read (entire packet is available for reading).
-     * |        |          |0 = The endpoint packet buffer is not full.
-     * |        |          |1 = The endpoint packet buffer is full.
-     * |        |          |Note: This bit is read-only.
-     * |[1]     |BUFEMPTYIF|Buffer Empty
-     * |        |          |For an IN endpoint, a buffer is available to the local side for writing up to FIFO full of bytes.
-     * |        |          |0 = The endpoint buffer is not empty.
-     * |        |          |1 = The endpoint buffer is empty.
-     * |        |          |For an OUT endpoint:
-     * |        |          |0 = The currently selected buffer has not a count of 0.
-     * |        |          |1 = The currently selected buffer has a count of 0, or no buffer is available on the local side (nothing to read).
-     * |        |          |Note: This bit is read-only.
-     * |[2]     |SHORTTXIF |Short Packet Transferred Interrupt
-     * |        |          |0 = The length of the last packet was not less than the Maximum Packet Size (EPMPS).
-     * |        |          |1 = The length of the last packet was less than the Maximum Packet Size (EPMPS).
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[3]     |TXPKIF    |Data Packet Transmitted Interrupt
-     * |        |          |0 = Not a data packet is transmitted from the endpoint to the host.
-     * |        |          |1 = A data packet is transmitted from the endpoint to the host.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[4]     |RXPKIF    |Data Packet Received Interrupt
-     * |        |          |0 = No data packet is received from the host by the endpoint.
-     * |        |          |1 = A data packet is received from the host by the endpoint.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[5]     |OUTTKIF   |Data OUT Token Interrupt
-     * |        |          |0 = A Data OUT token has not been received from the host.
-     * |        |          |1 = A Data OUT token has been received from the host.
-     * |        |          |This bit also set by PING tokens(in high-speed only).
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[6]     |INTKIF    |Data IN Token Interrupt
-     * |        |          |0 = Not Data IN token has been received from the host.
-     * |        |          |1 = A Data IN token has been received from the host.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[7]     |PINGIF    |PING Token Interrupt
-     * |        |          |0 = A Data PING token has not been received from the host.
-     * |        |          |1 = A Data PING token has been received from the host.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[8]     |NAKIF     |USB NAK Sent
-     * |        |          |0 = The last USB IN packet could be provided, and was acknowledged with a ACK.
-     * |        |          |1 = The last USB IN packet could not be provided, and was acknowledged with a NAK.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[9]     |STALLIF   |USB STALL Sent
-     * |        |          |0 = The last USB packet could be accepted or provided because the endpoint was stalled, and was acknowledged with a STALL.
-     * |        |          |1 = The last USB packet could not be accepted or provided because the endpoint was stalled, and was acknowledged with a STALL.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[10]    |NYETIF    |NYET Sent
-     * |        |          |0 = The space available in the RAM is sufficient to accommodate the next on coming data packet.
-     * |        |          |1 = The space available in the RAM is not sufficient to accommodate the next on coming data packet.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[11]    |ERRIF     |ERR Sent
-     * |        |          |0 = No any error in the transaction.
-     * |        |          |1 = There occurs any error in the transaction.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[12]    |SHORTRXIF |Bulk Out Short Packet Received
-     * |        |          |0 = No bulk out short packet is received.
-     * |        |          |1 = Received bulk out short packet (including zero length packet ).
-     * |        |          |Note: Write 1 to clear this bit to 0.
-    */
-    __IO uint32_t EPJINTSTS;
-
-    /**
-     * EPJINTEN
-     * ===================================================================================================
-     * Offset: 0x1D4  Endpoint J Interrupt Enable Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0]     |BUFFULLIEN|Buffer Full Interrupt
-     * |        |          |When set, this bit enables a local interrupt to be set when a buffer full condition is detected on the bus.
-     * |        |          |0 = Buffer full interrupt Disabled.
-     * |        |          |1 = Buffer full interrupt Enabled.
-     * |[1]     |BUFEMPTYIEN|Buffer Empty Interrupt
-     * |        |          |When set, this bit enables a local interrupt to be set when a buffer empty condition is detected on the bus.
-     * |        |          |0 = Buffer empty interrupt Disabled.
-     * |        |          |1 = Buffer empty interrupt Enabled.
-     * |[2]     |SHORTTXIEN|Short Packet Transferred Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a short data packet has been transferred to/from the host.
-     * |        |          |0 = Short data packet interrupt Disabled.
-     * |        |          |1 = Short data packet interrupt Enabled.
-     * |[3]     |TXPKIEN   |Data Packet Transmitted Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a data packet has been received from the host.
-     * |        |          |0 = Data packet has been received from the host interrupt Disabled.
-     * |        |          |1 = Data packet has been received from the host interrupt Enabled.
-     * |[4]     |RXPKIEN   |Data Packet Received Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a data packet has been transmitted to the host.
-     * |        |          |0 = Data packet has been transmitted to the host interrupt Disabled.
-     * |        |          |1 = Data packet has been transmitted to the host interrupt Enabled.
-     * |[5]     |OUTTKIEN  |Data OUT Token Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a Data OUT token has been received from the host.
-     * |        |          |0 = Data OUT token interrupt Disabled.
-     * |        |          |1 = Data OUT token interrupt Enabled.
-     * |[6]     |INTKIEN   |Data IN Token Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a Data IN token has been received from the host.
-     * |        |          |0 = Data IN token interrupt Disabled.
-     * |        |          |1 = Data IN token interrupt Enabled.
-     * |[7]     |PINGIEN   |PING Token Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a PING token has been received from the host.
-     * |        |          |0 = PING token interrupt Disabled.
-     * |        |          |1 = PING token interrupt Enabled.
-     * |[8]     |NAKIEN    |USB NAK Sent Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a NAK token is sent to the host.
-     * |        |          |0 = NAK token interrupt Disabled.
-     * |        |          |1 = NAK token interrupt Enabled.
-     * |[9]     |STALLIEN  |USB STALL Sent Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a stall token is sent to the host.
-     * |        |          |0 = STALL token interrupt Disabled.
-     * |        |          |1 = STALL token interrupt Enabled.
-     * |[10]    |NYETIEN   |NYET Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set whenever NYET condition occurs on the bus for this endpoint.
-     * |        |          |0 = NYET condition interrupt Disabled.
-     * |        |          |1 = NYET condition interrupt Enabled.
-     * |[11]    |ERRIEN    |ERR Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set whenever ERR condition occurs on the bus for this endpoint.
-     * |        |          |0 = Error event interrupt Disabled.
-     * |        |          |1 = Error event interrupt Enabled.
-     * |[12]    |SHORTRXIEN|Bulk Out Short Packet Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set whenever bulk out short packet occurs on the bus for this endpoint.
-     * |        |          |0 = Bulk out interrupt Disabled.
-     * |        |          |1 = Bulk out interrupt Enabled.
-    */
-    __IO uint32_t EPJINTEN;
-
-    /**
-     * EPJDATCNT
-     * ===================================================================================================
-     * Offset: 0x1D8  Endpoint J Data Available Count Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:15]  |DATCNT    |Data Count
-     * |        |          |For an OUT/IN endpoint, this register returns the number of valid bytes in the endpoint packet buffer.
-     * |[16:30] |DMALOOP   |DMA Loop
-     * |        |          |This register is the remaining DMA loop to complete. Each loop means 32-byte transfer.
-    */
-    __I  uint32_t EPJDATCNT;
-
-    /**
-     * EPJRSPCTL
-     * ===================================================================================================
-     * Offset: 0x1DC  Endpoint J Response Control Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0]     |FLUSH     |Buffer Flush
-     * |        |          |Writing 1 to this bit causes the packet buffer to be flushed and the corresponding EP_AVAIL register to be cleared.
-     * |        |          |This bit is self-clearing.
-     * |        |          |This bit should always be written after an configuration event.
-     * |        |          |0 = The packet buffer is not flushed.
-     * |        |          |1 = The packet buffer is flushed by user.
-     * |[1:2]   |MODE      |Mode Control
-     * |        |          |The two bits decide the operation mode of the in-endpoint.
-     * |        |          |00: Auto-Validate Mode
-     * |        |          |01: Manual-Validate Mode
-     * |        |          |10: Fly Mode
-     * |        |          |11: Reserved
-     * |        |          |These bits are not valid for an out-endpoint.
-     * |        |          |The auto validate mode will be activated when the reserved mode is selected.
-     * |[3]     |TOGGLE    |Endpoint Toggle
-     * |        |          |This bit is used to clear the endpoint data toggle bit.
-     * |        |          |Reading this bit returns the current state of the endpoint data toggle bit.
-     * |        |          |The local CPU may use this bit to initialize the end-point's toggle in case of reception of a Set Interface request or a Clear Feature (ep_halt) request from the host.
-     * |        |          |Only when toggle bit is "1", this bit can be written into the inversed write data bit[3].
-     * |        |          |0 = Not clear the endpoint data toggle bit.
-     * |        |          |1 = Clear the endpoint data toggle bit.
-     * |[4]     |HALT      |Endpoint Halt
-     * |        |          |This bit is used to send a STALL handshake as response to the token from the host.
-     * |        |          |When an Endpoint Set Feature (Endpoin_halt) is detected by the local CPU, it must write a '1' to this bit.
-     * |        |          |0 = Not send a STALL handshake as response to the token from the host.
-     * |        |          |1 = Send a STALL handshake as response to the token from the host.
-     * |[5]     |ZEROLEN   |Zero Length
-     * |        |          |This bit is used to send a zero-length packet n response to an IN-token.
-     * |        |          |When this bit is set, a zero packet is sent to the host on reception of an IN-token.
-     * |        |          |0 = A zero packet is not sent to the host on reception of an IN-token.
-     * |        |          |1 = A zero packet is sent to the host on reception of an IN-token.
-     * |[6]     |SHORTTXEN |Short Packet Transfer Enable
-     * |        |          |This bit is applicable only in case of Auto-Validate Method.
-     * |        |          |This bit is set to validate any remaining data in the buffer which is not equal to the MPS of the endpoint, and happens to be the last transfer.
-     * |        |          |0 = Not validate any remaining data in the buffer which is not equal to the MPS of the endpoint.
-     * |        |          |1 = Validate any remaining data in the buffer which is not equal to the MPS of the endpoint.
-     * |[7]     |DISBUF    |Buffer Disable Control
-     * |        |          |This bit is used to disable buffer (set buffer size to 1) when a Bulk-OUT short packet is received.
-     * |        |          |0 = Buffer Not Disabled when Bulk-OUT short packet is received.
-     * |        |          |1 = Buffer Disabled when Bulk-OUT short packet is received.
-    */
-    __IO uint32_t EPJRSPCTL;
-
-    /**
-     * EPJMPS
-     * ===================================================================================================
-     * Offset: 0x1E0  Endpoint J Maximum Packet Size Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:10]  |EPMPS     |Endpoint Maximum Packet Size
-     * |        |          |This field determines the Maximum Packet Size of the Endpoint.
-    */
-    __IO uint32_t EPJMPS;
-
-    /**
-     * EPJTXCNT
-     * ===================================================================================================
-     * Offset: 0x1E4  Endpoint J Transfer Count Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:10]  |TXCNT     |Endpoint Transfer Count
-     * |        |          |For IN endpoints, this field determines the total number of bytes to be sent to the host in case of manual validation method.
-     * |        |          |For OUT endpoints, this field has no effect.
-    */
-    __IO uint32_t EPJTXCNT;
-
-    /**
-     * EPJCFG
-     * ===================================================================================================
-     * Offset: 0x1E8  Endpoint J Configuration Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0]     |EPEN      |Endpoint Valid
-     * |        |          |When set, this bit enables this endpoint.
-     * |        |          |This bit has no effect on Endpoint 0, which is always enabled.
-     * |        |          |0 = The endpoint Disabled.
-     * |        |          |1 = The endpoint Enabled.
-     * |[1:2]   |EPTYPE    |Endpoint Type
-     * |        |          |This field selects the type of this endpoint. Endpoint 0 is forced to a Control type.
-     * |        |          |00 = Reserved.
-     * |        |          |01 = Bulk.
-     * |        |          |10 = Interrupt.
-     * |        |          |11 = Isochronous.
-     * |[3]     |EPDIR     |Endpoint Direction
-     * |        |          |0 = out-endpoint (Host OUT to Device).
-     * |        |          |1 = in-endpoint (Host IN to Device).
-     * |        |          |Note: A maximum of one OUT and IN endpoint is allowed for each endpoint number.
-     * |[4:7]   |EPNUM     |Endpoint Number
-     * |        |          |This field selects the number of the endpoint. Valid numbers 1 to 15.
-    */
-    __IO uint32_t EPJCFG;
-
-    /**
-     * EPJBUFSTART
-     * ===================================================================================================
-     * Offset: 0x1EC  Endpoint J RAM Start Address Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:11]  |SADDR     |Endpoint Start Address
-     * |        |          |This is the start-address of the RAM space allocated for the endpoint A~L.
-    */
-    __IO uint32_t EPJBUFSTART;
-
-    /**
-     * EPJBUFEND
-     * ===================================================================================================
-     * Offset: 0x1F0  Endpoint J RAM End Address Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:11]  |EADDR     |Endpoint End Address
-     * |        |          |This is the end-address of the RAM space allocated for the endpoint A~L.
-    */
-    __IO uint32_t EPJBUFEND;
-
-    union {
-
-        /**
-         * EPKDAT
-         * ===================================================================================================
-         * Offset: 0x1F4  Endpoint K Data Register
-         * ---------------------------------------------------------------------------------------------------
-         * |Bits    |Field     |Descriptions
-         * | :----: | :----:   | :---- |
-         * |[0:31]  |EPDAT     |Endpoint A~L Data Register
-         * |        |          |Endpoint A~L data buffer for the buffer transaction (read or write).
-         * |        |          |Note: Only word or byte access are supported.
-        */
-        __IO uint32_t EPKDAT;
-        /** Endpoint K Data Buffer for Byte Access */
-        __IO uint8_t  EPKDAT_BYTE;
-
-    }; ///< Define EPK Data Register 32-bit or 8-bit access
-
-    /**
-     * EPKINTSTS
-     * ===================================================================================================
-     * Offset: 0x1F8  Endpoint K Interrupt Status Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0]     |BUFFULLIF |Buffer Full
-     * |        |          |For an IN endpoint, the currently selected buffer is full, or no buffer is available to the local side for writing (no space to write).
-     * |        |          |For an OUT endpoint, there is a buffer available on the local side, and there are FIFO full of bytes available to be read (entire packet is available for reading).
-     * |        |          |0 = The endpoint packet buffer is not full.
-     * |        |          |1 = The endpoint packet buffer is full.
-     * |        |          |Note: This bit is read-only.
-     * |[1]     |BUFEMPTYIF|Buffer Empty
-     * |        |          |For an IN endpoint, a buffer is available to the local side for writing up to FIFO full of bytes.
-     * |        |          |0 = The endpoint buffer is not empty.
-     * |        |          |1 = The endpoint buffer is empty.
-     * |        |          |For an OUT endpoint:
-     * |        |          |0 = The currently selected buffer has not a count of 0.
-     * |        |          |1 = The currently selected buffer has a count of 0, or no buffer is available on the local side (nothing to read).
-     * |        |          |Note: This bit is read-only.
-     * |[2]     |SHORTTXIF |Short Packet Transferred Interrupt
-     * |        |          |0 = The length of the last packet was not less than the Maximum Packet Size (EPMPS).
-     * |        |          |1 = The length of the last packet was less than the Maximum Packet Size (EPMPS).
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[3]     |TXPKIF    |Data Packet Transmitted Interrupt
-     * |        |          |0 = Not a data packet is transmitted from the endpoint to the host.
-     * |        |          |1 = A data packet is transmitted from the endpoint to the host.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[4]     |RXPKIF    |Data Packet Received Interrupt
-     * |        |          |0 = No data packet is received from the host by the endpoint.
-     * |        |          |1 = A data packet is received from the host by the endpoint.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[5]     |OUTTKIF   |Data OUT Token Interrupt
-     * |        |          |0 = A Data OUT token has not been received from the host.
-     * |        |          |1 = A Data OUT token has been received from the host.
-     * |        |          |This bit also set by PING tokens(in high-speed only).
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[6]     |INTKIF    |Data IN Token Interrupt
-     * |        |          |0 = Not Data IN token has been received from the host.
-     * |        |          |1 = A Data IN token has been received from the host.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[7]     |PINGIF    |PING Token Interrupt
-     * |        |          |0 = A Data PING token has not been received from the host.
-     * |        |          |1 = A Data PING token has been received from the host.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[8]     |NAKIF     |USB NAK Sent
-     * |        |          |0 = The last USB IN packet could be provided, and was acknowledged with a ACK.
-     * |        |          |1 = The last USB IN packet could not be provided, and was acknowledged with a NAK.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[9]     |STALLIF   |USB STALL Sent
-     * |        |          |0 = The last USB packet could be accepted or provided because the endpoint was stalled, and was acknowledged with a STALL.
-     * |        |          |1 = The last USB packet could not be accepted or provided because the endpoint was stalled, and was acknowledged with a STALL.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[10]    |NYETIF    |NYET Sent
-     * |        |          |0 = The space available in the RAM is sufficient to accommodate the next on coming data packet.
-     * |        |          |1 = The space available in the RAM is not sufficient to accommodate the next on coming data packet.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[11]    |ERRIF     |ERR Sent
-     * |        |          |0 = No any error in the transaction.
-     * |        |          |1 = There occurs any error in the transaction.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[12]    |SHORTRXIF |Bulk Out Short Packet Received
-     * |        |          |0 = No bulk out short packet is received.
-     * |        |          |1 = Received bulk out short packet (including zero length packet ).
-     * |        |          |Note: Write 1 to clear this bit to 0.
-    */
-    __IO uint32_t EPKINTSTS;
-
-    /**
-     * EPKINTEN
-     * ===================================================================================================
-     * Offset: 0x1FC  Endpoint K Interrupt Enable Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0]     |BUFFULLIEN|Buffer Full Interrupt
-     * |        |          |When set, this bit enables a local interrupt to be set when a buffer full condition is detected on the bus.
-     * |        |          |0 = Buffer full interrupt Disabled.
-     * |        |          |1 = Buffer full interrupt Enabled.
-     * |[1]     |BUFEMPTYIEN|Buffer Empty Interrupt
-     * |        |          |When set, this bit enables a local interrupt to be set when a buffer empty condition is detected on the bus.
-     * |        |          |0 = Buffer empty interrupt Disabled.
-     * |        |          |1 = Buffer empty interrupt Enabled.
-     * |[2]     |SHORTTXIEN|Short Packet Transferred Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a short data packet has been transferred to/from the host.
-     * |        |          |0 = Short data packet interrupt Disabled.
-     * |        |          |1 = Short data packet interrupt Enabled.
-     * |[3]     |TXPKIEN   |Data Packet Transmitted Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a data packet has been received from the host.
-     * |        |          |0 = Data packet has been received from the host interrupt Disabled.
-     * |        |          |1 = Data packet has been received from the host interrupt Enabled.
-     * |[4]     |RXPKIEN   |Data Packet Received Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a data packet has been transmitted to the host.
-     * |        |          |0 = Data packet has been transmitted to the host interrupt Disabled.
-     * |        |          |1 = Data packet has been transmitted to the host interrupt Enabled.
-     * |[5]     |OUTTKIEN  |Data OUT Token Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a Data OUT token has been received from the host.
-     * |        |          |0 = Data OUT token interrupt Disabled.
-     * |        |          |1 = Data OUT token interrupt Enabled.
-     * |[6]     |INTKIEN   |Data IN Token Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a Data IN token has been received from the host.
-     * |        |          |0 = Data IN token interrupt Disabled.
-     * |        |          |1 = Data IN token interrupt Enabled.
-     * |[7]     |PINGIEN   |PING Token Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a PING token has been received from the host.
-     * |        |          |0 = PING token interrupt Disabled.
-     * |        |          |1 = PING token interrupt Enabled.
-     * |[8]     |NAKIEN    |USB NAK Sent Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a NAK token is sent to the host.
-     * |        |          |0 = NAK token interrupt Disabled.
-     * |        |          |1 = NAK token interrupt Enabled.
-     * |[9]     |STALLIEN  |USB STALL Sent Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a stall token is sent to the host.
-     * |        |          |0 = STALL token interrupt Disabled.
-     * |        |          |1 = STALL token interrupt Enabled.
-     * |[10]    |NYETIEN   |NYET Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set whenever NYET condition occurs on the bus for this endpoint.
-     * |        |          |0 = NYET condition interrupt Disabled.
-     * |        |          |1 = NYET condition interrupt Enabled.
-     * |[11]    |ERRIEN    |ERR Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set whenever ERR condition occurs on the bus for this endpoint.
-     * |        |          |0 = Error event interrupt Disabled.
-     * |        |          |1 = Error event interrupt Enabled.
-     * |[12]    |SHORTRXIEN|Bulk Out Short Packet Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set whenever bulk out short packet occurs on the bus for this endpoint.
-     * |        |          |0 = Bulk out interrupt Disabled.
-     * |        |          |1 = Bulk out interrupt Enabled.
-    */
-    __IO uint32_t EPKINTEN;
-
-    /**
-     * EPKDATCNT
-     * ===================================================================================================
-     * Offset: 0x200  Endpoint K Data Available Count Register
-     * ---------------------------------------------------------------------------------------------------
-     * |Bits    |Field     |Descriptions
-     * | :----: | :----:   | :---- |
-     * |[0:15]  |DATCNT    |Data Count
-     * |        |          |For an OUT/IN endpoint, this register returns the number of valid bytes in the endpoint packet buffer.
-     * |[16:30] |DMALOOP   |DMA Loop
-     * |        |          |This register is the remaining DMA loop to complete. Each loop means 32-byte transfer.
-    */
-    __I  uint32_t EPKDATCNT;
-
+    USBD_EP_T EP[12];
+         uint32_t RESERVE2[1];
+ 
     /**
-     * EPKRSPCTL
+     * UVCHDAT0
      * ===================================================================================================
-     * Offset: 0x204  Endpoint K Response Control Register
+     * Offset: 0x248  USB Header Word0
      * ---------------------------------------------------------------------------------------------------
      * |Bits    |Field     |Descriptions
      * | :----: | :----:   | :---- |
-     * |[0]     |FLUSH     |Buffer Flush
-     * |        |          |Writing 1 to this bit causes the packet buffer to be flushed and the corresponding EP_AVAIL register to be cleared.
-     * |        |          |This bit is self-clearing.
-     * |        |          |This bit should always be written after an configuration event.
-     * |        |          |0 = The packet buffer is not flushed.
-     * |        |          |1 = The packet buffer is flushed by user.
-     * |[1:2]   |MODE      |Mode Control
-     * |        |          |The two bits decide the operation mode of the in-endpoint.
-     * |        |          |00: Auto-Validate Mode
-     * |        |          |01: Manual-Validate Mode
-     * |        |          |10: Fly Mode
-     * |        |          |11: Reserved
-     * |        |          |These bits are not valid for an out-endpoint.
-     * |        |          |The auto validate mode will be activated when the reserved mode is selected.
-     * |[3]     |TOGGLE    |Endpoint Toggle
-     * |        |          |This bit is used to clear the endpoint data toggle bit.
-     * |        |          |Reading this bit returns the current state of the endpoint data toggle bit.
-     * |        |          |The local CPU may use this bit to initialize the end-point's toggle in case of reception of a Set Interface request or a Clear Feature (ep_halt) request from the host.
-     * |        |          |Only when toggle bit is "1", this bit can be written into the inversed write data bit[3].
-     * |        |          |0 = Not clear the endpoint data toggle bit.
-     * |        |          |1 = Clear the endpoint data toggle bit.
-     * |[4]     |HALT      |Endpoint Halt
-     * |        |          |This bit is used to send a STALL handshake as response to the token from the host.
-     * |        |          |When an Endpoint Set Feature (Endpoin_halt) is detected by the local CPU, it must write a '1' to this bit.
-     * |        |          |0 = Not send a STALL handshake as response to the token from the host.
-     * |        |          |1 = Send a STALL handshake as response to the token from the host.
-     * |[5]     |ZEROLEN   |Zero Length
-     * |        |          |This bit is used to send a zero-length packet n response to an IN-token.
-     * |        |          |When this bit is set, a zero packet is sent to the host on reception of an IN-token.
-     * |        |          |0 = A zero packet is not sent to the host on reception of an IN-token.
-     * |        |          |1 = A zero packet is sent to the host on reception of an IN-token.
-     * |[6]     |SHORTTXEN |Short Packet Transfer Enable
-     * |        |          |This bit is applicable only in case of Auto-Validate Method.
-     * |        |          |This bit is set to validate any remaining data in the buffer which is not equal to the MPS of the endpoint, and happens to be the last transfer.
-     * |        |          |0 = Not validate any remaining data in the buffer which is not equal to the MPS of the endpoint.
-     * |        |          |1 = Validate any remaining data in the buffer which is not equal to the MPS of the endpoint.
-     * |[7]     |DISBUF    |Buffer Disable Control
-     * |        |          |This bit is used to disable buffer (set buffer size to 1) when a Bulk-OUT short packet is received.
-     * |        |          |0 = Buffer Not Disabled when Bulk-OUT short packet is received.
-     * |        |          |1 = Buffer Disabled when Bulk-OUT short packet is received.
-    */
-    __IO uint32_t EPKRSPCTL;
+     * |[31:0]  |DAT       |The first head data(byte 0 was sent first)
+ */
+    __IO uint32_t UVCHDAT0;              
 
     /**
-     * EPKMPS
+     * UVCHDAT1
      * ===================================================================================================
-     * Offset: 0x208  Endpoint K Maximum Packet Size Register
+     * Offset: 0x24C  USB Header Word1
      * ---------------------------------------------------------------------------------------------------
      * |Bits    |Field     |Descriptions
      * | :----: | :----:   | :---- |
-     * |[0:10]  |EPMPS     |Endpoint Maximum Packet Size
-     * |        |          |This field determines the Maximum Packet Size of the Endpoint.
-    */
-    __IO uint32_t EPKMPS;
+     * |[31:0]  |DAT       |The second head data(byte 0 was sent first)
+ */
+    __IO uint32_t UVCHDAT1;              
 
     /**
-     * EPKTXCNT
+     * UVCHDAT2
      * ===================================================================================================
-     * Offset: 0x20C  Endpoint K Transfer Count Register
+     * Offset: 0x250  USB Header Word2
      * ---------------------------------------------------------------------------------------------------
      * |Bits    |Field     |Descriptions
      * | :----: | :----:   | :---- |
-     * |[0:10]  |TXCNT     |Endpoint Transfer Count
-     * |        |          |For IN endpoints, this field determines the total number of bytes to be sent to the host in case of manual validation method.
-     * |        |          |For OUT endpoints, this field has no effect.
-    */
-    __IO uint32_t EPKTXCNT;
+     * |[31:0]  |DAT       |The third head data(byte 0 was sent first)
+ */
+    __IO uint32_t UVCHDAT2;              
 
     /**
-     * EPKCFG
+     * UVCEPAHCNT
      * ===================================================================================================
-     * Offset: 0x210  Endpoint K Configuration Register
+     * Offset: 0x254  Endpoint A Header Count
      * ---------------------------------------------------------------------------------------------------
      * |Bits    |Field     |Descriptions
      * | :----: | :----:   | :---- |
-     * |[0]     |EPEN      |Endpoint Valid
-     * |        |          |When set, this bit enables this endpoint.
-     * |        |          |This bit has no effect on Endpoint 0, which is always enabled.
-     * |        |          |0 = The endpoint Disabled.
-     * |        |          |1 = The endpoint Enabled.
-     * |[1:2]   |EPTYPE    |Endpoint Type
-     * |        |          |This field selects the type of this endpoint. Endpoint 0 is forced to a Control type.
-     * |        |          |00 = Reserved.
-     * |        |          |01 = Bulk.
-     * |        |          |10 = Interrupt.
-     * |        |          |11 = Isochronous.
-     * |[3]     |EPDIR     |Endpoint Direction
-     * |        |          |0 = out-endpoint (Host OUT to Device).
-     * |        |          |1 = in-endpoint (Host IN to Device).
-     * |        |          |Note: A maximum of one OUT and IN endpoint is allowed for each endpoint number.
-     * |[4:7]   |EPNUM     |Endpoint Number
-     * |        |          |This field selects the number of the endpoint. Valid numbers 1 to 15.
-    */
-    __IO uint32_t EPKCFG;
+     * |[3:0]   |CNT       |This is the header count for the endpoint A~L The header count must be EVEN.
+ */
+    __IO uint32_t UVCEPAHCNT;            
 
     /**
-     * EPKBUFSTART
+     * UVCEPBHCNT
      * ===================================================================================================
-     * Offset: 0x214  Endpoint K RAM Start Address Register
+     * Offset: 0x258  Endpoint B Header Count
      * ---------------------------------------------------------------------------------------------------
      * |Bits    |Field     |Descriptions
      * | :----: | :----:   | :---- |
-     * |[0:11]  |SADDR     |Endpoint Start Address
-     * |        |          |This is the start-address of the RAM space allocated for the endpoint A~L.
-    */
-    __IO uint32_t EPKBUFSTART;
+     * |[3:0]   |CNT       |This is the header count for the endpoint A~L The header count must be EVEN.
+ */
+    __IO uint32_t UVCEPBHCNT;            
 
     /**
-     * EPKBUFEND
+     * UVCEPCHCNT
      * ===================================================================================================
-     * Offset: 0x218  Endpoint K RAM End Address Register
+     * Offset: 0x25C  Endpoint C Header Count
      * ---------------------------------------------------------------------------------------------------
      * |Bits    |Field     |Descriptions
      * | :----: | :----:   | :---- |
-     * |[0:11]  |EADDR     |Endpoint End Address
-     * |        |          |This is the end-address of the RAM space allocated for the endpoint A~L.
-    */
-    __IO uint32_t EPKBUFEND;
-
-    union {
+     * |[3:0]   |CNT       |This is the header count for the endpoint A~L The header count must be EVEN.
+ */
+    __IO uint32_t UVCEPCHCNT;            
 
-        /**
-         * EPLDAT
-         * ===================================================================================================
-         * Offset: 0x21C  Endpoint L Data Register
-         * ---------------------------------------------------------------------------------------------------
-         * |Bits    |Field     |Descriptions
-         * | :----: | :----:   | :---- |
-         * |[0:31]  |EPDAT     |Endpoint A~L Data Register
-         * |        |          |Endpoint A~L data buffer for the buffer transaction (read or write).
-         * |        |          |Note: Only word or byte access are supported.
-        */
-        __IO uint32_t EPLDAT;
-        /** Endpoint L Data Buffer for Byte Access */
-        __IO uint8_t  EPLDAT_BYTE;
-
-    }; ///< Define EPL Data Register 32-bit or 8-bit access
-
     /**
-     * EPLINTSTS
+     * UVCEPDHCNT
      * ===================================================================================================
-     * Offset: 0x220  Endpoint L Interrupt Status Register
+     * Offset: 0x260  Endpoint D Header Count
      * ---------------------------------------------------------------------------------------------------
      * |Bits    |Field     |Descriptions
      * | :----: | :----:   | :---- |
-     * |[0]     |BUFFULLIF |Buffer Full
-     * |        |          |For an IN endpoint, the currently selected buffer is full, or no buffer is available to the local side for writing (no space to write).
-     * |        |          |For an OUT endpoint, there is a buffer available on the local side, and there are FIFO full of bytes available to be read (entire packet is available for reading).
-     * |        |          |0 = The endpoint packet buffer is not full.
-     * |        |          |1 = The endpoint packet buffer is full.
-     * |        |          |Note: This bit is read-only.
-     * |[1]     |BUFEMPTYIF|Buffer Empty
-     * |        |          |For an IN endpoint, a buffer is available to the local side for writing up to FIFO full of bytes.
-     * |        |          |0 = The endpoint buffer is not empty.
-     * |        |          |1 = The endpoint buffer is empty.
-     * |        |          |For an OUT endpoint:
-     * |        |          |0 = The currently selected buffer has not a count of 0.
-     * |        |          |1 = The currently selected buffer has a count of 0, or no buffer is available on the local side (nothing to read).
-     * |        |          |Note: This bit is read-only.
-     * |[2]     |SHORTTXIF |Short Packet Transferred Interrupt
-     * |        |          |0 = The length of the last packet was not less than the Maximum Packet Size (EPMPS).
-     * |        |          |1 = The length of the last packet was less than the Maximum Packet Size (EPMPS).
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[3]     |TXPKIF    |Data Packet Transmitted Interrupt
-     * |        |          |0 = Not a data packet is transmitted from the endpoint to the host.
-     * |        |          |1 = A data packet is transmitted from the endpoint to the host.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[4]     |RXPKIF    |Data Packet Received Interrupt
-     * |        |          |0 = No data packet is received from the host by the endpoint.
-     * |        |          |1 = A data packet is received from the host by the endpoint.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[5]     |OUTTKIF   |Data OUT Token Interrupt
-     * |        |          |0 = A Data OUT token has not been received from the host.
-     * |        |          |1 = A Data OUT token has been received from the host.
-     * |        |          |This bit also set by PING tokens(in high-speed only).
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[6]     |INTKIF    |Data IN Token Interrupt
-     * |        |          |0 = Not Data IN token has been received from the host.
-     * |        |          |1 = A Data IN token has been received from the host.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[7]     |PINGIF    |PING Token Interrupt
-     * |        |          |0 = A Data PING token has not been received from the host.
-     * |        |          |1 = A Data PING token has been received from the host.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[8]     |NAKIF     |USB NAK Sent
-     * |        |          |0 = The last USB IN packet could be provided, and was acknowledged with a ACK.
-     * |        |          |1 = The last USB IN packet could not be provided, and was acknowledged with a NAK.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[9]     |STALLIF   |USB STALL Sent
-     * |        |          |0 = The last USB packet could be accepted or provided because the endpoint was stalled, and was acknowledged with a STALL.
-     * |        |          |1 = The last USB packet could not be accepted or provided because the endpoint was stalled, and was acknowledged with a STALL.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[10]    |NYETIF    |NYET Sent
-     * |        |          |0 = The space available in the RAM is sufficient to accommodate the next on coming data packet.
-     * |        |          |1 = The space available in the RAM is not sufficient to accommodate the next on coming data packet.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[11]    |ERRIF     |ERR Sent
-     * |        |          |0 = No any error in the transaction.
-     * |        |          |1 = There occurs any error in the transaction.
-     * |        |          |Note: Write 1 to clear this bit to 0.
-     * |[12]    |SHORTRXIF |Bulk Out Short Packet Received
-     * |        |          |0 = No bulk out short packet is received.
-     * |        |          |1 = Received bulk out short packet (including zero length packet ).
-     * |        |          |Note: Write 1 to clear this bit to 0.
-    */
-    __IO uint32_t EPLINTSTS;
+     * |[3:0]   |CNT       |This is the header count for the endpoint A~L The header count must be EVEN.
+ */
+    __IO uint32_t UVCEPDHCNT;            
 
     /**
-     * EPLINTEN
+     * UVCEPEHCNT
      * ===================================================================================================
-     * Offset: 0x224  Endpoint L Interrupt Enable Register
+     * Offset: 0x264  Endpoint E Header Count
      * ---------------------------------------------------------------------------------------------------
      * |Bits    |Field     |Descriptions
      * | :----: | :----:   | :---- |
-     * |[0]     |BUFFULLIEN|Buffer Full Interrupt
-     * |        |          |When set, this bit enables a local interrupt to be set when a buffer full condition is detected on the bus.
-     * |        |          |0 = Buffer full interrupt Disabled.
-     * |        |          |1 = Buffer full interrupt Enabled.
-     * |[1]     |BUFEMPTYIEN|Buffer Empty Interrupt
-     * |        |          |When set, this bit enables a local interrupt to be set when a buffer empty condition is detected on the bus.
-     * |        |          |0 = Buffer empty interrupt Disabled.
-     * |        |          |1 = Buffer empty interrupt Enabled.
-     * |[2]     |SHORTTXIEN|Short Packet Transferred Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a short data packet has been transferred to/from the host.
-     * |        |          |0 = Short data packet interrupt Disabled.
-     * |        |          |1 = Short data packet interrupt Enabled.
-     * |[3]     |TXPKIEN   |Data Packet Transmitted Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a data packet has been received from the host.
-     * |        |          |0 = Data packet has been received from the host interrupt Disabled.
-     * |        |          |1 = Data packet has been received from the host interrupt Enabled.
-     * |[4]     |RXPKIEN   |Data Packet Received Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a data packet has been transmitted to the host.
-     * |        |          |0 = Data packet has been transmitted to the host interrupt Disabled.
-     * |        |          |1 = Data packet has been transmitted to the host interrupt Enabled.
-     * |[5]     |OUTTKIEN  |Data OUT Token Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a Data OUT token has been received from the host.
-     * |        |          |0 = Data OUT token interrupt Disabled.
-     * |        |          |1 = Data OUT token interrupt Enabled.
-     * |[6]     |INTKIEN   |Data IN Token Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a Data IN token has been received from the host.
-     * |        |          |0 = Data IN token interrupt Disabled.
-     * |        |          |1 = Data IN token interrupt Enabled.
-     * |[7]     |PINGIEN   |PING Token Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a PING token has been received from the host.
-     * |        |          |0 = PING token interrupt Disabled.
-     * |        |          |1 = PING token interrupt Enabled.
-     * |[8]     |NAKIEN    |USB NAK Sent Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a NAK token is sent to the host.
-     * |        |          |0 = NAK token interrupt Disabled.
-     * |        |          |1 = NAK token interrupt Enabled.
-     * |[9]     |STALLIEN  |USB STALL Sent Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set when a stall token is sent to the host.
-     * |        |          |0 = STALL token interrupt Disabled.
-     * |        |          |1 = STALL token interrupt Enabled.
-     * |[10]    |NYETIEN   |NYET Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set whenever NYET condition occurs on the bus for this endpoint.
-     * |        |          |0 = NYET condition interrupt Disabled.
-     * |        |          |1 = NYET condition interrupt Enabled.
-     * |[11]    |ERRIEN    |ERR Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set whenever ERR condition occurs on the bus for this endpoint.
-     * |        |          |0 = Error event interrupt Disabled.
-     * |        |          |1 = Error event interrupt Enabled.
-     * |[12]    |SHORTRXIEN|Bulk Out Short Packet Interrupt Enable Control
-     * |        |          |When set, this bit enables a local interrupt to be set whenever bulk out short packet occurs on the bus for this endpoint.
-     * |        |          |0 = Bulk out interrupt Disabled.
-     * |        |          |1 = Bulk out interrupt Enabled.
-    */
-    __IO uint32_t EPLINTEN;
+     * |[3:0]   |CNT       |This is the header count for the endpoint A~L The header count must be EVEN.
+ */
+    __IO uint32_t UVCEPEHCNT;            
 
     /**
-     * EPLDATCNT
+     * UVCEPFHCNT
      * ===================================================================================================
-     * Offset: 0x228  Endpoint L Data Available Count Register
+     * Offset: 0x268  Endpoint F Header Count
      * ---------------------------------------------------------------------------------------------------
      * |Bits    |Field     |Descriptions
      * | :----: | :----:   | :---- |
-     * |[0:15]  |DATCNT    |Data Count
-     * |        |          |For an OUT/IN endpoint, this register returns the number of valid bytes in the endpoint packet buffer.
-     * |[16:30] |DMALOOP   |DMA Loop
-     * |        |          |This register is the remaining DMA loop to complete. Each loop means 32-byte transfer.
-    */
-    __I  uint32_t EPLDATCNT;
+     * |[3:0]   |CNT       |This is the header count for the endpoint A~L The header count must be EVEN.
+ */
+    __IO uint32_t UVCEPFHCNT;            
 
     /**
-     * EPLRSPCTL
+     * UVCEPGHCNT
      * ===================================================================================================
-     * Offset: 0x22C  Endpoint L Response Control Register
+     * Offset: 0x26C  Endpoint G Header Count
      * ---------------------------------------------------------------------------------------------------
      * |Bits    |Field     |Descriptions
      * | :----: | :----:   | :---- |
-     * |[0]     |FLUSH     |Buffer Flush
-     * |        |          |Writing 1 to this bit causes the packet buffer to be flushed and the corresponding EP_AVAIL register to be cleared.
-     * |        |          |This bit is self-clearing.
-     * |        |          |This bit should always be written after an configuration event.
-     * |        |          |0 = The packet buffer is not flushed.
-     * |        |          |1 = The packet buffer is flushed by user.
-     * |[1:2]   |MODE      |Mode Control
-     * |        |          |The two bits decide the operation mode of the in-endpoint.
-     * |        |          |00: Auto-Validate Mode
-     * |        |          |01: Manual-Validate Mode
-     * |        |          |10: Fly Mode
-     * |        |          |11: Reserved
-     * |        |          |These bits are not valid for an out-endpoint.
-     * |        |          |The auto validate mode will be activated when the reserved mode is selected.
-     * |[3]     |TOGGLE    |Endpoint Toggle
-     * |        |          |This bit is used to clear the endpoint data toggle bit.
-     * |        |          |Reading this bit returns the current state of the endpoint data toggle bit.
-     * |        |          |The local CPU may use this bit to initialize the end-point's toggle in case of reception of a Set Interface request or a Clear Feature (ep_halt) request from the host.
-     * |        |          |Only when toggle bit is "1", this bit can be written into the inversed write data bit[3].
-     * |        |          |0 = Not clear the endpoint data toggle bit.
-     * |        |          |1 = Clear the endpoint data toggle bit.
-     * |[4]     |HALT      |Endpoint Halt
-     * |        |          |This bit is used to send a STALL handshake as response to the token from the host.
-     * |        |          |When an Endpoint Set Feature (Endpoin_halt) is detected by the local CPU, it must write a '1' to this bit.
-     * |        |          |0 = Not send a STALL handshake as response to the token from the host.
-     * |        |          |1 = Send a STALL handshake as response to the token from the host.
-     * |[5]     |ZEROLEN   |Zero Length
-     * |        |          |This bit is used to send a zero-length packet n response to an IN-token.
-     * |        |          |When this bit is set, a zero packet is sent to the host on reception of an IN-token.
-     * |        |          |0 = A zero packet is not sent to the host on reception of an IN-token.
-     * |        |          |1 = A zero packet is sent to the host on reception of an IN-token.
-     * |[6]     |SHORTTXEN |Short Packet Transfer Enable
-     * |        |          |This bit is applicable only in case of Auto-Validate Method.
-     * |        |          |This bit is set to validate any remaining data in the buffer which is not equal to the MPS of the endpoint, and happens to be the last transfer.
-     * |        |          |0 = Not validate any remaining data in the buffer which is not equal to the MPS of the endpoint.
-     * |        |          |1 = Validate any remaining data in the buffer which is not equal to the MPS of the endpoint.
-     * |[7]     |DISBUF    |Buffer Disable Control
-     * |        |          |This bit is used to disable buffer (set buffer size to 1) when a Bulk-OUT short packet is received.
-     * |        |          |0 = Buffer Not Disabled when Bulk-OUT short packet is received.
-     * |        |          |1 = Buffer Disabled when Bulk-OUT short packet is received.
-    */
-    __IO uint32_t EPLRSPCTL;
+     * |[3:0]   |CNT       |This is the header count for the endpoint A~L The header count must be EVEN.
+ */
+    __IO uint32_t UVCEPGHCNT;            
 
     /**
-     * EPLMPS
+     * UVCEPHHCNT
      * ===================================================================================================
-     * Offset: 0x230  Endpoint L Maximum Packet Size Register
+     * Offset: 0x270  Endpoint H Header Count
      * ---------------------------------------------------------------------------------------------------
      * |Bits    |Field     |Descriptions
      * | :----: | :----:   | :---- |
-     * |[0:10]  |EPMPS     |Endpoint Maximum Packet Size
-     * |        |          |This field determines the Maximum Packet Size of the Endpoint.
-    */
-    __IO uint32_t EPLMPS;
+     * |[3:0]   |CNT       |This is the header count for the endpoint A~L The header count must be EVEN.
+ */
+    __IO uint32_t UVCEPHHCNT;            
 
     /**
-     * EPLTXCNT
+     * UVCEPIHCNT
      * ===================================================================================================
-     * Offset: 0x234  Endpoint L Transfer Count Register
+     * Offset: 0x274  Endpoint I Header Count
      * ---------------------------------------------------------------------------------------------------
      * |Bits    |Field     |Descriptions
      * | :----: | :----:   | :---- |
-     * |[0:10]  |TXCNT     |Endpoint Transfer Count
-     * |        |          |For IN endpoints, this field determines the total number of bytes to be sent to the host in case of manual validation method.
-     * |        |          |For OUT endpoints, this field has no effect.
-    */
-    __IO uint32_t EPLTXCNT;
+     * |[3:0]   |CNT       |This is the header count for the endpoint A~L The header count must be EVEN.
+ */
+    __IO uint32_t UVCEPIHCNT;            
 
     /**
-     * EPLCFG
+     * UVCEPJHCNT
      * ===================================================================================================
-     * Offset: 0x238  Endpoint L Configuration Register
+     * Offset: 0x278  Endpoint J Header Count
      * ---------------------------------------------------------------------------------------------------
      * |Bits    |Field     |Descriptions
      * | :----: | :----:   | :---- |
-     * |[0]     |EPEN      |Endpoint Valid
-     * |        |          |When set, this bit enables this endpoint.
-     * |        |          |This bit has no effect on Endpoint 0, which is always enabled.
-     * |        |          |0 = The endpoint Disabled.
-     * |        |          |1 = The endpoint Enabled.
-     * |[1:2]   |EPTYPE    |Endpoint Type
-     * |        |          |This field selects the type of this endpoint. Endpoint 0 is forced to a Control type.
-     * |        |          |00 = Reserved.
-     * |        |          |01 = Bulk.
-     * |        |          |10 = Interrupt.
-     * |        |          |11 = Isochronous.
-     * |[3]     |EPDIR     |Endpoint Direction
-     * |        |          |0 = out-endpoint (Host OUT to Device).
-     * |        |          |1 = in-endpoint (Host IN to Device).
-     * |        |          |Note: A maximum of one OUT and IN endpoint is allowed for each endpoint number.
-     * |[4:7]   |EPNUM     |Endpoint Number
-     * |        |          |This field selects the number of the endpoint. Valid numbers 1 to 15.
-    */
-    __IO uint32_t EPLCFG;
+     * |[3:0]   |CNT       |This is the header count for the endpoint A~L The header count must be EVEN.
+ */
+    __IO uint32_t UVCEPJHCNT;            
 
     /**
-     * EPLBUFSTART
+     * UVCEPKHCNT
      * ===================================================================================================
-     * Offset: 0x23C  Endpoint L RAM Start Address Register
+     * Offset: 0x27C  Endpoint K Header Count
      * ---------------------------------------------------------------------------------------------------
      * |Bits    |Field     |Descriptions
      * | :----: | :----:   | :---- |
-     * |[0:11]  |SADDR     |Endpoint Start Address
-     * |        |          |This is the start-address of the RAM space allocated for the endpoint A~L.
-    */
-    __IO uint32_t EPLBUFSTART;
+     * |[3:0]   |CNT       |This is the header count for the endpoint A~L The header count must be EVEN.
+ */
+    __IO uint32_t UVCEPKHCNT;            
 
     /**
-     * EPLBUFEND
+     * UVCEPLHCNT
      * ===================================================================================================
-     * Offset: 0x240  Endpoint L RAM End Address Register
+     * Offset: 0x280  Endpoint L Header Count
      * ---------------------------------------------------------------------------------------------------
      * |Bits    |Field     |Descriptions
      * | :----: | :----:   | :---- |
-     * |[0:11]  |EADDR     |Endpoint End Address
-     * |        |          |This is the end-address of the RAM space allocated for the endpoint A~L.
-    */
-    __IO uint32_t EPLBUFEND;
-
-    uint32_t RESERVE2[303];
+     * |[3:0]   |CNT       |This is the header count for the endpoint A~L The header count must be EVEN.
+ */
+    __IO uint32_t UVCEPLHCNT;            
+         uint32_t RESERVE3[287];
 
 
     /**
@@ -31631,11 +28631,11 @@ typedef struct {
      * ---------------------------------------------------------------------------------------------------
      * |Bits    |Field     |Descriptions
      * | :----: | :----:   | :---- |
-     * |[0:31]  |DMAADDR   |DMAADDR
+     * |[31:0]  |DMAADDR   |DMAADDR
      * |        |          |The register specifies the address from which the DMA has to read / write.
-     * |        |          |The address must WORD (32-bit) aligned.
-    */
-    __IO uint32_t DMAADDR;
+     * |        |          |The address must WORD (32-bit) aligne.
+ */
+    __IO uint32_t DMAADDR;               
 
     /**
      * PHYCTL
@@ -31647,17 +28647,17 @@ typedef struct {
      * |[8]     |DPPUEN    |DP Pull-Up
      * |        |          |0 = Pull-up resistor on D+ Disabled.
      * |        |          |1 = Pull-up resistor on D+ Enabled.
-     * |[9]     |PHYEN     |PHY Suspend Enable Control
+     * |[9]     |PHYEN     |PHY Suspend Enable Bit
      * |        |          |0 = The USB PHY is suspend.
      * |        |          |1 = The USB PHY is not suspend.
-     * |[24]    |WKEN      |Wake-Up Enable Control
+     * |[24]    |WKEN      |Wake-Up Enable Bit
      * |        |          |0 = The wake-up function Disabled.
      * |        |          |1 = The wake-up function Enabled.
      * |[31]    |VBUSDET   |VBUS Status
      * |        |          |0 = The VBUS is not detected yet.
      * |        |          |1 = The VBUS is detected.
-    */
-    __IO uint32_t PHYCTL;
+ */
+    __IO uint32_t PHYCTL;                
 
 } USBD_T;
 
@@ -31666,455 +28666,2085 @@ typedef struct {
     Constant Definitions for USBD Controller
 @{ */
 
-#define USBD_GINTSTS_USBIF_Pos           (0)                                               /*!< USBD GINTSTS: USBIF Position           */
-#define USBD_GINTSTS_USBIF_Msk           (0x1ul << USBD_GINTSTS_USBIF_Pos)                 /*!< USBD GINTSTS: USBIF Mask               */
+#define USBD_GINTSTS_USBIF_Pos           (0)                                               /*!< USBD_T::GINTSTS: USBIF Position           */
+#define USBD_GINTSTS_USBIF_Msk           (0x1ul << USBD_GINTSTS_USBIF_Pos)                 /*!< USBD_T::GINTSTS: USBIF Mask               */
 
-#define USBD_GINTSTS_CEPIF_Pos           (1)                                               /*!< USBD GINTSTS: CEPIF Position           */
-#define USBD_GINTSTS_CEPIF_Msk           (0x1ul << USBD_GINTSTS_CEPIF_Pos)                 /*!< USBD GINTSTS: CEPIF Mask               */
+#define USBD_GINTSTS_CEPIF_Pos           (1)                                               /*!< USBD_T::GINTSTS: CEPIF Position           */
+#define USBD_GINTSTS_CEPIF_Msk           (0x1ul << USBD_GINTSTS_CEPIF_Pos)                 /*!< USBD_T::GINTSTS: CEPIF Mask               */
 
-#define USBD_GINTSTS_EPAIF_Pos           (2)                                               /*!< USBD GINTSTS: EPAIF Position           */
-#define USBD_GINTSTS_EPAIF_Msk           (0x1ul << USBD_GINTSTS_EPAIF_Pos)                 /*!< USBD GINTSTS: EPAIF Mask               */
+#define USBD_GINTSTS_EPAIF_Pos           (2)                                               /*!< USBD_T::GINTSTS: EPAIF Position           */
+#define USBD_GINTSTS_EPAIF_Msk           (0x1ul << USBD_GINTSTS_EPAIF_Pos)                 /*!< USBD_T::GINTSTS: EPAIF Mask               */
 
-#define USBD_GINTSTS_EPBIF_Pos           (3)                                               /*!< USBD GINTSTS: EPBIF Position           */
-#define USBD_GINTSTS_EPBIF_Msk           (0x1ul << USBD_GINTSTS_EPBIF_Pos)                 /*!< USBD GINTSTS: EPBIF Mask               */
+#define USBD_GINTSTS_EPBIF_Pos           (3)                                               /*!< USBD_T::GINTSTS: EPBIF Position           */
+#define USBD_GINTSTS_EPBIF_Msk           (0x1ul << USBD_GINTSTS_EPBIF_Pos)                 /*!< USBD_T::GINTSTS: EPBIF Mask               */
 
-#define USBD_GINTSTS_EPCIF_Pos           (4)                                               /*!< USBD GINTSTS: EPCIF Position           */
-#define USBD_GINTSTS_EPCIF_Msk           (0x1ul << USBD_GINTSTS_EPCIF_Pos)                 /*!< USBD GINTSTS: EPCIF Mask               */
+#define USBD_GINTSTS_EPCIF_Pos           (4)                                               /*!< USBD_T::GINTSTS: EPCIF Position           */
+#define USBD_GINTSTS_EPCIF_Msk           (0x1ul << USBD_GINTSTS_EPCIF_Pos)                 /*!< USBD_T::GINTSTS: EPCIF Mask               */
 
-#define USBD_GINTSTS_EPDIF_Pos           (5)                                               /*!< USBD GINTSTS: EPDIF Position           */
-#define USBD_GINTSTS_EPDIF_Msk           (0x1ul << USBD_GINTSTS_EPDIF_Pos)                 /*!< USBD GINTSTS: EPDIF Mask               */
+#define USBD_GINTSTS_EPDIF_Pos           (5)                                               /*!< USBD_T::GINTSTS: EPDIF Position           */
+#define USBD_GINTSTS_EPDIF_Msk           (0x1ul << USBD_GINTSTS_EPDIF_Pos)                 /*!< USBD_T::GINTSTS: EPDIF Mask               */
 
-#define USBD_GINTSTS_EPEIF_Pos           (6)                                               /*!< USBD GINTSTS: EPEIF Position           */
-#define USBD_GINTSTS_EPEIF_Msk           (0x1ul << USBD_GINTSTS_EPEIF_Pos)                 /*!< USBD GINTSTS: EPEIF Mask               */
+#define USBD_GINTSTS_EPEIF_Pos           (6)                                               /*!< USBD_T::GINTSTS: EPEIF Position           */
+#define USBD_GINTSTS_EPEIF_Msk           (0x1ul << USBD_GINTSTS_EPEIF_Pos)                 /*!< USBD_T::GINTSTS: EPEIF Mask               */
 
-#define USBD_GINTSTS_EPFIF_Pos           (7)                                               /*!< USBD GINTSTS: EPFIF Position           */
-#define USBD_GINTSTS_EPFIF_Msk           (0x1ul << USBD_GINTSTS_EPFIF_Pos)                 /*!< USBD GINTSTS: EPFIF Mask               */
+#define USBD_GINTSTS_EPFIF_Pos           (7)                                               /*!< USBD_T::GINTSTS: EPFIF Position           */
+#define USBD_GINTSTS_EPFIF_Msk           (0x1ul << USBD_GINTSTS_EPFIF_Pos)                 /*!< USBD_T::GINTSTS: EPFIF Mask               */
 
-#define USBD_GINTSTS_EPGIF_Pos           (8)                                               /*!< USBD GINTSTS: EPGIF Position           */
-#define USBD_GINTSTS_EPGIF_Msk           (0x1ul << USBD_GINTSTS_EPGIF_Pos)                 /*!< USBD GINTSTS: EPGIF Mask               */
+#define USBD_GINTSTS_EPGIF_Pos           (8)                                               /*!< USBD_T::GINTSTS: EPGIF Position           */
+#define USBD_GINTSTS_EPGIF_Msk           (0x1ul << USBD_GINTSTS_EPGIF_Pos)                 /*!< USBD_T::GINTSTS: EPGIF Mask               */
 
-#define USBD_GINTSTS_EPHIF_Pos           (9)                                               /*!< USBD GINTSTS: EPHIF Position           */
-#define USBD_GINTSTS_EPHIF_Msk           (0x1ul << USBD_GINTSTS_EPHIF_Pos)                 /*!< USBD GINTSTS: EPHIF Mask               */
+#define USBD_GINTSTS_EPHIF_Pos           (9)                                               /*!< USBD_T::GINTSTS: EPHIF Position           */
+#define USBD_GINTSTS_EPHIF_Msk           (0x1ul << USBD_GINTSTS_EPHIF_Pos)                 /*!< USBD_T::GINTSTS: EPHIF Mask               */
 
-#define USBD_GINTSTS_EPIIF_Pos           (10)                                              /*!< USBD GINTSTS: EPIIF Position           */
-#define USBD_GINTSTS_EPIIF_Msk           (0x1ul << USBD_GINTSTS_EPIIF_Pos)                 /*!< USBD GINTSTS: EPIIF Mask               */
+#define USBD_GINTSTS_EPIIF_Pos           (10)                                              /*!< USBD_T::GINTSTS: EPIIF Position           */
+#define USBD_GINTSTS_EPIIF_Msk           (0x1ul << USBD_GINTSTS_EPIIF_Pos)                 /*!< USBD_T::GINTSTS: EPIIF Mask               */
 
-#define USBD_GINTSTS_EPJIF_Pos           (11)                                              /*!< USBD GINTSTS: EPJIF Position           */
-#define USBD_GINTSTS_EPJIF_Msk           (0x1ul << USBD_GINTSTS_EPJIF_Pos)                 /*!< USBD GINTSTS: EPJIF Mask               */
+#define USBD_GINTSTS_EPJIF_Pos           (11)                                              /*!< USBD_T::GINTSTS: EPJIF Position           */
+#define USBD_GINTSTS_EPJIF_Msk           (0x1ul << USBD_GINTSTS_EPJIF_Pos)                 /*!< USBD_T::GINTSTS: EPJIF Mask               */
 
-#define USBD_GINTSTS_EPKIF_Pos           (12)                                              /*!< USBD GINTSTS: EPKIF Position           */
-#define USBD_GINTSTS_EPKIF_Msk           (0x1ul << USBD_GINTSTS_EPKIF_Pos)                 /*!< USBD GINTSTS: EPKIF Mask               */
+#define USBD_GINTSTS_EPKIF_Pos           (12)                                              /*!< USBD_T::GINTSTS: EPKIF Position           */
+#define USBD_GINTSTS_EPKIF_Msk           (0x1ul << USBD_GINTSTS_EPKIF_Pos)                 /*!< USBD_T::GINTSTS: EPKIF Mask               */
 
-#define USBD_GINTSTS_EPLIF_Pos           (13)                                              /*!< USBD GINTSTS: EPLIF Position           */
-#define USBD_GINTSTS_EPLIF_Msk           (0x1ul << USBD_GINTSTS_EPLIF_Pos)                 /*!< USBD GINTSTS: EPLIF Mask               */
+#define USBD_GINTSTS_EPLIF_Pos           (13)                                              /*!< USBD_T::GINTSTS: EPLIF Position           */
+#define USBD_GINTSTS_EPLIF_Msk           (0x1ul << USBD_GINTSTS_EPLIF_Pos)                 /*!< USBD_T::GINTSTS: EPLIF Mask               */
 
-#define USBD_GINTEN_USBIE_Pos            (0)                                               /*!< USBD GINTEN: USBIE Position            */
-#define USBD_GINTEN_USBIE_Msk            (0x1ul << USBD_GINTEN_USBIE_Pos)                  /*!< USBD GINTEN: USBIE Mask                */
+#define USBD_GINTEN_USBIEN_Pos           (0)                                               /*!< USBD_T::GINTEN: USBIEN Position           */
+#define USBD_GINTEN_USBIEN_Msk           (0x1ul << USBD_GINTEN_USBIEN_Pos)                 /*!< USBD_T::GINTEN: USBIEN Mask               */
 
-#define USBD_GINTEN_CEPIE_Pos            (1)                                               /*!< USBD GINTEN: CEPIE Position            */
-#define USBD_GINTEN_CEPIE_Msk            (0x1ul << USBD_GINTEN_CEPIE_Pos)                  /*!< USBD GINTEN: CEPIE Mask                */
+#define USBD_GINTEN_CEPIEN_Pos           (1)                                               /*!< USBD_T::GINTEN: CEPIEN Position           */
+#define USBD_GINTEN_CEPIEN_Msk           (0x1ul << USBD_GINTEN_CEPIEN_Pos)                 /*!< USBD_T::GINTEN: CEPIEN Mask               */
 
-#define USBD_GINTEN_EPAIE_Pos            (2)                                               /*!< USBD GINTEN: EPAIE Position            */
-#define USBD_GINTEN_EPAIE_Msk            (0x1ul << USBD_GINTEN_EPAIE_Pos)                  /*!< USBD GINTEN: EPAIE Mask                */
+#define USBD_GINTEN_EPAIEN_Pos           (2)                                               /*!< USBD_T::GINTEN: EPAIEN Position           */
+#define USBD_GINTEN_EPAIEN_Msk           (0x1ul << USBD_GINTEN_EPAIEN_Pos)                 /*!< USBD_T::GINTEN: EPAIEN Mask               */
 
-#define USBD_GINTEN_EPBIE_Pos            (3)                                               /*!< USBD GINTEN: EPBIE Position            */
-#define USBD_GINTEN_EPBIE_Msk            (0x1ul << USBD_GINTEN_EPBIE_Pos)                  /*!< USBD GINTEN: EPBIE Mask                */
+#define USBD_GINTEN_EPBIEN_Pos           (3)                                               /*!< USBD_T::GINTEN: EPBIEN Position           */
+#define USBD_GINTEN_EPBIEN_Msk           (0x1ul << USBD_GINTEN_EPBIEN_Pos)                 /*!< USBD_T::GINTEN: EPBIEN Mask               */
 
-#define USBD_GINTEN_EPCIE_Pos            (4)                                               /*!< USBD GINTEN: EPCIE Position            */
-#define USBD_GINTEN_EPCIE_Msk            (0x1ul << USBD_GINTEN_EPCIE_Pos)                  /*!< USBD GINTEN: EPCIE Mask                */
+#define USBD_GINTEN_EPCIEN_Pos           (4)                                               /*!< USBD_T::GINTEN: EPCIEN Position           */
+#define USBD_GINTEN_EPCIEN_Msk           (0x1ul << USBD_GINTEN_EPCIEN_Pos)                 /*!< USBD_T::GINTEN: EPCIEN Mask               */
 
-#define USBD_GINTEN_EPDIE_Pos            (5)                                               /*!< USBD GINTEN: EPDIE Position            */
-#define USBD_GINTEN_EPDIE_Msk            (0x1ul << USBD_GINTEN_EPDIE_Pos)                  /*!< USBD GINTEN: EPDIE Mask                */
+#define USBD_GINTEN_EPDIEN_Pos           (5)                                               /*!< USBD_T::GINTEN: EPDIEN Position           */
+#define USBD_GINTEN_EPDIEN_Msk           (0x1ul << USBD_GINTEN_EPDIEN_Pos)                 /*!< USBD_T::GINTEN: EPDIEN Mask               */
 
-#define USBD_GINTEN_EPEIE_Pos            (6)                                               /*!< USBD GINTEN: EPEIE Position            */
-#define USBD_GINTEN_EPEIE_Msk            (0x1ul << USBD_GINTEN_EPEIE_Pos)                  /*!< USBD GINTEN: EPEIE Mask                */
+#define USBD_GINTEN_EPEIEN_Pos           (6)                                               /*!< USBD_T::GINTEN: EPEIEN Position           */
+#define USBD_GINTEN_EPEIEN_Msk           (0x1ul << USBD_GINTEN_EPEIEN_Pos)                 /*!< USBD_T::GINTEN: EPEIEN Mask               */
 
-#define USBD_GINTEN_EPFIE_Pos            (7)                                               /*!< USBD GINTEN: EPFIE Position            */
-#define USBD_GINTEN_EPFIE_Msk            (0x1ul << USBD_GINTEN_EPFIE_Pos)                  /*!< USBD GINTEN: EPFIE Mask                */
+#define USBD_GINTEN_EPFIEN_Pos           (7)                                               /*!< USBD_T::GINTEN: EPFIEN Position           */
+#define USBD_GINTEN_EPFIEN_Msk           (0x1ul << USBD_GINTEN_EPFIEN_Pos)                 /*!< USBD_T::GINTEN: EPFIEN Mask               */
 
-#define USBD_GINTEN_EPGIE_Pos            (8)                                               /*!< USBD GINTEN: EPGIE Position            */
-#define USBD_GINTEN_EPGIE_Msk            (0x1ul << USBD_GINTEN_EPGIE_Pos)                  /*!< USBD GINTEN: EPGIE Mask                */
+#define USBD_GINTEN_EPGIEN_Pos           (8)                                               /*!< USBD_T::GINTEN: EPGIEN Position           */
+#define USBD_GINTEN_EPGIEN_Msk           (0x1ul << USBD_GINTEN_EPGIEN_Pos)                 /*!< USBD_T::GINTEN: EPGIEN Mask               */
 
-#define USBD_GINTEN_EPHIE_Pos            (9)                                               /*!< USBD GINTEN: EPHIE Position            */
-#define USBD_GINTEN_EPHIE_Msk            (0x1ul << USBD_GINTEN_EPHIE_Pos)                  /*!< USBD GINTEN: EPHIE Mask                */
+#define USBD_GINTEN_EPHIEN_Pos           (9)                                               /*!< USBD_T::GINTEN: EPHIEN Position           */
+#define USBD_GINTEN_EPHIEN_Msk           (0x1ul << USBD_GINTEN_EPHIEN_Pos)                 /*!< USBD_T::GINTEN: EPHIEN Mask               */
 
-#define USBD_GINTEN_EPIIE_Pos            (10)                                              /*!< USBD GINTEN: EPIIE Position            */
-#define USBD_GINTEN_EPIIE_Msk            (0x1ul << USBD_GINTEN_EPIIE_Pos)                  /*!< USBD GINTEN: EPIIE Mask                */
+#define USBD_GINTEN_EPIIEN_Pos           (10)                                              /*!< USBD_T::GINTEN: EPIIEN Position           */
+#define USBD_GINTEN_EPIIEN_Msk           (0x1ul << USBD_GINTEN_EPIIEN_Pos)                 /*!< USBD_T::GINTEN: EPIIEN Mask               */
 
-#define USBD_GINTEN_EPJIE_Pos            (11)                                              /*!< USBD GINTEN: EPJIE Position            */
-#define USBD_GINTEN_EPJIE_Msk            (0x1ul << USBD_GINTEN_EPJIE_Pos)                  /*!< USBD GINTEN: EPJIE Mask                */
+#define USBD_GINTEN_EPJIEN_Pos           (11)                                              /*!< USBD_T::GINTEN: EPJIEN Position           */
+#define USBD_GINTEN_EPJIEN_Msk           (0x1ul << USBD_GINTEN_EPJIEN_Pos)                 /*!< USBD_T::GINTEN: EPJIEN Mask               */
 
-#define USBD_GINTEN_EPKIE_Pos            (12)                                              /*!< USBD GINTEN: EPKIE Position            */
-#define USBD_GINTEN_EPKIE_Msk            (0x1ul << USBD_GINTEN_EPKIE_Pos)                  /*!< USBD GINTEN: EPKIE Mask                */
+#define USBD_GINTEN_EPKIEN_Pos           (12)                                              /*!< USBD_T::GINTEN: EPKIEN Position           */
+#define USBD_GINTEN_EPKIEN_Msk           (0x1ul << USBD_GINTEN_EPKIEN_Pos)                 /*!< USBD_T::GINTEN: EPKIEN Mask               */
 
-#define USBD_GINTEN_EPLIE_Pos            (13)                                              /*!< USBD GINTEN: EPLIE Position            */
-#define USBD_GINTEN_EPLIE_Msk            (0x1ul << USBD_GINTEN_EPLIE_Pos)                  /*!< USBD GINTEN: EPLIE Mask                */
+#define USBD_GINTEN_EPLIEN_Pos           (13)                                              /*!< USBD_T::GINTEN: EPLIEN Position           */
+#define USBD_GINTEN_EPLIEN_Msk           (0x1ul << USBD_GINTEN_EPLIEN_Pos)                 /*!< USBD_T::GINTEN: EPLIEN Mask               */
 
-#define USBD_BUSINTSTS_SOFIF_Pos         (0)                                               /*!< USBD BUSINTSTS: SOFIF Position         */
-#define USBD_BUSINTSTS_SOFIF_Msk         (0x1ul << USBD_BUSINTSTS_SOFIF_Pos)               /*!< USBD BUSINTSTS: SOFIF Mask             */
+#define USBD_BUSINTSTS_SOFIF_Pos         (0)                                               /*!< USBD_T::BUSINTSTS: SOFIF Position         */
+#define USBD_BUSINTSTS_SOFIF_Msk         (0x1ul << USBD_BUSINTSTS_SOFIF_Pos)               /*!< USBD_T::BUSINTSTS: SOFIF Mask             */
 
-#define USBD_BUSINTSTS_RSTIF_Pos         (1)                                               /*!< USBD BUSINTSTS: RSTIF Position         */
-#define USBD_BUSINTSTS_RSTIF_Msk         (0x1ul << USBD_BUSINTSTS_RSTIF_Pos)               /*!< USBD BUSINTSTS: RSTIF Mask             */
+#define USBD_BUSINTSTS_RSTIF_Pos         (1)                                               /*!< USBD_T::BUSINTSTS: RSTIF Position         */
+#define USBD_BUSINTSTS_RSTIF_Msk         (0x1ul << USBD_BUSINTSTS_RSTIF_Pos)               /*!< USBD_T::BUSINTSTS: RSTIF Mask             */
 
-#define USBD_BUSINTSTS_RESUMEIF_Pos      (2)                                               /*!< USBD BUSINTSTS: RESUMEIF Position      */
-#define USBD_BUSINTSTS_RESUMEIF_Msk      (0x1ul << USBD_BUSINTSTS_RESUMEIF_Pos)            /*!< USBD BUSINTSTS: RESUMEIF Mask          */
+#define USBD_BUSINTSTS_RESUMEIF_Pos      (2)                                               /*!< USBD_T::BUSINTSTS: RESUMEIF Position      */
+#define USBD_BUSINTSTS_RESUMEIF_Msk      (0x1ul << USBD_BUSINTSTS_RESUMEIF_Pos)            /*!< USBD_T::BUSINTSTS: RESUMEIF Mask          */
 
-#define USBD_BUSINTSTS_SUSPENDIF_Pos     (3)                                               /*!< USBD BUSINTSTS: SUSPENDIF Position     */
-#define USBD_BUSINTSTS_SUSPENDIF_Msk     (0x1ul << USBD_BUSINTSTS_SUSPENDIF_Pos)           /*!< USBD BUSINTSTS: SUSPENDIF Mask         */
+#define USBD_BUSINTSTS_SUSPENDIF_Pos     (3)                                               /*!< USBD_T::BUSINTSTS: SUSPENDIF Position     */
+#define USBD_BUSINTSTS_SUSPENDIF_Msk     (0x1ul << USBD_BUSINTSTS_SUSPENDIF_Pos)           /*!< USBD_T::BUSINTSTS: SUSPENDIF Mask         */
 
-#define USBD_BUSINTSTS_HISPDIF_Pos       (4)                                               /*!< USBD BUSINTSTS: HISPDIF Position       */
-#define USBD_BUSINTSTS_HISPDIF_Msk       (0x1ul << USBD_BUSINTSTS_HISPDIF_Pos)             /*!< USBD BUSINTSTS: HISPDIF Mask           */
+#define USBD_BUSINTSTS_HISPDIF_Pos       (4)                                               /*!< USBD_T::BUSINTSTS: HISPDIF Position       */
+#define USBD_BUSINTSTS_HISPDIF_Msk       (0x1ul << USBD_BUSINTSTS_HISPDIF_Pos)             /*!< USBD_T::BUSINTSTS: HISPDIF Mask           */
 
-#define USBD_BUSINTSTS_DMADONEIF_Pos     (5)                                               /*!< USBD BUSINTSTS: DMADONEIF Position     */
-#define USBD_BUSINTSTS_DMADONEIF_Msk     (0x1ul << USBD_BUSINTSTS_DMADONEIF_Pos)           /*!< USBD BUSINTSTS: DMADONEIF Mask         */
+#define USBD_BUSINTSTS_DMADONEIF_Pos     (5)                                               /*!< USBD_T::BUSINTSTS: DMADONEIF Position     */
+#define USBD_BUSINTSTS_DMADONEIF_Msk     (0x1ul << USBD_BUSINTSTS_DMADONEIF_Pos)           /*!< USBD_T::BUSINTSTS: DMADONEIF Mask         */
 
-#define USBD_BUSINTSTS_PHYCLKVLDIF_Pos   (6)                                               /*!< USBD BUSINTSTS: PHYCLKVLDIF Position   */
-#define USBD_BUSINTSTS_PHYCLKVLDIF_Msk   (0x1ul << USBD_BUSINTSTS_PHYCLKVLDIF_Pos)         /*!< USBD BUSINTSTS: PHYCLKVLDIF Mask       */
+#define USBD_BUSINTSTS_PHYCLKVLDIF_Pos   (6)                                               /*!< USBD_T::BUSINTSTS: PHYCLKVLDIF Position   */
+#define USBD_BUSINTSTS_PHYCLKVLDIF_Msk   (0x1ul << USBD_BUSINTSTS_PHYCLKVLDIF_Pos)         /*!< USBD_T::BUSINTSTS: PHYCLKVLDIF Mask       */
 
-#define USBD_BUSINTSTS_VBUSDETIF_Pos     (8)                                               /*!< USBD BUSINTSTS: VBUSDETIF Position     */
-#define USBD_BUSINTSTS_VBUSDETIF_Msk     (0x1ul << USBD_BUSINTSTS_VBUSDETIF_Pos)           /*!< USBD BUSINTSTS: VBUSDETIF Mask         */
+#define USBD_BUSINTSTS_VBUSDETIF_Pos     (8)                                               /*!< USBD_T::BUSINTSTS: VBUSDETIF Position     */
+#define USBD_BUSINTSTS_VBUSDETIF_Msk     (0x1ul << USBD_BUSINTSTS_VBUSDETIF_Pos)           /*!< USBD_T::BUSINTSTS: VBUSDETIF Mask         */
 
-#define USBD_BUSINTEN_SOFIEN_Pos         (0)                                               /*!< USBD BUSINTEN: SOFIEN Position         */
-#define USBD_BUSINTEN_SOFIEN_Msk         (0x1ul << USBD_BUSINTEN_SOFIEN_Pos)               /*!< USBD BUSINTEN: SOFIEN Mask             */
+#define USBD_BUSINTEN_SOFIEN_Pos         (0)                                               /*!< USBD_T::BUSINTEN: SOFIEN Position         */
+#define USBD_BUSINTEN_SOFIEN_Msk         (0x1ul << USBD_BUSINTEN_SOFIEN_Pos)               /*!< USBD_T::BUSINTEN: SOFIEN Mask             */
 
-#define USBD_BUSINTEN_RSTIEN_Pos         (1)                                               /*!< USBD BUSINTEN: RSTIEN Position         */
-#define USBD_BUSINTEN_RSTIEN_Msk         (0x1ul << USBD_BUSINTEN_RSTIEN_Pos)               /*!< USBD BUSINTEN: RSTIEN Mask             */
+#define USBD_BUSINTEN_RSTIEN_Pos         (1)                                               /*!< USBD_T::BUSINTEN: RSTIEN Position         */
+#define USBD_BUSINTEN_RSTIEN_Msk         (0x1ul << USBD_BUSINTEN_RSTIEN_Pos)               /*!< USBD_T::BUSINTEN: RSTIEN Mask             */
 
-#define USBD_BUSINTEN_RESUMEIEN_Pos      (2)                                               /*!< USBD BUSINTEN: RESUMEIEN Position      */
-#define USBD_BUSINTEN_RESUMEIEN_Msk      (0x1ul << USBD_BUSINTEN_RESUMEIEN_Pos)            /*!< USBD BUSINTEN: RESUMEIEN Mask          */
+#define USBD_BUSINTEN_RESUMEIEN_Pos      (2)                                               /*!< USBD_T::BUSINTEN: RESUMEIEN Position      */
+#define USBD_BUSINTEN_RESUMEIEN_Msk      (0x1ul << USBD_BUSINTEN_RESUMEIEN_Pos)            /*!< USBD_T::BUSINTEN: RESUMEIEN Mask          */
 
-#define USBD_BUSINTEN_SUSPENDIEN_Pos     (3)                                               /*!< USBD BUSINTEN: SUSPENDIEN Position     */
-#define USBD_BUSINTEN_SUSPENDIEN_Msk     (0x1ul << USBD_BUSINTEN_SUSPENDIEN_Pos)           /*!< USBD BUSINTEN: SUSPENDIEN Mask         */
+#define USBD_BUSINTEN_SUSPENDIEN_Pos     (3)                                               /*!< USBD_T::BUSINTEN: SUSPENDIEN Position     */
+#define USBD_BUSINTEN_SUSPENDIEN_Msk     (0x1ul << USBD_BUSINTEN_SUSPENDIEN_Pos)           /*!< USBD_T::BUSINTEN: SUSPENDIEN Mask         */
 
-#define USBD_BUSINTEN_HISPDIEN_Pos       (4)                                               /*!< USBD BUSINTEN: HISPDIEN Position       */
-#define USBD_BUSINTEN_HISPDIEN_Msk       (0x1ul << USBD_BUSINTEN_HISPDIEN_Pos)             /*!< USBD BUSINTEN: HISPDIEN Mask           */
+#define USBD_BUSINTEN_HISPDIEN_Pos       (4)                                               /*!< USBD_T::BUSINTEN: HISPDIEN Position       */
+#define USBD_BUSINTEN_HISPDIEN_Msk       (0x1ul << USBD_BUSINTEN_HISPDIEN_Pos)             /*!< USBD_T::BUSINTEN: HISPDIEN Mask           */
 
-#define USBD_BUSINTEN_DMADONEIEN_Pos     (5)                                               /*!< USBD BUSINTEN: DMADONEIEN Position     */
-#define USBD_BUSINTEN_DMADONEIEN_Msk     (0x1ul << USBD_BUSINTEN_DMADONEIEN_Pos)           /*!< USBD BUSINTEN: DMADONEIEN Mask         */
+#define USBD_BUSINTEN_DMADONEIEN_Pos     (5)                                               /*!< USBD_T::BUSINTEN: DMADONEIEN Position     */
+#define USBD_BUSINTEN_DMADONEIEN_Msk     (0x1ul << USBD_BUSINTEN_DMADONEIEN_Pos)           /*!< USBD_T::BUSINTEN: DMADONEIEN Mask         */
 
-#define USBD_BUSINTEN_PHYCLKVLDIEN_Pos   (6)                                               /*!< USBD BUSINTEN: PHYCLKVLDIEN Position   */
-#define USBD_BUSINTEN_PHYCLKVLDIEN_Msk   (0x1ul << USBD_BUSINTEN_PHYCLKVLDIEN_Pos)         /*!< USBD BUSINTEN: PHYCLKVLDIEN Mask       */
+#define USBD_BUSINTEN_PHYCLKVLDIEN_Pos   (6)                                               /*!< USBD_T::BUSINTEN: PHYCLKVLDIEN Position   */
+#define USBD_BUSINTEN_PHYCLKVLDIEN_Msk   (0x1ul << USBD_BUSINTEN_PHYCLKVLDIEN_Pos)         /*!< USBD_T::BUSINTEN: PHYCLKVLDIEN Mask       */
 
-#define USBD_BUSINTEN_VBUSDETIEN_Pos     (8)                                               /*!< USBD BUSINTEN: VBUSDETIEN Position     */
-#define USBD_BUSINTEN_VBUSDETIEN_Msk     (0x1ul << USBD_BUSINTEN_VBUSDETIEN_Pos)           /*!< USBD BUSINTEN: VBUSDETIEN Mask         */
+#define USBD_BUSINTEN_VBUSDETIEN_Pos     (8)                                               /*!< USBD_T::BUSINTEN: VBUSDETIEN Position     */
+#define USBD_BUSINTEN_VBUSDETIEN_Msk     (0x1ul << USBD_BUSINTEN_VBUSDETIEN_Pos)           /*!< USBD_T::BUSINTEN: VBUSDETIEN Mask         */
 
-#define USBD_OPER_RESUMEEN_Pos           (0)                                               /*!< USBD OPER: RESUMEEN Position           */
-#define USBD_OPER_RESUMEEN_Msk           (0x1ul << USBD_OPER_RESUMEEN_Pos)                 /*!< USBD OPER: RESUMEEN Mask               */
+#define USBD_OPER_RESUMEEN_Pos           (0)                                               /*!< USBD_T::OPER: RESUMEEN Position           */
+#define USBD_OPER_RESUMEEN_Msk           (0x1ul << USBD_OPER_RESUMEEN_Pos)                 /*!< USBD_T::OPER: RESUMEEN Mask               */
 
-#define USBD_OPER_HISPDEN_Pos            (1)                                               /*!< USBD OPER: HISPDEN Position            */
-#define USBD_OPER_HISPDEN_Msk            (0x1ul << USBD_OPER_HISPDEN_Pos)                  /*!< USBD OPER: HISPDEN Mask                */
+#define USBD_OPER_HISPDEN_Pos            (1)                                               /*!< USBD_T::OPER: HISPDEN Position            */
+#define USBD_OPER_HISPDEN_Msk            (0x1ul << USBD_OPER_HISPDEN_Pos)                  /*!< USBD_T::OPER: HISPDEN Mask                */
 
-#define USBD_OPER_CURSPD_Pos             (2)                                               /*!< USBD OPER: CURSPD Position             */
-#define USBD_OPER_CURSPD_Msk             (0x1ul << USBD_OPER_CURSPD_Pos)                   /*!< USBD OPER: CURSPD Mask                 */
+#define USBD_OPER_CURSPD_Pos             (2)                                               /*!< USBD_T::OPER: CURSPD Position             */
+#define USBD_OPER_CURSPD_Msk             (0x1ul << USBD_OPER_CURSPD_Pos)                   /*!< USBD_T::OPER: CURSPD Mask                 */
 
-#define USBD_FRAMECNT_MFRAMECNT_Pos      (0)                                               /*!< USBD FRAMECNT: MFRAMECNT Position      */
-#define USBD_FRAMECNT_MFRAMECNT_Msk      (0x7ul << USBD_FRAMECNT_MFRAMECNT_Pos)            /*!< USBD FRAMECNT: MFRAMECNT Mask          */
+#define USBD_FRAMECNT_MFRAMECNT_Pos      (0)                                               /*!< USBD_T::FRAMECNT: MFRAMECNT Position      */
+#define USBD_FRAMECNT_MFRAMECNT_Msk      (0x7ul << USBD_FRAMECNT_MFRAMECNT_Pos)            /*!< USBD_T::FRAMECNT: MFRAMECNT Mask          */
 
-#define USBD_FRAMECNT_FRAMECNT_Pos       (3)                                               /*!< USBD FRAMECNT: FRAMECNT Position       */
-#define USBD_FRAMECNT_FRAMECNT_Msk       (0x7fful << USBD_FRAMECNT_FRAMECNT_Pos)           /*!< USBD FRAMECNT: FRAMECNT Mask           */
+#define USBD_FRAMECNT_FRAMECNT_Pos       (3)                                               /*!< USBD_T::FRAMECNT: FRAMECNT Position       */
+#define USBD_FRAMECNT_FRAMECNT_Msk       (0x7fful << USBD_FRAMECNT_FRAMECNT_Pos)           /*!< USBD_T::FRAMECNT: FRAMECNT Mask           */
 
-#define USBD_FADDR_FADDR_Pos             (0)                                               /*!< USBD FADDR: FADDR Position             */
-#define USBD_FADDR_FADDR_Msk             (0x7ful << USBD_FADDR_FADDR_Pos)                  /*!< USBD FADDR: FADDR Mask                 */
+#define USBD_FADDR_FADDR_Pos             (0)                                               /*!< USBD_T::FADDR: FADDR Position             */
+#define USBD_FADDR_FADDR_Msk             (0x7ful << USBD_FADDR_FADDR_Pos)                  /*!< USBD_T::FADDR: FADDR Mask                 */
 
-#define USBD_TEST_TESTMODE_Pos           (0)                                               /*!< USBD TEST: TESTMODE Position           */
-#define USBD_TEST_TESTMODE_Msk           (0x7ul << USBD_TEST_TESTMODE_Pos)                 /*!< USBD TEST: TESTMODE Mask               */
+#define USBD_TEST_TESTMODE_Pos           (0)                                               /*!< USBD_T::TEST: TESTMODE Position           */
+#define USBD_TEST_TESTMODE_Msk           (0x7ul << USBD_TEST_TESTMODE_Pos)                 /*!< USBD_T::TEST: TESTMODE Mask               */
 
-#define USBD_CEPDAT_DAT_Pos              (0)                                               /*!< USBD CEPDAT: DAT Position              */
-#define USBD_CEPDAT_DAT_Msk              (0xfffffffful << USBD_CEPDAT_DAT_Pos)             /*!< USBD CEPDAT: DAT Mask                  */
+#define USBD_CEPDAT_DAT_Pos              (0)                                               /*!< USBD_T::CEPDAT: DAT Position              */
+#define USBD_CEPDAT_DAT_Msk              (0xfffffffful << USBD_CEPDAT_DAT_Pos)             /*!< USBD_T::CEPDAT: DAT Mask                  */
 
-#define USBD_CEPCTL_NAKCLR_Pos           (0)                                               /*!< USBD CEPCTL: NAKCLR Position           */
-#define USBD_CEPCTL_NAKCLR_Msk           (0x1ul << USBD_CEPCTL_NAKCLR_Pos)                 /*!< USBD CEPCTL: NAKCLR Mask               */
+#define USBD_CEPCTL_NAKCLR_Pos           (0)                                               /*!< USBD_T::CEPCTL: NAKCLR Position           */
+#define USBD_CEPCTL_NAKCLR_Msk           (0x1ul << USBD_CEPCTL_NAKCLR_Pos)                 /*!< USBD_T::CEPCTL: NAKCLR Mask               */
 
-#define USBD_CEPCTL_STALLEN_Pos          (1)                                               /*!< USBD CEPCTL: STALLEN Position          */
-#define USBD_CEPCTL_STALLEN_Msk          (0x1ul << USBD_CEPCTL_STALLEN_Pos)                /*!< USBD CEPCTL: STALLEN Mask              */
+#define USBD_CEPCTL_STALLEN_Pos          (1)                                               /*!< USBD_T::CEPCTL: STALLEN Position          */
+#define USBD_CEPCTL_STALLEN_Msk          (0x1ul << USBD_CEPCTL_STALLEN_Pos)                /*!< USBD_T::CEPCTL: STALLEN Mask              */
 
-#define USBD_CEPCTL_ZEROLEN_Pos          (2)                                               /*!< USBD CEPCTL: ZEROLEN Position          */
-#define USBD_CEPCTL_ZEROLEN_Msk          (0x1ul << USBD_CEPCTL_ZEROLEN_Pos)                /*!< USBD CEPCTL: ZEROLEN Mask              */
+#define USBD_CEPCTL_ZEROLEN_Pos          (2)                                               /*!< USBD_T::CEPCTL: ZEROLEN Position          */
+#define USBD_CEPCTL_ZEROLEN_Msk          (0x1ul << USBD_CEPCTL_ZEROLEN_Pos)                /*!< USBD_T::CEPCTL: ZEROLEN Mask              */
 
-#define USBD_CEPCTL_FLUSH_Pos            (3)                                               /*!< USBD CEPCTL: FLUSH Position            */
-#define USBD_CEPCTL_FLUSH_Msk            (0x1ul << USBD_CEPCTL_FLUSH_Pos)                  /*!< USBD CEPCTL: FLUSH Mask                */
+#define USBD_CEPCTL_FLUSH_Pos            (3)                                               /*!< USBD_T::CEPCTL: FLUSH Position            */
+#define USBD_CEPCTL_FLUSH_Msk            (0x1ul << USBD_CEPCTL_FLUSH_Pos)                  /*!< USBD_T::CEPCTL: FLUSH Mask                */
 
-#define USBD_CEPINTEN_SETUPTKIEN_Pos     (0)                                               /*!< USBD CEPINTEN: SETUPTKIEN Position     */
-#define USBD_CEPINTEN_SETUPTKIEN_Msk     (0x1ul << USBD_CEPINTEN_SETUPTKIEN_Pos)           /*!< USBD CEPINTEN: SETUPTKIEN Mask         */
+#define USBD_CEPINTEN_SETUPTKIEN_Pos     (0)                                               /*!< USBD_T::CEPINTEN: SETUPTKIEN Position     */
+#define USBD_CEPINTEN_SETUPTKIEN_Msk     (0x1ul << USBD_CEPINTEN_SETUPTKIEN_Pos)           /*!< USBD_T::CEPINTEN: SETUPTKIEN Mask         */
 
-#define USBD_CEPINTEN_SETUPPKIEN_Pos     (1)                                               /*!< USBD CEPINTEN: SETUPPKIEN Position     */
-#define USBD_CEPINTEN_SETUPPKIEN_Msk     (0x1ul << USBD_CEPINTEN_SETUPPKIEN_Pos)           /*!< USBD CEPINTEN: SETUPPKIEN Mask         */
+#define USBD_CEPINTEN_SETUPPKIEN_Pos     (1)                                               /*!< USBD_T::CEPINTEN: SETUPPKIEN Position     */
+#define USBD_CEPINTEN_SETUPPKIEN_Msk     (0x1ul << USBD_CEPINTEN_SETUPPKIEN_Pos)           /*!< USBD_T::CEPINTEN: SETUPPKIEN Mask         */
 
-#define USBD_CEPINTEN_OUTTKIEN_Pos       (2)                                               /*!< USBD CEPINTEN: OUTTKIEN Position       */
-#define USBD_CEPINTEN_OUTTKIEN_Msk       (0x1ul << USBD_CEPINTEN_OUTTKIEN_Pos)             /*!< USBD CEPINTEN: OUTTKIEN Mask           */
+#define USBD_CEPINTEN_OUTTKIEN_Pos       (2)                                               /*!< USBD_T::CEPINTEN: OUTTKIEN Position       */
+#define USBD_CEPINTEN_OUTTKIEN_Msk       (0x1ul << USBD_CEPINTEN_OUTTKIEN_Pos)             /*!< USBD_T::CEPINTEN: OUTTKIEN Mask           */
 
-#define USBD_CEPINTEN_INTKIEN_Pos        (3)                                               /*!< USBD CEPINTEN: INTKIEN Position        */
-#define USBD_CEPINTEN_INTKIEN_Msk        (0x1ul << USBD_CEPINTEN_INTKIEN_Pos)              /*!< USBD CEPINTEN: INTKIEN Mask            */
+#define USBD_CEPINTEN_INTKIEN_Pos        (3)                                               /*!< USBD_T::CEPINTEN: INTKIEN Position        */
+#define USBD_CEPINTEN_INTKIEN_Msk        (0x1ul << USBD_CEPINTEN_INTKIEN_Pos)              /*!< USBD_T::CEPINTEN: INTKIEN Mask            */
 
-#define USBD_CEPINTEN_PINGIEN_Pos        (4)                                               /*!< USBD CEPINTEN: PINGIEN Position        */
-#define USBD_CEPINTEN_PINGIEN_Msk        (0x1ul << USBD_CEPINTEN_PINGIEN_Pos)              /*!< USBD CEPINTEN: PINGIEN Mask            */
+#define USBD_CEPINTEN_PINGIEN_Pos        (4)                                               /*!< USBD_T::CEPINTEN: PINGIEN Position        */
+#define USBD_CEPINTEN_PINGIEN_Msk        (0x1ul << USBD_CEPINTEN_PINGIEN_Pos)              /*!< USBD_T::CEPINTEN: PINGIEN Mask            */
 
-#define USBD_CEPINTEN_TXPKIEN_Pos        (5)                                               /*!< USBD CEPINTEN: TXPKIEN Position        */
-#define USBD_CEPINTEN_TXPKIEN_Msk        (0x1ul << USBD_CEPINTEN_TXPKIEN_Pos)              /*!< USBD CEPINTEN: TXPKIEN Mask            */
+#define USBD_CEPINTEN_TXPKIEN_Pos        (5)                                               /*!< USBD_T::CEPINTEN: TXPKIEN Position        */
+#define USBD_CEPINTEN_TXPKIEN_Msk        (0x1ul << USBD_CEPINTEN_TXPKIEN_Pos)              /*!< USBD_T::CEPINTEN: TXPKIEN Mask            */
 
-#define USBD_CEPINTEN_RXPKIEN_Pos        (6)                                               /*!< USBD CEPINTEN: RXPKIEN Position        */
-#define USBD_CEPINTEN_RXPKIEN_Msk        (0x1ul << USBD_CEPINTEN_RXPKIEN_Pos)              /*!< USBD CEPINTEN: RXPKIEN Mask            */
+#define USBD_CEPINTEN_RXPKIEN_Pos        (6)                                               /*!< USBD_T::CEPINTEN: RXPKIEN Position        */
+#define USBD_CEPINTEN_RXPKIEN_Msk        (0x1ul << USBD_CEPINTEN_RXPKIEN_Pos)              /*!< USBD_T::CEPINTEN: RXPKIEN Mask            */
 
-#define USBD_CEPINTEN_NAKIEN_Pos         (7)                                               /*!< USBD CEPINTEN: NAKIEN Position         */
-#define USBD_CEPINTEN_NAKIEN_Msk         (0x1ul << USBD_CEPINTEN_NAKIEN_Pos)               /*!< USBD CEPINTEN: NAKIEN Mask             */
+#define USBD_CEPINTEN_NAKIEN_Pos         (7)                                               /*!< USBD_T::CEPINTEN: NAKIEN Position         */
+#define USBD_CEPINTEN_NAKIEN_Msk         (0x1ul << USBD_CEPINTEN_NAKIEN_Pos)               /*!< USBD_T::CEPINTEN: NAKIEN Mask             */
 
-#define USBD_CEPINTEN_STALLIEN_Pos       (8)                                               /*!< USBD CEPINTEN: STALLIEN Position       */
-#define USBD_CEPINTEN_STALLIEN_Msk       (0x1ul << USBD_CEPINTEN_STALLIEN_Pos)             /*!< USBD CEPINTEN: STALLIEN Mask           */
+#define USBD_CEPINTEN_STALLIEN_Pos       (8)                                               /*!< USBD_T::CEPINTEN: STALLIEN Position       */
+#define USBD_CEPINTEN_STALLIEN_Msk       (0x1ul << USBD_CEPINTEN_STALLIEN_Pos)             /*!< USBD_T::CEPINTEN: STALLIEN Mask           */
 
-#define USBD_CEPINTEN_ERRIEN_Pos         (9)                                               /*!< USBD CEPINTEN: ERRIEN Position         */
-#define USBD_CEPINTEN_ERRIEN_Msk         (0x1ul << USBD_CEPINTEN_ERRIEN_Pos)               /*!< USBD CEPINTEN: ERRIEN Mask             */
+#define USBD_CEPINTEN_ERRIEN_Pos         (9)                                               /*!< USBD_T::CEPINTEN: ERRIEN Position         */
+#define USBD_CEPINTEN_ERRIEN_Msk         (0x1ul << USBD_CEPINTEN_ERRIEN_Pos)               /*!< USBD_T::CEPINTEN: ERRIEN Mask             */
 
-#define USBD_CEPINTEN_STSDONEIEN_Pos     (10)                                              /*!< USBD CEPINTEN: STSDONEIEN Position     */
-#define USBD_CEPINTEN_STSDONEIEN_Msk     (0x1ul << USBD_CEPINTEN_STSDONEIEN_Pos)           /*!< USBD CEPINTEN: STSDONEIEN Mask         */
+#define USBD_CEPINTEN_STSDONEIEN_Pos     (10)                                              /*!< USBD_T::CEPINTEN: STSDONEIEN Position     */
+#define USBD_CEPINTEN_STSDONEIEN_Msk     (0x1ul << USBD_CEPINTEN_STSDONEIEN_Pos)           /*!< USBD_T::CEPINTEN: STSDONEIEN Mask         */
 
-#define USBD_CEPINTEN_BUFFULLIEN_Pos     (11)                                              /*!< USBD CEPINTEN: BUFFULLIEN Position     */
-#define USBD_CEPINTEN_BUFFULLIEN_Msk     (0x1ul << USBD_CEPINTEN_BUFFULLIEN_Pos)           /*!< USBD CEPINTEN: BUFFULLIEN Mask         */
+#define USBD_CEPINTEN_BUFFULLIEN_Pos     (11)                                              /*!< USBD_T::CEPINTEN: BUFFULLIEN Position     */
+#define USBD_CEPINTEN_BUFFULLIEN_Msk     (0x1ul << USBD_CEPINTEN_BUFFULLIEN_Pos)           /*!< USBD_T::CEPINTEN: BUFFULLIEN Mask         */
 
-#define USBD_CEPINTEN_BUFEMPTYIEN_Pos    (12)                                              /*!< USBD CEPINTEN: BUFEMPTYIEN Position    */
-#define USBD_CEPINTEN_BUFEMPTYIEN_Msk    (0x1ul << USBD_CEPINTEN_BUFEMPTYIEN_Pos)          /*!< USBD CEPINTEN: BUFEMPTYIEN Mask        */
+#define USBD_CEPINTEN_BUFEMPTYIEN_Pos    (12)                                              /*!< USBD_T::CEPINTEN: BUFEMPTYIEN Position    */
+#define USBD_CEPINTEN_BUFEMPTYIEN_Msk    (0x1ul << USBD_CEPINTEN_BUFEMPTYIEN_Pos)          /*!< USBD_T::CEPINTEN: BUFEMPTYIEN Mask        */
 
-#define USBD_CEPINTSTS_SETUPTKIF_Pos     (0)                                               /*!< USBD CEPINTSTS: SETUPTKIF Position     */
-#define USBD_CEPINTSTS_SETUPTKIF_Msk     (0x1ul << USBD_CEPINTSTS_SETUPTKIF_Pos)           /*!< USBD CEPINTSTS: SETUPTKIF Mask         */
+#define USBD_CEPINTSTS_SETUPTKIF_Pos     (0)                                               /*!< USBD_T::CEPINTSTS: SETUPTKIF Position     */
+#define USBD_CEPINTSTS_SETUPTKIF_Msk     (0x1ul << USBD_CEPINTSTS_SETUPTKIF_Pos)           /*!< USBD_T::CEPINTSTS: SETUPTKIF Mask         */
 
-#define USBD_CEPINTSTS_SETUPPKIF_Pos     (1)                                               /*!< USBD CEPINTSTS: SETUPPKIF Position     */
-#define USBD_CEPINTSTS_SETUPPKIF_Msk     (0x1ul << USBD_CEPINTSTS_SETUPPKIF_Pos)           /*!< USBD CEPINTSTS: SETUPPKIF Mask         */
+#define USBD_CEPINTSTS_SETUPPKIF_Pos     (1)                                               /*!< USBD_T::CEPINTSTS: SETUPPKIF Position     */
+#define USBD_CEPINTSTS_SETUPPKIF_Msk     (0x1ul << USBD_CEPINTSTS_SETUPPKIF_Pos)           /*!< USBD_T::CEPINTSTS: SETUPPKIF Mask         */
 
-#define USBD_CEPINTSTS_OUTTKIF_Pos       (2)                                               /*!< USBD CEPINTSTS: OUTTKIF Position       */
-#define USBD_CEPINTSTS_OUTTKIF_Msk       (0x1ul << USBD_CEPINTSTS_OUTTKIF_Pos)             /*!< USBD CEPINTSTS: OUTTKIF Mask           */
+#define USBD_CEPINTSTS_OUTTKIF_Pos       (2)                                               /*!< USBD_T::CEPINTSTS: OUTTKIF Position       */
+#define USBD_CEPINTSTS_OUTTKIF_Msk       (0x1ul << USBD_CEPINTSTS_OUTTKIF_Pos)             /*!< USBD_T::CEPINTSTS: OUTTKIF Mask           */
 
-#define USBD_CEPINTSTS_INTKIF_Pos        (3)                                               /*!< USBD CEPINTSTS: INTKIF Position        */
-#define USBD_CEPINTSTS_INTKIF_Msk        (0x1ul << USBD_CEPINTSTS_INTKIF_Pos)              /*!< USBD CEPINTSTS: INTKIF Mask            */
+#define USBD_CEPINTSTS_INTKIF_Pos        (3)                                               /*!< USBD_T::CEPINTSTS: INTKIF Position        */
+#define USBD_CEPINTSTS_INTKIF_Msk        (0x1ul << USBD_CEPINTSTS_INTKIF_Pos)              /*!< USBD_T::CEPINTSTS: INTKIF Mask            */
 
-#define USBD_CEPINTSTS_PINGIF_Pos        (4)                                               /*!< USBD CEPINTSTS: PINGIF Position        */
-#define USBD_CEPINTSTS_PINGIF_Msk        (0x1ul << USBD_CEPINTSTS_PINGIF_Pos)              /*!< USBD CEPINTSTS: PINGIF Mask            */
+#define USBD_CEPINTSTS_PINGIF_Pos        (4)                                               /*!< USBD_T::CEPINTSTS: PINGIF Position        */
+#define USBD_CEPINTSTS_PINGIF_Msk        (0x1ul << USBD_CEPINTSTS_PINGIF_Pos)              /*!< USBD_T::CEPINTSTS: PINGIF Mask            */
 
-#define USBD_CEPINTSTS_TXPKIF_Pos        (5)                                               /*!< USBD CEPINTSTS: TXPKIF Position        */
-#define USBD_CEPINTSTS_TXPKIF_Msk        (0x1ul << USBD_CEPINTSTS_TXPKIF_Pos)              /*!< USBD CEPINTSTS: TXPKIF Mask            */
+#define USBD_CEPINTSTS_TXPKIF_Pos        (5)                                               /*!< USBD_T::CEPINTSTS: TXPKIF Position        */
+#define USBD_CEPINTSTS_TXPKIF_Msk        (0x1ul << USBD_CEPINTSTS_TXPKIF_Pos)              /*!< USBD_T::CEPINTSTS: TXPKIF Mask            */
 
-#define USBD_CEPINTSTS_RXPKIF_Pos        (6)                                               /*!< USBD CEPINTSTS: RXPKIF Position        */
-#define USBD_CEPINTSTS_RXPKIF_Msk        (0x1ul << USBD_CEPINTSTS_RXPKIF_Pos)              /*!< USBD CEPINTSTS: RXPKIF Mask            */
+#define USBD_CEPINTSTS_RXPKIF_Pos        (6)                                               /*!< USBD_T::CEPINTSTS: RXPKIF Position        */
+#define USBD_CEPINTSTS_RXPKIF_Msk        (0x1ul << USBD_CEPINTSTS_RXPKIF_Pos)              /*!< USBD_T::CEPINTSTS: RXPKIF Mask            */
 
-#define USBD_CEPINTSTS_NAKIF_Pos         (7)                                               /*!< USBD CEPINTSTS: NAKIF Position         */
-#define USBD_CEPINTSTS_NAKIF_Msk         (0x1ul << USBD_CEPINTSTS_NAKIF_Pos)               /*!< USBD CEPINTSTS: NAKIF Mask             */
+#define USBD_CEPINTSTS_NAKIF_Pos         (7)                                               /*!< USBD_T::CEPINTSTS: NAKIF Position         */
+#define USBD_CEPINTSTS_NAKIF_Msk         (0x1ul << USBD_CEPINTSTS_NAKIF_Pos)               /*!< USBD_T::CEPINTSTS: NAKIF Mask             */
 
-#define USBD_CEPINTSTS_STALLIF_Pos       (8)                                               /*!< USBD CEPINTSTS: STALLIF Position       */
-#define USBD_CEPINTSTS_STALLIF_Msk       (0x1ul << USBD_CEPINTSTS_STALLIF_Pos)             /*!< USBD CEPINTSTS: STALLIF Mask           */
+#define USBD_CEPINTSTS_STALLIF_Pos       (8)                                               /*!< USBD_T::CEPINTSTS: STALLIF Position       */
+#define USBD_CEPINTSTS_STALLIF_Msk       (0x1ul << USBD_CEPINTSTS_STALLIF_Pos)             /*!< USBD_T::CEPINTSTS: STALLIF Mask           */
 
-#define USBD_CEPINTSTS_ERRIF_Pos         (9)                                               /*!< USBD CEPINTSTS: ERRIF Position         */
-#define USBD_CEPINTSTS_ERRIF_Msk         (0x1ul << USBD_CEPINTSTS_ERRIF_Pos)               /*!< USBD CEPINTSTS: ERRIF Mask             */
+#define USBD_CEPINTSTS_ERRIF_Pos         (9)                                               /*!< USBD_T::CEPINTSTS: ERRIF Position         */
+#define USBD_CEPINTSTS_ERRIF_Msk         (0x1ul << USBD_CEPINTSTS_ERRIF_Pos)               /*!< USBD_T::CEPINTSTS: ERRIF Mask             */
 
-#define USBD_CEPINTSTS_STSDONEIF_Pos     (10)                                              /*!< USBD CEPINTSTS: STSDONEIF Position     */
-#define USBD_CEPINTSTS_STSDONEIF_Msk     (0x1ul << USBD_CEPINTSTS_STSDONEIF_Pos)           /*!< USBD CEPINTSTS: STSDONEIF Mask         */
+#define USBD_CEPINTSTS_STSDONEIF_Pos     (10)                                              /*!< USBD_T::CEPINTSTS: STSDONEIF Position     */
+#define USBD_CEPINTSTS_STSDONEIF_Msk     (0x1ul << USBD_CEPINTSTS_STSDONEIF_Pos)           /*!< USBD_T::CEPINTSTS: STSDONEIF Mask         */
 
-#define USBD_CEPINTSTS_BUFFULLIF_Pos     (11)                                              /*!< USBD CEPINTSTS: BUFFULLIF Position     */
-#define USBD_CEPINTSTS_BUFFULLIF_Msk     (0x1ul << USBD_CEPINTSTS_BUFFULLIF_Pos)           /*!< USBD CEPINTSTS: BUFFULLIF Mask         */
+#define USBD_CEPINTSTS_BUFFULLIF_Pos     (11)                                              /*!< USBD_T::CEPINTSTS: BUFFULLIF Position     */
+#define USBD_CEPINTSTS_BUFFULLIF_Msk     (0x1ul << USBD_CEPINTSTS_BUFFULLIF_Pos)           /*!< USBD_T::CEPINTSTS: BUFFULLIF Mask         */
 
-#define USBD_CEPINTSTS_BUFEMPTYIF_Pos    (12)                                              /*!< USBD CEPINTSTS: BUFEMPTYIF Position    */
-#define USBD_CEPINTSTS_BUFEMPTYIF_Msk    (0x1ul << USBD_CEPINTSTS_BUFEMPTYIF_Pos)          /*!< USBD CEPINTSTS: BUFEMPTYIF Mask        */
+#define USBD_CEPINTSTS_BUFEMPTYIF_Pos    (12)                                              /*!< USBD_T::CEPINTSTS: BUFEMPTYIF Position    */
+#define USBD_CEPINTSTS_BUFEMPTYIF_Msk    (0x1ul << USBD_CEPINTSTS_BUFEMPTYIF_Pos)          /*!< USBD_T::CEPINTSTS: BUFEMPTYIF Mask        */
 
-#define USBD_CEPTXCNT_TXCNT_Pos          (0)                                               /*!< USBD CEPTXCNT: TXCNT Position          */
-#define USBD_CEPTXCNT_TXCNT_Msk          (0xfful << USBD_CEPTXCNT_TXCNT_Pos)               /*!< USBD CEPTXCNT: TXCNT Mask              */
+#define USBD_CEPTXCNT_TXCNT_Pos          (0)                                               /*!< USBD_T::CEPTXCNT: TXCNT Position          */
+#define USBD_CEPTXCNT_TXCNT_Msk          (0xfful << USBD_CEPTXCNT_TXCNT_Pos)               /*!< USBD_T::CEPTXCNT: TXCNT Mask              */
 
-#define USBD_CEPRXCNT_RXCNT_Pos          (0)                                               /*!< USBD CEPRXCNT: RXCNT Position          */
-#define USBD_CEPRXCNT_RXCNT_Msk          (0xfful << USBD_CEPRXCNT_RXCNT_Pos)               /*!< USBD CEPRXCNT: RXCNT Mask              */
+#define USBD_CEPRXCNT_RXCNT_Pos          (0)                                               /*!< USBD_T::CEPRXCNT: RXCNT Position          */
+#define USBD_CEPRXCNT_RXCNT_Msk          (0xfful << USBD_CEPRXCNT_RXCNT_Pos)               /*!< USBD_T::CEPRXCNT: RXCNT Mask              */
 
-#define USBD_CEPDATCNT_DATCNT_Pos        (0)                                               /*!< USBD CEPDATCNT: DATCNT Position        */
-#define USBD_CEPDATCNT_DATCNT_Msk        (0xfffful << USBD_CEPDATCNT_DATCNT_Pos)           /*!< USBD CEPDATCNT: DATCNT Mask            */
+#define USBD_CEPDATCNT_DATCNT_Pos        (0)                                               /*!< USBD_T::CEPDATCNT: DATCNT Position        */
+#define USBD_CEPDATCNT_DATCNT_Msk        (0xfffful << USBD_CEPDATCNT_DATCNT_Pos)           /*!< USBD_T::CEPDATCNT: DATCNT Mask            */
 
-#define USBD_SETUP1_0_SETUP0_Pos         (0)                                               /*!< USBD SETUP1_0: SETUP0 Position         */
-#define USBD_SETUP1_0_SETUP0_Msk         (0xfful << USBD_SETUP1_0_SETUP0_Pos)              /*!< USBD SETUP1_0: SETUP0 Mask             */
+#define USBD_SETUP1_0_SETUP0_Pos         (0)                                               /*!< USBD_T::SETUP1_0: SETUP0 Position         */
+#define USBD_SETUP1_0_SETUP0_Msk         (0xfful << USBD_SETUP1_0_SETUP0_Pos)              /*!< USBD_T::SETUP1_0: SETUP0 Mask             */
 
-#define USBD_SETUP1_0_SETUP1_Pos         (8)                                               /*!< USBD SETUP1_0: SETUP1 Position         */
-#define USBD_SETUP1_0_SETUP1_Msk         (0xfful << USBD_SETUP1_0_SETUP1_Pos)              /*!< USBD SETUP1_0: SETUP1 Mask             */
+#define USBD_SETUP1_0_SETUP1_Pos         (8)                                               /*!< USBD_T::SETUP1_0: SETUP1 Position         */
+#define USBD_SETUP1_0_SETUP1_Msk         (0xfful << USBD_SETUP1_0_SETUP1_Pos)              /*!< USBD_T::SETUP1_0: SETUP1 Mask             */
 
-#define USBD_SETUP3_2_SETUP2_Pos         (0)                                               /*!< USBD SETUP3_2: SETUP2 Position         */
-#define USBD_SETUP3_2_SETUP2_Msk         (0xfful << USBD_SETUP3_2_SETUP2_Pos)              /*!< USBD SETUP3_2: SETUP2 Mask             */
+#define USBD_SETUP3_2_SETUP2_Pos         (0)                                               /*!< USBD_T::SETUP3_2: SETUP2 Position         */
+#define USBD_SETUP3_2_SETUP2_Msk         (0xfful << USBD_SETUP3_2_SETUP2_Pos)              /*!< USBD_T::SETUP3_2: SETUP2 Mask             */
 
-#define USBD_SETUP3_2_SETUP3_Pos         (8)                                               /*!< USBD SETUP3_2: SETUP3 Position         */
-#define USBD_SETUP3_2_SETUP3_Msk         (0xfful << USBD_SETUP3_2_SETUP3_Pos)              /*!< USBD SETUP3_2: SETUP3 Mask             */
+#define USBD_SETUP3_2_SETUP3_Pos         (8)                                               /*!< USBD_T::SETUP3_2: SETUP3 Position         */
+#define USBD_SETUP3_2_SETUP3_Msk         (0xfful << USBD_SETUP3_2_SETUP3_Pos)              /*!< USBD_T::SETUP3_2: SETUP3 Mask             */
 
-#define USBD_SETUP5_4_SETUP4_Pos         (0)                                               /*!< USBD SETUP5_4: SETUP4 Position         */
-#define USBD_SETUP5_4_SETUP4_Msk         (0xfful << USBD_SETUP5_4_SETUP4_Pos)              /*!< USBD SETUP5_4: SETUP4 Mask             */
+#define USBD_SETUP5_4_SETUP4_Pos         (0)                                               /*!< USBD_T::SETUP5_4: SETUP4 Position         */
+#define USBD_SETUP5_4_SETUP4_Msk         (0xfful << USBD_SETUP5_4_SETUP4_Pos)              /*!< USBD_T::SETUP5_4: SETUP4 Mask             */
 
-#define USBD_SETUP5_4_SETUP5_Pos         (8)                                               /*!< USBD SETUP5_4: SETUP5 Position         */
-#define USBD_SETUP5_4_SETUP5_Msk         (0xfful << USBD_SETUP5_4_SETUP5_Pos)              /*!< USBD SETUP5_4: SETUP5 Mask             */
+#define USBD_SETUP5_4_SETUP5_Pos         (8)                                               /*!< USBD_T::SETUP5_4: SETUP5 Position         */
+#define USBD_SETUP5_4_SETUP5_Msk         (0xfful << USBD_SETUP5_4_SETUP5_Pos)              /*!< USBD_T::SETUP5_4: SETUP5 Mask             */
 
-#define USBD_SETUP7_6_SETUP6_Pos         (0)                                               /*!< USBD SETUP7_6: SETUP6 Position         */
-#define USBD_SETUP7_6_SETUP6_Msk         (0xfful << USBD_SETUP7_6_SETUP6_Pos)              /*!< USBD SETUP7_6: SETUP6 Mask             */
+#define USBD_SETUP7_6_SETUP6_Pos         (0)                                               /*!< USBD_T::SETUP7_6: SETUP6 Position         */
+#define USBD_SETUP7_6_SETUP6_Msk         (0xfful << USBD_SETUP7_6_SETUP6_Pos)              /*!< USBD_T::SETUP7_6: SETUP6 Mask             */
 
-#define USBD_SETUP7_6_SETUP7_Pos         (8)                                               /*!< USBD SETUP7_6: SETUP7 Position         */
-#define USBD_SETUP7_6_SETUP7_Msk         (0xfful << USBD_SETUP7_6_SETUP7_Pos)              /*!< USBD SETUP7_6: SETUP7 Mask             */
+#define USBD_SETUP7_6_SETUP7_Pos         (8)                                               /*!< USBD_T::SETUP7_6: SETUP7 Position         */
+#define USBD_SETUP7_6_SETUP7_Msk         (0xfful << USBD_SETUP7_6_SETUP7_Pos)              /*!< USBD_T::SETUP7_6: SETUP7 Mask             */
 
-#define USBD_CEPBUFSTART_SADDR_Pos       (0)                                               /*!< USBD CEPBUFSTART: SADDR Position       */
-#define USBD_CEPBUFSTART_SADDR_Msk       (0xffful << USBD_CEPBUFSTART_SADDR_Pos)           /*!< USBD CEPBUFSTART: SADDR Mask           */
+#define USBD_CEPBUFSTART_SADDR_Pos       (0)                                               /*!< USBD_T::CEPBUFSTART: SADDR Position       */
+#define USBD_CEPBUFSTART_SADDR_Msk       (0xffful << USBD_CEPBUFSTART_SADDR_Pos)           /*!< USBD_T::CEPBUFSTART: SADDR Mask           */
 
-#define USBD_CEPBUFEND_EADDR_Pos         (0)                                               /*!< USBD CEPBUFEND: EADDR Position         */
-#define USBD_CEPBUFEND_EADDR_Msk         (0xffful << USBD_CEPBUFEND_EADDR_Pos)             /*!< USBD CEPBUFEND: EADDR Mask             */
+#define USBD_CEPBUFEND_EADDR_Pos         (0)                                               /*!< USBD_T::CEPBUFEND: EADDR Position         */
+#define USBD_CEPBUFEND_EADDR_Msk         (0xffful << USBD_CEPBUFEND_EADDR_Pos)             /*!< USBD_T::CEPBUFEND: EADDR Mask             */
 
-#define USBD_DMACTL_EPNUM_Pos            (0)                                               /*!< USBD DMACTL: EPNUM Position            */
-#define USBD_DMACTL_EPNUM_Msk            (0xful << USBD_DMACTL_EPNUM_Pos)                  /*!< USBD DMACTL: EPNUM Mask                */
+#define USBD_DMACTL_EPNUM_Pos            (0)                                               /*!< USBD_T::DMACTL: EPNUM Position            */
+#define USBD_DMACTL_EPNUM_Msk            (0xful << USBD_DMACTL_EPNUM_Pos)                  /*!< USBD_T::DMACTL: EPNUM Mask                */
 
-#define USBD_DMACTL_DMARD_Pos            (4)                                               /*!< USBD DMACTL: DMARD Position            */
-#define USBD_DMACTL_DMARD_Msk            (0x1ul << USBD_DMACTL_DMARD_Pos)                  /*!< USBD DMACTL: DMARD Mask                */
+#define USBD_DMACTL_DMARD_Pos            (4)                                               /*!< USBD_T::DMACTL: DMARD Position            */
+#define USBD_DMACTL_DMARD_Msk            (0x1ul << USBD_DMACTL_DMARD_Pos)                  /*!< USBD_T::DMACTL: DMARD Mask                */
 
-#define USBD_DMACTL_DMAEN_Pos            (5)                                               /*!< USBD DMACTL: DMAEN Position            */
-#define USBD_DMACTL_DMAEN_Msk            (0x1ul << USBD_DMACTL_DMAEN_Pos)                  /*!< USBD DMACTL: DMAEN Mask                */
+#define USBD_DMACTL_DMAEN_Pos            (5)                                               /*!< USBD_T::DMACTL: DMAEN Position            */
+#define USBD_DMACTL_DMAEN_Msk            (0x1ul << USBD_DMACTL_DMAEN_Pos)                  /*!< USBD_T::DMACTL: DMAEN Mask                */
 
-#define USBD_DMACTL_SGEN_Pos             (6)                                               /*!< USBD DMACTL: SGEN Position             */
-#define USBD_DMACTL_SGEN_Msk             (0x1ul << USBD_DMACTL_SGEN_Pos)                   /*!< USBD DMACTL: SGEN Mask                 */
+#define USBD_DMACTL_SGEN_Pos             (6)                                               /*!< USBD_T::DMACTL: SGEN Position             */
+#define USBD_DMACTL_SGEN_Msk             (0x1ul << USBD_DMACTL_SGEN_Pos)                   /*!< USBD_T::DMACTL: SGEN Mask                 */
 
-#define USBD_DMACTL_DMARST_Pos           (7)                                               /*!< USBD DMACTL: DMARST Position           */
-#define USBD_DMACTL_DMARST_Msk           (0x1ul << USBD_DMACTL_DMARST_Pos)                 /*!< USBD DMACTL: DMARST Mask               */
+#define USBD_DMACTL_DMARST_Pos           (7)                                               /*!< USBD_T::DMACTL: DMARST Position           */
+#define USBD_DMACTL_DMARST_Msk           (0x1ul << USBD_DMACTL_DMARST_Pos)                 /*!< USBD_T::DMACTL: DMARST Mask               */
 
-#define USBD_DMACNT_DMACNT_Pos           (0)                                               /*!< USBD DMACNT: DMACNT Position           */
-#define USBD_DMACNT_DMACNT_Msk           (0xffffful << USBD_DMACNT_DMACNT_Pos)             /*!< USBD DMACNT: DMACNT Mask               */
+#define USBD_DMACNT_DMACNT_Pos           (0)                                               /*!< USBD_T::DMACNT: DMACNT Position           */
+#define USBD_DMACNT_DMACNT_Msk           (0xffffful << USBD_DMACNT_DMACNT_Pos)             /*!< USBD_T::DMACNT: DMACNT Mask               */
 
-#define USBD_EPDAT_EPDAT_Pos             (0)                                               /*!< USBD EPDAT: EPDAT Position            */
-#define USBD_EPDAT_EPDAT_Msk             (0xfffffffful << USBD_EPDAT_EPDAT_Pos)            /*!< USBD EPDAT: EPDAT Mask                */
+#define USBD_EPADAT_EPDAT_Pos            (0)                                               /*!< USBD_T::EPADAT: EPDAT Position            */
+#define USBD_EPADAT_EPDAT_Msk            (0xfffffffful << USBD_EPADAT_EPDAT_Pos)           /*!< USBD_T::EPADAT: EPDAT Mask                */
 
-#define USBD_EPINTSTS_BUFFULLIF_Pos      (0)                                               /*!< USBD EPINTSTS: BUFFULLIF Position     */
-#define USBD_EPINTSTS_BUFFULLIF_Msk      (0x1ul << USBD_EPINTSTS_BUFFULLIF_Pos)            /*!< USBD EPINTSTS: BUFFULLIF Mask         */
+#define USBD_EPAINTSTS_BUFFULLIF_Pos     (0)                                               /*!< USBD_T::EPAINTSTS: BUFFULLIF Position     */
+#define USBD_EPAINTSTS_BUFFULLIF_Msk     (0x1ul << USBD_EPAINTSTS_BUFFULLIF_Pos)           /*!< USBD_T::EPAINTSTS: BUFFULLIF Mask         */
 
-#define USBD_EPINTSTS_BUFEMPTYIF_Pos     (1)                                               /*!< USBD EPINTSTS: BUFEMPTYIF Position    */
-#define USBD_EPINTSTS_BUFEMPTYIF_Msk     (0x1ul << USBD_EPINTSTS_BUFEMPTYIF_Pos)           /*!< USBD EPINTSTS: BUFEMPTYIF Mask        */
+#define USBD_EPAINTSTS_BUFEMPTYIF_Pos    (1)                                               /*!< USBD_T::EPAINTSTS: BUFEMPTYIF Position    */
+#define USBD_EPAINTSTS_BUFEMPTYIF_Msk    (0x1ul << USBD_EPAINTSTS_BUFEMPTYIF_Pos)          /*!< USBD_T::EPAINTSTS: BUFEMPTYIF Mask        */
 
-#define USBD_EPINTSTS_SHORTTXIF_Pos      (2)                                               /*!< USBD EPINTSTS: SHORTTXIF Position     */
-#define USBD_EPINTSTS_SHORTTXIF_Msk      (0x1ul << USBD_EPINTSTS_SHORTTXIF_Pos)            /*!< USBD EPINTSTS: SHORTTXIF Mask         */
+#define USBD_EPAINTSTS_SHORTTXIF_Pos     (2)                                               /*!< USBD_T::EPAINTSTS: SHORTTXIF Position     */
+#define USBD_EPAINTSTS_SHORTTXIF_Msk     (0x1ul << USBD_EPAINTSTS_SHORTTXIF_Pos)           /*!< USBD_T::EPAINTSTS: SHORTTXIF Mask         */
 
-#define USBD_EPINTSTS_TXPKIF_Pos         (3)                                               /*!< USBD EPINTSTS: TXPKIF Position        */
-#define USBD_EPINTSTS_TXPKIF_Msk         (0x1ul << USBD_EPINTSTS_TXPKIF_Pos)               /*!< USBD EPINTSTS: TXPKIF Mask            */
+#define USBD_EPAINTSTS_TXPKIF_Pos        (3)                                               /*!< USBD_T::EPAINTSTS: TXPKIF Position        */
+#define USBD_EPAINTSTS_TXPKIF_Msk        (0x1ul << USBD_EPAINTSTS_TXPKIF_Pos)              /*!< USBD_T::EPAINTSTS: TXPKIF Mask            */
 
-#define USBD_EPINTSTS_RXPKIF_Pos         (4)                                               /*!< USBD EPINTSTS: RXPKIF Position        */
-#define USBD_EPINTSTS_RXPKIF_Msk         (0x1ul << USBD_EPINTSTS_RXPKIF_Pos)               /*!< USBD EPINTSTS: RXPKIF Mask            */
+#define USBD_EPAINTSTS_RXPKIF_Pos        (4)                                               /*!< USBD_T::EPAINTSTS: RXPKIF Position        */
+#define USBD_EPAINTSTS_RXPKIF_Msk        (0x1ul << USBD_EPAINTSTS_RXPKIF_Pos)              /*!< USBD_T::EPAINTSTS: RXPKIF Mask            */
 
-#define USBD_EPINTSTS_OUTTKIF_Pos        (5)                                               /*!< USBD EPINTSTS: OUTTKIF Position       */
-#define USBD_EPINTSTS_OUTTKIF_Msk        (0x1ul << USBD_EPINTSTS_OUTTKIF_Pos)              /*!< USBD EPINTSTS: OUTTKIF Mask           */
+#define USBD_EPAINTSTS_OUTTKIF_Pos       (5)                                               /*!< USBD_T::EPAINTSTS: OUTTKIF Position       */
+#define USBD_EPAINTSTS_OUTTKIF_Msk       (0x1ul << USBD_EPAINTSTS_OUTTKIF_Pos)             /*!< USBD_T::EPAINTSTS: OUTTKIF Mask           */
 
-#define USBD_EPINTSTS_INTKIF_Pos         (6)                                               /*!< USBD EPINTSTS: INTKIF Position        */
-#define USBD_EPINTSTS_INTKIF_Msk         (0x1ul << USBD_EPINTSTS_INTKIF_Pos)               /*!< USBD EPINTSTS: INTKIF Mask            */
+#define USBD_EPAINTSTS_INTKIF_Pos        (6)                                               /*!< USBD_T::EPAINTSTS: INTKIF Position        */
+#define USBD_EPAINTSTS_INTKIF_Msk        (0x1ul << USBD_EPAINTSTS_INTKIF_Pos)              /*!< USBD_T::EPAINTSTS: INTKIF Mask            */
 
-#define USBD_EPINTSTS_PINGIF_Pos         (7)                                               /*!< USBD EPINTSTS: PINGIF Position        */
-#define USBD_EPINTSTS_PINGIF_Msk         (0x1ul << USBD_EPINTSTS_PINGIF_Pos)               /*!< USBD EPINTSTS: PINGIF Mask            */
+#define USBD_EPAINTSTS_PINGIF_Pos        (7)                                               /*!< USBD_T::EPAINTSTS: PINGIF Position        */
+#define USBD_EPAINTSTS_PINGIF_Msk        (0x1ul << USBD_EPAINTSTS_PINGIF_Pos)              /*!< USBD_T::EPAINTSTS: PINGIF Mask            */
 
-#define USBD_EPINTSTS_NAKIF_Pos          (8)                                               /*!< USBD EPINTSTS: NAKIF Position         */
-#define USBD_EPINTSTS_NAKIF_Msk          (0x1ul << USBD_EPINTSTS_NAKIF_Pos)                /*!< USBD EPINTSTS: NAKIF Mask             */
+#define USBD_EPAINTSTS_NAKIF_Pos         (8)                                               /*!< USBD_T::EPAINTSTS: NAKIF Position         */
+#define USBD_EPAINTSTS_NAKIF_Msk         (0x1ul << USBD_EPAINTSTS_NAKIF_Pos)               /*!< USBD_T::EPAINTSTS: NAKIF Mask             */
 
-#define USBD_EPINTSTS_STALLIF_Pos        (9)                                               /*!< USBD EPINTSTS: STALLIF Position       */
-#define USBD_EPINTSTS_STALLIF_Msk        (0x1ul << USBD_EPINTSTS_STALLIF_Pos)              /*!< USBD EPINTSTS: STALLIF Mask           */
+#define USBD_EPAINTSTS_STALLIF_Pos       (9)                                               /*!< USBD_T::EPAINTSTS: STALLIF Position       */
+#define USBD_EPAINTSTS_STALLIF_Msk       (0x1ul << USBD_EPAINTSTS_STALLIF_Pos)             /*!< USBD_T::EPAINTSTS: STALLIF Mask           */
 
-#define USBD_EPINTSTS_NYETIF_Pos         (10)                                              /*!< USBD EPINTSTS: NYETIF Position        */
-#define USBD_EPINTSTS_NYETIF_Msk         (0x1ul << USBD_EPINTSTS_NYETIF_Pos)               /*!< USBD EPINTSTS: NYETIF Mask            */
+#define USBD_EPAINTSTS_NYETIF_Pos        (10)                                              /*!< USBD_T::EPAINTSTS: NYETIF Position        */
+#define USBD_EPAINTSTS_NYETIF_Msk        (0x1ul << USBD_EPAINTSTS_NYETIF_Pos)              /*!< USBD_T::EPAINTSTS: NYETIF Mask            */
 
-#define USBD_EPINTSTS_ERRIF_Pos          (11)                                              /*!< USBD EPINTSTS: ERRIF Position         */
-#define USBD_EPINTSTS_ERRIF_Msk          (0x1ul << USBD_EPINTSTS_ERRIF_Pos)                /*!< USBD EPINTSTS: ERRIF Mask             */
+#define USBD_EPAINTSTS_ERRIF_Pos         (11)                                              /*!< USBD_T::EPAINTSTS: ERRIF Position         */
+#define USBD_EPAINTSTS_ERRIF_Msk         (0x1ul << USBD_EPAINTSTS_ERRIF_Pos)               /*!< USBD_T::EPAINTSTS: ERRIF Mask             */
 
-#define USBD_EPINTSTS_SHORTRXIF_Pos      (12)                                              /*!< USBD EPINTSTS: SHORTRXIF Position     */
-#define USBD_EPINTSTS_SHORTRXIF_Msk      (0x1ul << USBD_EPINTSTS_SHORTRXIF_Pos)            /*!< USBD EPINTSTS: SHORTRXIF Mask         */
+#define USBD_EPAINTSTS_SHORTRXIF_Pos     (12)                                              /*!< USBD_T::EPAINTSTS: SHORTRXIF Position     */
+#define USBD_EPAINTSTS_SHORTRXIF_Msk     (0x1ul << USBD_EPAINTSTS_SHORTRXIF_Pos)           /*!< USBD_T::EPAINTSTS: SHORTRXIF Mask         */
 
-#define USBD_EPINTEN_BUFFULLIEN_Pos      (0)                                               /*!< USBD EPINTEN: BUFFULLIEN Position     */
-#define USBD_EPINTEN_BUFFULLIEN_Msk      (0x1ul << USBD_EPINTEN_BUFFULLIEN_Pos)            /*!< USBD EPINTEN: BUFFULLIEN Mask         */
+#define USBD_EPAINTEN_BUFFULLIEN_Pos     (0)                                               /*!< USBD_T::EPAINTEN: BUFFULLIEN Position     */
+#define USBD_EPAINTEN_BUFFULLIEN_Msk     (0x1ul << USBD_EPAINTEN_BUFFULLIEN_Pos)           /*!< USBD_T::EPAINTEN: BUFFULLIEN Mask         */
 
-#define USBD_EPINTEN_BUFEMPTYIEN_Pos     (1)                                               /*!< USBD EPINTEN: BUFEMPTYIEN Position    */
-#define USBD_EPINTEN_BUFEMPTYIEN_Msk     (0x1ul << USBD_EPINTEN_BUFEMPTYIEN_Pos)           /*!< USBD EPINTEN: BUFEMPTYIEN Mask        */
+#define USBD_EPAINTEN_BUFEMPTYIEN_Pos    (1)                                               /*!< USBD_T::EPAINTEN: BUFEMPTYIEN Position    */
+#define USBD_EPAINTEN_BUFEMPTYIEN_Msk    (0x1ul << USBD_EPAINTEN_BUFEMPTYIEN_Pos)          /*!< USBD_T::EPAINTEN: BUFEMPTYIEN Mask        */
 
-#define USBD_EPINTEN_SHORTTXIEN_Pos      (2)                                               /*!< USBD EPINTEN: SHORTTXIEN Position     */
-#define USBD_EPINTEN_SHORTTXIEN_Msk      (0x1ul << USBD_EPINTEN_SHORTTXIEN_Pos)            /*!< USBD EPINTEN: SHORTTXIEN Mask         */
+#define USBD_EPAINTEN_SHORTTXIEN_Pos     (2)                                               /*!< USBD_T::EPAINTEN: SHORTTXIEN Position     */
+#define USBD_EPAINTEN_SHORTTXIEN_Msk     (0x1ul << USBD_EPAINTEN_SHORTTXIEN_Pos)           /*!< USBD_T::EPAINTEN: SHORTTXIEN Mask         */
 
-#define USBD_EPINTEN_TXPKIEN_Pos         (3)                                               /*!< USBD EPINTEN: TXPKIEN Position        */
-#define USBD_EPINTEN_TXPKIEN_Msk         (0x1ul << USBD_EPINTEN_TXPKIEN_Pos)               /*!< USBD EPINTEN: TXPKIEN Mask            */
+#define USBD_EPAINTEN_TXPKIEN_Pos        (3)                                               /*!< USBD_T::EPAINTEN: TXPKIEN Position        */
+#define USBD_EPAINTEN_TXPKIEN_Msk        (0x1ul << USBD_EPAINTEN_TXPKIEN_Pos)              /*!< USBD_T::EPAINTEN: TXPKIEN Mask            */
 
-#define USBD_EPINTEN_RXPKIEN_Pos         (4)                                               /*!< USBD EPINTEN: RXPKIEN Position        */
-#define USBD_EPINTEN_RXPKIEN_Msk         (0x1ul << USBD_EPINTEN_RXPKIEN_Pos)               /*!< USBD EPINTEN: RXPKIEN Mask            */
+#define USBD_EPAINTEN_RXPKIEN_Pos        (4)                                               /*!< USBD_T::EPAINTEN: RXPKIEN Position        */
+#define USBD_EPAINTEN_RXPKIEN_Msk        (0x1ul << USBD_EPAINTEN_RXPKIEN_Pos)              /*!< USBD_T::EPAINTEN: RXPKIEN Mask            */
 
-#define USBD_EPINTEN_OUTTKIEN_Pos        (5)                                               /*!< USBD EPINTEN: OUTTKIEN Position       */
-#define USBD_EPINTEN_OUTTKIEN_Msk        (0x1ul << USBD_EPINTEN_OUTTKIEN_Pos)              /*!< USBD EPINTEN: OUTTKIEN Mask           */
+#define USBD_EPAINTEN_OUTTKIEN_Pos       (5)                                               /*!< USBD_T::EPAINTEN: OUTTKIEN Position       */
+#define USBD_EPAINTEN_OUTTKIEN_Msk       (0x1ul << USBD_EPAINTEN_OUTTKIEN_Pos)             /*!< USBD_T::EPAINTEN: OUTTKIEN Mask           */
 
-#define USBD_EPINTEN_INTKIEN_Pos         (6)                                               /*!< USBD EPINTEN: INTKIEN Position        */
-#define USBD_EPINTEN_INTKIEN_Msk         (0x1ul << USBD_EPINTEN_INTKIEN_Pos)               /*!< USBD EPINTEN: INTKIEN Mask            */
+#define USBD_EPAINTEN_INTKIEN_Pos        (6)                                               /*!< USBD_T::EPAINTEN: INTKIEN Position        */
+#define USBD_EPAINTEN_INTKIEN_Msk        (0x1ul << USBD_EPAINTEN_INTKIEN_Pos)              /*!< USBD_T::EPAINTEN: INTKIEN Mask            */
 
-#define USBD_EPINTEN_PINGIEN_Pos         (7)                                               /*!< USBD EPINTEN: PINGIEN Position        */
-#define USBD_EPINTEN_PINGIEN_Msk         (0x1ul << USBD_EPINTEN_PINGIEN_Pos)               /*!< USBD EPINTEN: PINGIEN Mask            */
+#define USBD_EPAINTEN_PINGIEN_Pos        (7)                                               /*!< USBD_T::EPAINTEN: PINGIEN Position        */
+#define USBD_EPAINTEN_PINGIEN_Msk        (0x1ul << USBD_EPAINTEN_PINGIEN_Pos)              /*!< USBD_T::EPAINTEN: PINGIEN Mask            */
 
-#define USBD_EPINTEN_NAKIEN_Pos          (8)                                               /*!< USBD EPINTEN: NAKIEN Position         */
-#define USBD_EPINTEN_NAKIEN_Msk          (0x1ul << USBD_EPINTEN_NAKIEN_Pos)                /*!< USBD EPINTEN: NAKIEN Mask             */
+#define USBD_EPAINTEN_NAKIEN_Pos         (8)                                               /*!< USBD_T::EPAINTEN: NAKIEN Position         */
+#define USBD_EPAINTEN_NAKIEN_Msk         (0x1ul << USBD_EPAINTEN_NAKIEN_Pos)               /*!< USBD_T::EPAINTEN: NAKIEN Mask             */
 
-#define USBD_EPINTEN_STALLIEN_Pos        (9)                                               /*!< USBD EPINTEN: STALLIEN Position       */
-#define USBD_EPINTEN_STALLIEN_Msk        (0x1ul << USBD_EPINTEN_STALLIEN_Pos)              /*!< USBD EPINTEN: STALLIEN Mask           */
+#define USBD_EPAINTEN_STALLIEN_Pos       (9)                                               /*!< USBD_T::EPAINTEN: STALLIEN Position       */
+#define USBD_EPAINTEN_STALLIEN_Msk       (0x1ul << USBD_EPAINTEN_STALLIEN_Pos)             /*!< USBD_T::EPAINTEN: STALLIEN Mask           */
 
-#define USBD_EPINTEN_NYETIEN_Pos         (10)                                              /*!< USBD EPINTEN: NYETIEN Position        */
-#define USBD_EPINTEN_NYETIEN_Msk         (0x1ul << USBD_EPINTEN_NYETIEN_Pos)               /*!< USBD EPINTEN: NYETIEN Mask            */
+#define USBD_EPAINTEN_NYETIEN_Pos        (10)                                              /*!< USBD_T::EPAINTEN: NYETIEN Position        */
+#define USBD_EPAINTEN_NYETIEN_Msk        (0x1ul << USBD_EPAINTEN_NYETIEN_Pos)              /*!< USBD_T::EPAINTEN: NYETIEN Mask            */
 
-#define USBD_EPINTEN_ERRIEN_Pos          (11)                                              /*!< USBD EPINTEN: ERRIEN Position         */
-#define USBD_EPINTEN_ERRIEN_Msk          (0x1ul << USBD_EPINTEN_ERRIEN_Pos)                /*!< USBD EPINTEN: ERRIEN Mask             */
+#define USBD_EPAINTEN_ERRIEN_Pos         (11)                                              /*!< USBD_T::EPAINTEN: ERRIEN Position         */
+#define USBD_EPAINTEN_ERRIEN_Msk         (0x1ul << USBD_EPAINTEN_ERRIEN_Pos)               /*!< USBD_T::EPAINTEN: ERRIEN Mask             */
 
-#define USBD_EPINTEN_SHORTRXIEN_Pos      (12)                                              /*!< USBD EPINTEN: SHORTRXIEN Position     */
-#define USBD_EPINTEN_SHORTRXIEN_Msk      (0x1ul << USBD_EPINTEN_SHORTRXIEN_Pos)            /*!< USBD EPINTEN: SHORTRXIEN Mask         */
+#define USBD_EPAINTEN_SHORTRXIEN_Pos     (12)                                              /*!< USBD_T::EPAINTEN: SHORTRXIEN Position     */
+#define USBD_EPAINTEN_SHORTRXIEN_Msk     (0x1ul << USBD_EPAINTEN_SHORTRXIEN_Pos)           /*!< USBD_T::EPAINTEN: SHORTRXIEN Mask         */
 
-#define USBD_EPDATCNT_DATCNT_Pos         (0)                                               /*!< USBD EPDATCNT: DATCNT Position        */
-#define USBD_EPDATCNT_DATCNT_Msk         (0xfffful << USBD_EPDATCNT_DATCNT_Pos)            /*!< USBD EPDATCNT: DATCNT Mask            */
+#define USBD_EPADATCNT_DATCNT_Pos        (0)                                               /*!< USBD_T::EPADATCNT: DATCNT Position        */
+#define USBD_EPADATCNT_DATCNT_Msk        (0xfffful << USBD_EPADATCNT_DATCNT_Pos)           /*!< USBD_T::EPADATCNT: DATCNT Mask            */
 
-#define USBD_EPDATCNT_DMALOOP_Pos        (16)                                              /*!< USBD EPDATCNT: DMALOOP Position       */
-#define USBD_EPDATCNT_DMALOOP_Msk        (0x7ffful << USBD_EPDATCNT_DMALOOP_Pos)           /*!< USBD EPDATCNT: DMALOOP Mask           */
+#define USBD_EPADATCNT_DMALOOP_Pos       (16)                                              /*!< USBD_T::EPADATCNT: DMALOOP Position       */
+#define USBD_EPADATCNT_DMALOOP_Msk       (0x7ffful << USBD_EPADATCNT_DMALOOP_Pos)          /*!< USBD_T::EPADATCNT: DMALOOP Mask           */
 
-#define USBD_EPRSPCTL_FLUSH_Pos          (0)                                               /*!< USBD EPRSPCTL: FLUSH Position         */
-#define USBD_EPRSPCTL_FLUSH_Msk          (0x1ul << USBD_EPRSPCTL_FLUSH_Pos)                /*!< USBD EPRSPCTL: FLUSH Mask             */
+#define USBD_EPARSPCTL_FLUSH_Pos         (0)                                               /*!< USBD_T::EPARSPCTL: FLUSH Position         */
+#define USBD_EPARSPCTL_FLUSH_Msk         (0x1ul << USBD_EPARSPCTL_FLUSH_Pos)               /*!< USBD_T::EPARSPCTL: FLUSH Mask             */
 
-#define USBD_EPRSPCTL_MODE_Pos           (1)                                               /*!< USBD EPRSPCTL: MODE Position          */
-#define USBD_EPRSPCTL_MODE_Msk           (0x3ul << USBD_EPRSPCTL_MODE_Pos)                 /*!< USBD EPRSPCTL: MODE Mask              */
+#define USBD_EPARSPCTL_MODE_Pos          (1)                                               /*!< USBD_T::EPARSPCTL: MODE Position          */
+#define USBD_EPARSPCTL_MODE_Msk          (0x3ul << USBD_EPARSPCTL_MODE_Pos)                /*!< USBD_T::EPARSPCTL: MODE Mask              */
 
-#define USBD_EPRSPCTL_TOGGLE_Pos         (3)                                               /*!< USBD EPRSPCTL: TOGGLE Position        */
-#define USBD_EPRSPCTL_TOGGLE_Msk         (0x1ul << USBD_EPRSPCTL_TOGGLE_Pos)               /*!< USBD EPRSPCTL: TOGGLE Mask            */
+#define USBD_EPARSPCTL_TOGGLE_Pos        (3)                                               /*!< USBD_T::EPARSPCTL: TOGGLE Position        */
+#define USBD_EPARSPCTL_TOGGLE_Msk        (0x1ul << USBD_EPARSPCTL_TOGGLE_Pos)              /*!< USBD_T::EPARSPCTL: TOGGLE Mask            */
 
-#define USBD_EPRSPCTL_HALT_Pos           (4)                                               /*!< USBD EPRSPCTL: HALT Position          */
-#define USBD_EPRSPCTL_HALT_Msk           (0x1ul << USBD_EPRSPCTL_HALT_Pos)                 /*!< USBD EPRSPCTL: HALT Mask              */
+#define USBD_EPARSPCTL_HALT_Pos          (4)                                               /*!< USBD_T::EPARSPCTL: HALT Position          */
+#define USBD_EPARSPCTL_HALT_Msk          (0x1ul << USBD_EPARSPCTL_HALT_Pos)                /*!< USBD_T::EPARSPCTL: HALT Mask              */
 
-#define USBD_EPRSPCTL_ZEROLEN_Pos        (5)                                               /*!< USBD EPRSPCTL: ZEROLEN Position       */
-#define USBD_EPRSPCTL_ZEROLEN_Msk        (0x1ul << USBD_EPRSPCTL_ZEROLEN_Pos)              /*!< USBD EPRSPCTL: ZEROLEN Mask           */
+#define USBD_EPARSPCTL_ZEROLEN_Pos       (5)                                               /*!< USBD_T::EPARSPCTL: ZEROLEN Position       */
+#define USBD_EPARSPCTL_ZEROLEN_Msk       (0x1ul << USBD_EPARSPCTL_ZEROLEN_Pos)             /*!< USBD_T::EPARSPCTL: ZEROLEN Mask           */
 
-#define USBD_EPRSPCTL_SHORTTXEN_Pos      (6)                                               /*!< USBD EPRSPCTL: SHORTTXEN Position     */
-#define USBD_EPRSPCTL_SHORTTXEN_Msk      (0x1ul << USBD_EPRSPCTL_SHORTTXEN_Pos)            /*!< USBD EPRSPCTL: SHORTTXEN Mask         */
+#define USBD_EPARSPCTL_SHORTTXEN_Pos     (6)                                               /*!< USBD_T::EPARSPCTL: SHORTTXEN Position     */
+#define USBD_EPARSPCTL_SHORTTXEN_Msk     (0x1ul << USBD_EPARSPCTL_SHORTTXEN_Pos)           /*!< USBD_T::EPARSPCTL: SHORTTXEN Mask         */
 
-#define USBD_EPRSPCTL_DISBUF_Pos         (7)                                               /*!< USBD EPRSPCTL: DISBUF Position        */
-#define USBD_EPRSPCTL_DISBUF_Msk         (0x1ul << USBD_EPRSPCTL_DISBUF_Pos)               /*!< USBD EPRSPCTL: DISBUF Mask            */
+#define USBD_EPARSPCTL_DISBUF_Pos        (7)                                               /*!< USBD_T::EPARSPCTL: DISBUF Position        */
+#define USBD_EPARSPCTL_DISBUF_Msk        (0x1ul << USBD_EPARSPCTL_DISBUF_Pos)              /*!< USBD_T::EPARSPCTL: DISBUF Mask            */
 
-#define USBD_EPMPS_EPMPS_Pos             (0)                                               /*!< USBD EPMPS: EPMPS Position            */
-#define USBD_EPMPS_EPMPS_Msk             (0x7fful << USBD_EPMPS_EPMPS_Pos)                 /*!< USBD EPMPS: EPMPS Mask                */
+#define USBD_EPAMPS_EPMPS_Pos            (0)                                               /*!< USBD_T::EPAMPS: EPMPS Position            */
+#define USBD_EPAMPS_EPMPS_Msk            (0x7fful << USBD_EPAMPS_EPMPS_Pos)                /*!< USBD_T::EPAMPS: EPMPS Mask                */
 
-#define USBD_EPTXCNT_TXCNT_Pos           (0)                                               /*!< USBD EPTXCNT: TXCNT Position          */
-#define USBD_EPTXCNT_TXCNT_Msk           (0x7fful << USBD_EPTXCNT_TXCNT_Pos)               /*!< USBD EPTXCNT: TXCNT Mask              */
+#define USBD_EPATXCNT_TXCNT_Pos          (0)                                               /*!< USBD_T::EPATXCNT: TXCNT Position          */
+#define USBD_EPATXCNT_TXCNT_Msk          (0x7fful << USBD_EPATXCNT_TXCNT_Pos)              /*!< USBD_T::EPATXCNT: TXCNT Mask              */
 
-#define USBD_EPCFG_EPEN_Pos              (0)                                               /*!< USBD EPCFG: EPEN Position             */
-#define USBD_EPCFG_EPEN_Msk              (0x1ul << USBD_EPCFG_EPEN_Pos)                    /*!< USBD EPCFG: EPEN Mask                 */
+#define USBD_EPACFG_EPEN_Pos             (0)                                               /*!< USBD_T::EPACFG: EPEN Position             */
+#define USBD_EPACFG_EPEN_Msk             (0x1ul << USBD_EPACFG_EPEN_Pos)                   /*!< USBD_T::EPACFG: EPEN Mask                 */
 
-#define USBD_EPCFG_EPTYPE_Pos            (1)                                               /*!< USBD EPCFG: EPTYPE Position           */
-#define USBD_EPCFG_EPTYPE_Msk            (0x3ul << USBD_EPCFG_EPTYPE_Pos)                  /*!< USBD EPCFG: EPTYPE Mask               */
+#define USBD_EPACFG_EPTYPE_Pos           (1)                                               /*!< USBD_T::EPACFG: EPTYPE Position           */
+#define USBD_EPACFG_EPTYPE_Msk           (0x3ul << USBD_EPACFG_EPTYPE_Pos)                 /*!< USBD_T::EPACFG: EPTYPE Mask               */
 
-#define USBD_EPCFG_EPDIR_Pos             (3)                                               /*!< USBD EPCFG: EPDIR Position            */
-#define USBD_EPCFG_EPDIR_Msk             (0x1ul << USBD_EPCFG_EPDIR_Pos)                   /*!< USBD EPCFG: EPDIR Mask                */
+#define USBD_EPACFG_EPDIR_Pos            (3)                                               /*!< USBD_T::EPACFG: EPDIR Position            */
+#define USBD_EPACFG_EPDIR_Msk            (0x1ul << USBD_EPACFG_EPDIR_Pos)                  /*!< USBD_T::EPACFG: EPDIR Mask                */
 
-#define USBD_EPCFG_EPNUM_Pos             (4)                                               /*!< USBD EPCFG: EPNUM Position            */
-#define USBD_EPCFG_EPNUM_Msk             (0xful << USBD_EPCFG_EPNUM_Pos)                   /*!< USBD EPCFG: EPNUM Mask                */
+#define USBD_EPACFG_EPNUM_Pos            (4)                                               /*!< USBD_T::EPACFG: EPNUM Position            */
+#define USBD_EPACFG_EPNUM_Msk            (0xful << USBD_EPACFG_EPNUM_Pos)                  /*!< USBD_T::EPACFG: EPNUM Mask                */
 
-#define USBD_EPBUFSTART_SADDR_Pos        (0)                                               /*!< USBD EPBUFSTART: SADDR Position       */
-#define USBD_EPBUFSTART_SADDR_Msk        (0xffful << USBD_EPBUFSTART_SADDR_Pos)            /*!< USBD EPBUFSTART: SADDR Mask           */
+#define USBD_EPABUFSTART_SADDR_Pos       (0)                                               /*!< USBD_T::EPABUFSTART: SADDR Position       */
+#define USBD_EPABUFSTART_SADDR_Msk       (0xffful << USBD_EPABUFSTART_SADDR_Pos)           /*!< USBD_T::EPABUFSTART: SADDR Mask           */
 
-#define USBD_EPBUFEND_EADDR_Pos          (0)                                               /*!< USBD EPBUFEND: EADDR Position         */
-#define USBD_EPBUFEND_EADDR_Msk          (0xffful << USBD_EPBUFEND_EADDR_Pos)              /*!< USBD EPBUFEND: EADDR Mask             */
+#define USBD_EPABUFEND_EADDR_Pos         (0)                                               /*!< USBD_T::EPABUFEND: EADDR Position         */
+#define USBD_EPABUFEND_EADDR_Msk         (0xffful << USBD_EPABUFEND_EADDR_Pos)             /*!< USBD_T::EPABUFEND: EADDR Mask             */
 
-#define USBD_DMAADDR_DMAADDR_Pos         (0)                                               /*!< USBD DMAADDR: DMAADDR Position         */
-#define USBD_DMAADDR_DMAADDR_Msk         (0xfffffffful << USBD_DMAADDR_DMAADDR_Pos)        /*!< USBD DMAADDR: DMAADDR Mask             */
+#define USBD_EPBDAT_EPDAT_Pos            (0)                                               /*!< USBD_T::EPBDAT: EPDAT Position            */
+#define USBD_EPBDAT_EPDAT_Msk            (0xfffffffful << USBD_EPBDAT_EPDAT_Pos)           /*!< USBD_T::EPBDAT: EPDAT Mask                */
 
-#define USBD_PHYCTL_DPPUEN_Pos           (8)                                               /*!< USBD PHYCTL: DPPUEN Position           */
-#define USBD_PHYCTL_DPPUEN_Msk           (0x1ul << USBD_PHYCTL_DPPUEN_Pos)                 /*!< USBD PHYCTL: DPPUEN Mask               */
+#define USBD_EPBINTSTS_BUFFULLIF_Pos     (0)                                               /*!< USBD_T::EPBINTSTS: BUFFULLIF Position     */
+#define USBD_EPBINTSTS_BUFFULLIF_Msk     (0x1ul << USBD_EPBINTSTS_BUFFULLIF_Pos)           /*!< USBD_T::EPBINTSTS: BUFFULLIF Mask         */
 
-#define USBD_PHYCTL_PHYEN_Pos            (9)                                               /*!< USBD PHYCTL: PHYEN Position            */
-#define USBD_PHYCTL_PHYEN_Msk            (0x1ul << USBD_PHYCTL_PHYEN_Pos)                  /*!< USBD PHYCTL: PHYEN Mask                */
+#define USBD_EPBINTSTS_BUFEMPTYIF_Pos    (1)                                               /*!< USBD_T::EPBINTSTS: BUFEMPTYIF Position    */
+#define USBD_EPBINTSTS_BUFEMPTYIF_Msk    (0x1ul << USBD_EPBINTSTS_BUFEMPTYIF_Pos)          /*!< USBD_T::EPBINTSTS: BUFEMPTYIF Mask        */
 
-#define USBD_PHYCTL_WKEN_Pos             (24)                                              /*!< USBD PHYCTL: WKEN Position             */
-#define USBD_PHYCTL_WKEN_Msk             (0x1ul << USBD_PHYCTL_WKEN_Pos)                   /*!< USBD PHYCTL: WKEN Mask                 */
+#define USBD_EPBINTSTS_SHORTTXIF_Pos     (2)                                               /*!< USBD_T::EPBINTSTS: SHORTTXIF Position     */
+#define USBD_EPBINTSTS_SHORTTXIF_Msk     (0x1ul << USBD_EPBINTSTS_SHORTTXIF_Pos)           /*!< USBD_T::EPBINTSTS: SHORTTXIF Mask         */
 
-#define USBD_PHYCTL_VBUSDET_Pos          (31)                                              /*!< USBD PHYCTL: VBUSDET Position          */
-#define USBD_PHYCTL_VBUSDET_Msk          (0x1ul << USBD_PHYCTL_VBUSDET_Pos)                /*!< USBD PHYCTL: VBUSDET Mask              */
+#define USBD_EPBINTSTS_TXPKIF_Pos        (3)                                               /*!< USBD_T::EPBINTSTS: TXPKIF Position        */
+#define USBD_EPBINTSTS_TXPKIF_Msk        (0x1ul << USBD_EPBINTSTS_TXPKIF_Pos)              /*!< USBD_T::EPBINTSTS: TXPKIF Mask            */
+
+#define USBD_EPBINTSTS_RXPKIF_Pos        (4)                                               /*!< USBD_T::EPBINTSTS: RXPKIF Position        */
+#define USBD_EPBINTSTS_RXPKIF_Msk        (0x1ul << USBD_EPBINTSTS_RXPKIF_Pos)              /*!< USBD_T::EPBINTSTS: RXPKIF Mask            */
+
+#define USBD_EPBINTSTS_OUTTKIF_Pos       (5)                                               /*!< USBD_T::EPBINTSTS: OUTTKIF Position       */
+#define USBD_EPBINTSTS_OUTTKIF_Msk       (0x1ul << USBD_EPBINTSTS_OUTTKIF_Pos)             /*!< USBD_T::EPBINTSTS: OUTTKIF Mask           */
+
+#define USBD_EPBINTSTS_INTKIF_Pos        (6)                                               /*!< USBD_T::EPBINTSTS: INTKIF Position        */
+#define USBD_EPBINTSTS_INTKIF_Msk        (0x1ul << USBD_EPBINTSTS_INTKIF_Pos)              /*!< USBD_T::EPBINTSTS: INTKIF Mask            */
+
+#define USBD_EPBINTSTS_PINGIF_Pos        (7)                                               /*!< USBD_T::EPBINTSTS: PINGIF Position        */
+#define USBD_EPBINTSTS_PINGIF_Msk        (0x1ul << USBD_EPBINTSTS_PINGIF_Pos)              /*!< USBD_T::EPBINTSTS: PINGIF Mask            */
+
+#define USBD_EPBINTSTS_NAKIF_Pos         (8)                                               /*!< USBD_T::EPBINTSTS: NAKIF Position         */
+#define USBD_EPBINTSTS_NAKIF_Msk         (0x1ul << USBD_EPBINTSTS_NAKIF_Pos)               /*!< USBD_T::EPBINTSTS: NAKIF Mask             */
+
+#define USBD_EPBINTSTS_STALLIF_Pos       (9)                                               /*!< USBD_T::EPBINTSTS: STALLIF Position       */
+#define USBD_EPBINTSTS_STALLIF_Msk       (0x1ul << USBD_EPBINTSTS_STALLIF_Pos)             /*!< USBD_T::EPBINTSTS: STALLIF Mask           */
+
+#define USBD_EPBINTSTS_NYETIF_Pos        (10)                                              /*!< USBD_T::EPBINTSTS: NYETIF Position        */
+#define USBD_EPBINTSTS_NYETIF_Msk        (0x1ul << USBD_EPBINTSTS_NYETIF_Pos)              /*!< USBD_T::EPBINTSTS: NYETIF Mask            */
+
+#define USBD_EPBINTSTS_ERRIF_Pos         (11)                                              /*!< USBD_T::EPBINTSTS: ERRIF Position         */
+#define USBD_EPBINTSTS_ERRIF_Msk         (0x1ul << USBD_EPBINTSTS_ERRIF_Pos)               /*!< USBD_T::EPBINTSTS: ERRIF Mask             */
+
+#define USBD_EPBINTSTS_SHORTRXIF_Pos     (12)                                              /*!< USBD_T::EPBINTSTS: SHORTRXIF Position     */
+#define USBD_EPBINTSTS_SHORTRXIF_Msk     (0x1ul << USBD_EPBINTSTS_SHORTRXIF_Pos)           /*!< USBD_T::EPBINTSTS: SHORTRXIF Mask         */
+
+#define USBD_EPBINTEN_BUFFULLIEN_Pos     (0)                                               /*!< USBD_T::EPBINTEN: BUFFULLIEN Position     */
+#define USBD_EPBINTEN_BUFFULLIEN_Msk     (0x1ul << USBD_EPBINTEN_BUFFULLIEN_Pos)           /*!< USBD_T::EPBINTEN: BUFFULLIEN Mask         */
+
+#define USBD_EPBINTEN_BUFEMPTYIEN_Pos    (1)                                               /*!< USBD_T::EPBINTEN: BUFEMPTYIEN Position    */
+#define USBD_EPBINTEN_BUFEMPTYIEN_Msk    (0x1ul << USBD_EPBINTEN_BUFEMPTYIEN_Pos)          /*!< USBD_T::EPBINTEN: BUFEMPTYIEN Mask        */
+
+#define USBD_EPBINTEN_SHORTTXIEN_Pos     (2)                                               /*!< USBD_T::EPBINTEN: SHORTTXIEN Position     */
+#define USBD_EPBINTEN_SHORTTXIEN_Msk     (0x1ul << USBD_EPBINTEN_SHORTTXIEN_Pos)           /*!< USBD_T::EPBINTEN: SHORTTXIEN Mask         */
+
+#define USBD_EPBINTEN_TXPKIEN_Pos        (3)                                               /*!< USBD_T::EPBINTEN: TXPKIEN Position        */
+#define USBD_EPBINTEN_TXPKIEN_Msk        (0x1ul << USBD_EPBINTEN_TXPKIEN_Pos)              /*!< USBD_T::EPBINTEN: TXPKIEN Mask            */
+
+#define USBD_EPBINTEN_RXPKIEN_Pos        (4)                                               /*!< USBD_T::EPBINTEN: RXPKIEN Position        */
+#define USBD_EPBINTEN_RXPKIEN_Msk        (0x1ul << USBD_EPBINTEN_RXPKIEN_Pos)              /*!< USBD_T::EPBINTEN: RXPKIEN Mask            */
+
+#define USBD_EPBINTEN_OUTTKIEN_Pos       (5)                                               /*!< USBD_T::EPBINTEN: OUTTKIEN Position       */
+#define USBD_EPBINTEN_OUTTKIEN_Msk       (0x1ul << USBD_EPBINTEN_OUTTKIEN_Pos)             /*!< USBD_T::EPBINTEN: OUTTKIEN Mask           */
+
+#define USBD_EPBINTEN_INTKIEN_Pos        (6)                                               /*!< USBD_T::EPBINTEN: INTKIEN Position        */
+#define USBD_EPBINTEN_INTKIEN_Msk        (0x1ul << USBD_EPBINTEN_INTKIEN_Pos)              /*!< USBD_T::EPBINTEN: INTKIEN Mask            */
+
+#define USBD_EPBINTEN_PINGIEN_Pos        (7)                                               /*!< USBD_T::EPBINTEN: PINGIEN Position        */
+#define USBD_EPBINTEN_PINGIEN_Msk        (0x1ul << USBD_EPBINTEN_PINGIEN_Pos)              /*!< USBD_T::EPBINTEN: PINGIEN Mask            */
+
+#define USBD_EPBINTEN_NAKIEN_Pos         (8)                                               /*!< USBD_T::EPBINTEN: NAKIEN Position         */
+#define USBD_EPBINTEN_NAKIEN_Msk         (0x1ul << USBD_EPBINTEN_NAKIEN_Pos)               /*!< USBD_T::EPBINTEN: NAKIEN Mask             */
+
+#define USBD_EPBINTEN_STALLIEN_Pos       (9)                                               /*!< USBD_T::EPBINTEN: STALLIEN Position       */
+#define USBD_EPBINTEN_STALLIEN_Msk       (0x1ul << USBD_EPBINTEN_STALLIEN_Pos)             /*!< USBD_T::EPBINTEN: STALLIEN Mask           */
+
+#define USBD_EPBINTEN_NYETIEN_Pos        (10)                                              /*!< USBD_T::EPBINTEN: NYETIEN Position        */
+#define USBD_EPBINTEN_NYETIEN_Msk        (0x1ul << USBD_EPBINTEN_NYETIEN_Pos)              /*!< USBD_T::EPBINTEN: NYETIEN Mask            */
+
+#define USBD_EPBINTEN_ERRIEN_Pos         (11)                                              /*!< USBD_T::EPBINTEN: ERRIEN Position         */
+#define USBD_EPBINTEN_ERRIEN_Msk         (0x1ul << USBD_EPBINTEN_ERRIEN_Pos)               /*!< USBD_T::EPBINTEN: ERRIEN Mask             */
+
+#define USBD_EPBINTEN_SHORTRXIEN_Pos     (12)                                              /*!< USBD_T::EPBINTEN: SHORTRXIEN Position     */
+#define USBD_EPBINTEN_SHORTRXIEN_Msk     (0x1ul << USBD_EPBINTEN_SHORTRXIEN_Pos)           /*!< USBD_T::EPBINTEN: SHORTRXIEN Mask         */
+
+#define USBD_EPBDATCNT_DATCNT_Pos        (0)                                               /*!< USBD_T::EPBDATCNT: DATCNT Position        */
+#define USBD_EPBDATCNT_DATCNT_Msk        (0xfffful << USBD_EPBDATCNT_DATCNT_Pos)           /*!< USBD_T::EPBDATCNT: DATCNT Mask            */
+
+#define USBD_EPBDATCNT_DMALOOP_Pos       (16)                                              /*!< USBD_T::EPBDATCNT: DMALOOP Position       */
+#define USBD_EPBDATCNT_DMALOOP_Msk       (0x7ffful << USBD_EPBDATCNT_DMALOOP_Pos)          /*!< USBD_T::EPBDATCNT: DMALOOP Mask           */
+
+#define USBD_EPBRSPCTL_FLUSH_Pos         (0)                                               /*!< USBD_T::EPBRSPCTL: FLUSH Position         */
+#define USBD_EPBRSPCTL_FLUSH_Msk         (0x1ul << USBD_EPBRSPCTL_FLUSH_Pos)               /*!< USBD_T::EPBRSPCTL: FLUSH Mask             */
+
+#define USBD_EPBRSPCTL_MODE_Pos          (1)                                               /*!< USBD_T::EPBRSPCTL: MODE Position          */
+#define USBD_EPBRSPCTL_MODE_Msk          (0x3ul << USBD_EPBRSPCTL_MODE_Pos)                /*!< USBD_T::EPBRSPCTL: MODE Mask              */
+
+#define USBD_EPBRSPCTL_TOGGLE_Pos        (3)                                               /*!< USBD_T::EPBRSPCTL: TOGGLE Position        */
+#define USBD_EPBRSPCTL_TOGGLE_Msk        (0x1ul << USBD_EPBRSPCTL_TOGGLE_Pos)              /*!< USBD_T::EPBRSPCTL: TOGGLE Mask            */
+
+#define USBD_EPBRSPCTL_HALT_Pos          (4)                                               /*!< USBD_T::EPBRSPCTL: HALT Position          */
+#define USBD_EPBRSPCTL_HALT_Msk          (0x1ul << USBD_EPBRSPCTL_HALT_Pos)                /*!< USBD_T::EPBRSPCTL: HALT Mask              */
+
+#define USBD_EPBRSPCTL_ZEROLEN_Pos       (5)                                               /*!< USBD_T::EPBRSPCTL: ZEROLEN Position       */
+#define USBD_EPBRSPCTL_ZEROLEN_Msk       (0x1ul << USBD_EPBRSPCTL_ZEROLEN_Pos)             /*!< USBD_T::EPBRSPCTL: ZEROLEN Mask           */
+
+#define USBD_EPBRSPCTL_SHORTTXEN_Pos     (6)                                               /*!< USBD_T::EPBRSPCTL: SHORTTXEN Position     */
+#define USBD_EPBRSPCTL_SHORTTXEN_Msk     (0x1ul << USBD_EPBRSPCTL_SHORTTXEN_Pos)           /*!< USBD_T::EPBRSPCTL: SHORTTXEN Mask         */
+
+#define USBD_EPBRSPCTL_DISBUF_Pos        (7)                                               /*!< USBD_T::EPBRSPCTL: DISBUF Position        */
+#define USBD_EPBRSPCTL_DISBUF_Msk        (0x1ul << USBD_EPBRSPCTL_DISBUF_Pos)              /*!< USBD_T::EPBRSPCTL: DISBUF Mask            */
+
+#define USBD_EPBMPS_EPMPS_Pos            (0)                                               /*!< USBD_T::EPBMPS: EPMPS Position            */
+#define USBD_EPBMPS_EPMPS_Msk            (0x7fful << USBD_EPBMPS_EPMPS_Pos)                /*!< USBD_T::EPBMPS: EPMPS Mask                */
+
+#define USBD_EPBTXCNT_TXCNT_Pos          (0)                                               /*!< USBD_T::EPBTXCNT: TXCNT Position          */
+#define USBD_EPBTXCNT_TXCNT_Msk          (0x7fful << USBD_EPBTXCNT_TXCNT_Pos)              /*!< USBD_T::EPBTXCNT: TXCNT Mask              */
+
+#define USBD_EPBCFG_EPEN_Pos             (0)                                               /*!< USBD_T::EPBCFG: EPEN Position             */
+#define USBD_EPBCFG_EPEN_Msk             (0x1ul << USBD_EPBCFG_EPEN_Pos)                   /*!< USBD_T::EPBCFG: EPEN Mask                 */
+
+#define USBD_EPBCFG_EPTYPE_Pos           (1)                                               /*!< USBD_T::EPBCFG: EPTYPE Position           */
+#define USBD_EPBCFG_EPTYPE_Msk           (0x3ul << USBD_EPBCFG_EPTYPE_Pos)                 /*!< USBD_T::EPBCFG: EPTYPE Mask               */
+
+#define USBD_EPBCFG_EPDIR_Pos            (3)                                               /*!< USBD_T::EPBCFG: EPDIR Position            */
+#define USBD_EPBCFG_EPDIR_Msk            (0x1ul << USBD_EPBCFG_EPDIR_Pos)                  /*!< USBD_T::EPBCFG: EPDIR Mask                */
+
+#define USBD_EPBCFG_EPNUM_Pos            (4)                                               /*!< USBD_T::EPBCFG: EPNUM Position            */
+#define USBD_EPBCFG_EPNUM_Msk            (0xful << USBD_EPBCFG_EPNUM_Pos)                  /*!< USBD_T::EPBCFG: EPNUM Mask                */
+
+#define USBD_EPBBUFSTART_SADDR_Pos       (0)                                               /*!< USBD_T::EPBBUFSTART: SADDR Position       */
+#define USBD_EPBBUFSTART_SADDR_Msk       (0xffful << USBD_EPBBUFSTART_SADDR_Pos)           /*!< USBD_T::EPBBUFSTART: SADDR Mask           */
+
+#define USBD_EPBBUFEND_EADDR_Pos         (0)                                               /*!< USBD_T::EPBBUFEND: EADDR Position         */
+#define USBD_EPBBUFEND_EADDR_Msk         (0xffful << USBD_EPBBUFEND_EADDR_Pos)             /*!< USBD_T::EPBBUFEND: EADDR Mask             */
+
+#define USBD_EPCDAT_EPDAT_Pos            (0)                                               /*!< USBD_T::EPCDAT: EPDAT Position            */
+#define USBD_EPCDAT_EPDAT_Msk            (0xfffffffful << USBD_EPCDAT_EPDAT_Pos)           /*!< USBD_T::EPCDAT: EPDAT Mask                */
+
+#define USBD_EPCINTSTS_BUFFULLIF_Pos     (0)                                               /*!< USBD_T::EPCINTSTS: BUFFULLIF Position     */
+#define USBD_EPCINTSTS_BUFFULLIF_Msk     (0x1ul << USBD_EPCINTSTS_BUFFULLIF_Pos)           /*!< USBD_T::EPCINTSTS: BUFFULLIF Mask         */
+
+#define USBD_EPCINTSTS_BUFEMPTYIF_Pos    (1)                                               /*!< USBD_T::EPCINTSTS: BUFEMPTYIF Position    */
+#define USBD_EPCINTSTS_BUFEMPTYIF_Msk    (0x1ul << USBD_EPCINTSTS_BUFEMPTYIF_Pos)          /*!< USBD_T::EPCINTSTS: BUFEMPTYIF Mask        */
+
+#define USBD_EPCINTSTS_SHORTTXIF_Pos     (2)                                               /*!< USBD_T::EPCINTSTS: SHORTTXIF Position     */
+#define USBD_EPCINTSTS_SHORTTXIF_Msk     (0x1ul << USBD_EPCINTSTS_SHORTTXIF_Pos)           /*!< USBD_T::EPCINTSTS: SHORTTXIF Mask         */
+
+#define USBD_EPCINTSTS_TXPKIF_Pos        (3)                                               /*!< USBD_T::EPCINTSTS: TXPKIF Position        */
+#define USBD_EPCINTSTS_TXPKIF_Msk        (0x1ul << USBD_EPCINTSTS_TXPKIF_Pos)              /*!< USBD_T::EPCINTSTS: TXPKIF Mask            */
+
+#define USBD_EPCINTSTS_RXPKIF_Pos        (4)                                               /*!< USBD_T::EPCINTSTS: RXPKIF Position        */
+#define USBD_EPCINTSTS_RXPKIF_Msk        (0x1ul << USBD_EPCINTSTS_RXPKIF_Pos)              /*!< USBD_T::EPCINTSTS: RXPKIF Mask            */
+
+#define USBD_EPCINTSTS_OUTTKIF_Pos       (5)                                               /*!< USBD_T::EPCINTSTS: OUTTKIF Position       */
+#define USBD_EPCINTSTS_OUTTKIF_Msk       (0x1ul << USBD_EPCINTSTS_OUTTKIF_Pos)             /*!< USBD_T::EPCINTSTS: OUTTKIF Mask           */
+
+#define USBD_EPCINTSTS_INTKIF_Pos        (6)                                               /*!< USBD_T::EPCINTSTS: INTKIF Position        */
+#define USBD_EPCINTSTS_INTKIF_Msk        (0x1ul << USBD_EPCINTSTS_INTKIF_Pos)              /*!< USBD_T::EPCINTSTS: INTKIF Mask            */
+
+#define USBD_EPCINTSTS_PINGIF_Pos        (7)                                               /*!< USBD_T::EPCINTSTS: PINGIF Position        */
+#define USBD_EPCINTSTS_PINGIF_Msk        (0x1ul << USBD_EPCINTSTS_PINGIF_Pos)              /*!< USBD_T::EPCINTSTS: PINGIF Mask            */
+
+#define USBD_EPCINTSTS_NAKIF_Pos         (8)                                               /*!< USBD_T::EPCINTSTS: NAKIF Position         */
+#define USBD_EPCINTSTS_NAKIF_Msk         (0x1ul << USBD_EPCINTSTS_NAKIF_Pos)               /*!< USBD_T::EPCINTSTS: NAKIF Mask             */
+
+#define USBD_EPCINTSTS_STALLIF_Pos       (9)                                               /*!< USBD_T::EPCINTSTS: STALLIF Position       */
+#define USBD_EPCINTSTS_STALLIF_Msk       (0x1ul << USBD_EPCINTSTS_STALLIF_Pos)             /*!< USBD_T::EPCINTSTS: STALLIF Mask           */
+
+#define USBD_EPCINTSTS_NYETIF_Pos        (10)                                              /*!< USBD_T::EPCINTSTS: NYETIF Position        */
+#define USBD_EPCINTSTS_NYETIF_Msk        (0x1ul << USBD_EPCINTSTS_NYETIF_Pos)              /*!< USBD_T::EPCINTSTS: NYETIF Mask            */
+
+#define USBD_EPCINTSTS_ERRIF_Pos         (11)                                              /*!< USBD_T::EPCINTSTS: ERRIF Position         */
+#define USBD_EPCINTSTS_ERRIF_Msk         (0x1ul << USBD_EPCINTSTS_ERRIF_Pos)               /*!< USBD_T::EPCINTSTS: ERRIF Mask             */
+
+#define USBD_EPCINTSTS_SHORTRXIF_Pos     (12)                                              /*!< USBD_T::EPCINTSTS: SHORTRXIF Position     */
+#define USBD_EPCINTSTS_SHORTRXIF_Msk     (0x1ul << USBD_EPCINTSTS_SHORTRXIF_Pos)           /*!< USBD_T::EPCINTSTS: SHORTRXIF Mask         */
+
+#define USBD_EPCINTEN_BUFFULLIEN_Pos     (0)                                               /*!< USBD_T::EPCINTEN: BUFFULLIEN Position     */
+#define USBD_EPCINTEN_BUFFULLIEN_Msk     (0x1ul << USBD_EPCINTEN_BUFFULLIEN_Pos)           /*!< USBD_T::EPCINTEN: BUFFULLIEN Mask         */
+
+#define USBD_EPCINTEN_BUFEMPTYIEN_Pos    (1)                                               /*!< USBD_T::EPCINTEN: BUFEMPTYIEN Position    */
+#define USBD_EPCINTEN_BUFEMPTYIEN_Msk    (0x1ul << USBD_EPCINTEN_BUFEMPTYIEN_Pos)          /*!< USBD_T::EPCINTEN: BUFEMPTYIEN Mask        */
+
+#define USBD_EPCINTEN_SHORTTXIEN_Pos     (2)                                               /*!< USBD_T::EPCINTEN: SHORTTXIEN Position     */
+#define USBD_EPCINTEN_SHORTTXIEN_Msk     (0x1ul << USBD_EPCINTEN_SHORTTXIEN_Pos)           /*!< USBD_T::EPCINTEN: SHORTTXIEN Mask         */
+
+#define USBD_EPCINTEN_TXPKIEN_Pos        (3)                                               /*!< USBD_T::EPCINTEN: TXPKIEN Position        */
+#define USBD_EPCINTEN_TXPKIEN_Msk        (0x1ul << USBD_EPCINTEN_TXPKIEN_Pos)              /*!< USBD_T::EPCINTEN: TXPKIEN Mask            */
+
+#define USBD_EPCINTEN_RXPKIEN_Pos        (4)                                               /*!< USBD_T::EPCINTEN: RXPKIEN Position        */
+#define USBD_EPCINTEN_RXPKIEN_Msk        (0x1ul << USBD_EPCINTEN_RXPKIEN_Pos)              /*!< USBD_T::EPCINTEN: RXPKIEN Mask            */
+
+#define USBD_EPCINTEN_OUTTKIEN_Pos       (5)                                               /*!< USBD_T::EPCINTEN: OUTTKIEN Position       */
+#define USBD_EPCINTEN_OUTTKIEN_Msk       (0x1ul << USBD_EPCINTEN_OUTTKIEN_Pos)             /*!< USBD_T::EPCINTEN: OUTTKIEN Mask           */
+
+#define USBD_EPCINTEN_INTKIEN_Pos        (6)                                               /*!< USBD_T::EPCINTEN: INTKIEN Position        */
+#define USBD_EPCINTEN_INTKIEN_Msk        (0x1ul << USBD_EPCINTEN_INTKIEN_Pos)              /*!< USBD_T::EPCINTEN: INTKIEN Mask            */
+
+#define USBD_EPCINTEN_PINGIEN_Pos        (7)                                               /*!< USBD_T::EPCINTEN: PINGIEN Position        */
+#define USBD_EPCINTEN_PINGIEN_Msk        (0x1ul << USBD_EPCINTEN_PINGIEN_Pos)              /*!< USBD_T::EPCINTEN: PINGIEN Mask            */
+
+#define USBD_EPCINTEN_NAKIEN_Pos         (8)                                               /*!< USBD_T::EPCINTEN: NAKIEN Position         */
+#define USBD_EPCINTEN_NAKIEN_Msk         (0x1ul << USBD_EPCINTEN_NAKIEN_Pos)               /*!< USBD_T::EPCINTEN: NAKIEN Mask             */
+
+#define USBD_EPCINTEN_STALLIEN_Pos       (9)                                               /*!< USBD_T::EPCINTEN: STALLIEN Position       */
+#define USBD_EPCINTEN_STALLIEN_Msk       (0x1ul << USBD_EPCINTEN_STALLIEN_Pos)             /*!< USBD_T::EPCINTEN: STALLIEN Mask           */
+
+#define USBD_EPCINTEN_NYETIEN_Pos        (10)                                              /*!< USBD_T::EPCINTEN: NYETIEN Position        */
+#define USBD_EPCINTEN_NYETIEN_Msk        (0x1ul << USBD_EPCINTEN_NYETIEN_Pos)              /*!< USBD_T::EPCINTEN: NYETIEN Mask            */
+
+#define USBD_EPCINTEN_ERRIEN_Pos         (11)                                              /*!< USBD_T::EPCINTEN: ERRIEN Position         */
+#define USBD_EPCINTEN_ERRIEN_Msk         (0x1ul << USBD_EPCINTEN_ERRIEN_Pos)               /*!< USBD_T::EPCINTEN: ERRIEN Mask             */
+
+#define USBD_EPCINTEN_SHORTRXIEN_Pos     (12)                                              /*!< USBD_T::EPCINTEN: SHORTRXIEN Position     */
+#define USBD_EPCINTEN_SHORTRXIEN_Msk     (0x1ul << USBD_EPCINTEN_SHORTRXIEN_Pos)           /*!< USBD_T::EPCINTEN: SHORTRXIEN Mask         */
+
+#define USBD_EPCDATCNT_DATCNT_Pos        (0)                                               /*!< USBD_T::EPCDATCNT: DATCNT Position        */
+#define USBD_EPCDATCNT_DATCNT_Msk        (0xfffful << USBD_EPCDATCNT_DATCNT_Pos)           /*!< USBD_T::EPCDATCNT: DATCNT Mask            */
+
+#define USBD_EPCDATCNT_DMALOOP_Pos       (16)                                              /*!< USBD_T::EPCDATCNT: DMALOOP Position       */
+#define USBD_EPCDATCNT_DMALOOP_Msk       (0x7ffful << USBD_EPCDATCNT_DMALOOP_Pos)          /*!< USBD_T::EPCDATCNT: DMALOOP Mask           */
+
+#define USBD_EPCRSPCTL_FLUSH_Pos         (0)                                               /*!< USBD_T::EPCRSPCTL: FLUSH Position         */
+#define USBD_EPCRSPCTL_FLUSH_Msk         (0x1ul << USBD_EPCRSPCTL_FLUSH_Pos)               /*!< USBD_T::EPCRSPCTL: FLUSH Mask             */
+
+#define USBD_EPCRSPCTL_MODE_Pos          (1)                                               /*!< USBD_T::EPCRSPCTL: MODE Position          */
+#define USBD_EPCRSPCTL_MODE_Msk          (0x3ul << USBD_EPCRSPCTL_MODE_Pos)                /*!< USBD_T::EPCRSPCTL: MODE Mask              */
+
+#define USBD_EPCRSPCTL_TOGGLE_Pos        (3)                                               /*!< USBD_T::EPCRSPCTL: TOGGLE Position        */
+#define USBD_EPCRSPCTL_TOGGLE_Msk        (0x1ul << USBD_EPCRSPCTL_TOGGLE_Pos)              /*!< USBD_T::EPCRSPCTL: TOGGLE Mask            */
+
+#define USBD_EPCRSPCTL_HALT_Pos          (4)                                               /*!< USBD_T::EPCRSPCTL: HALT Position          */
+#define USBD_EPCRSPCTL_HALT_Msk          (0x1ul << USBD_EPCRSPCTL_HALT_Pos)                /*!< USBD_T::EPCRSPCTL: HALT Mask              */
+
+#define USBD_EPCRSPCTL_ZEROLEN_Pos       (5)                                               /*!< USBD_T::EPCRSPCTL: ZEROLEN Position       */
+#define USBD_EPCRSPCTL_ZEROLEN_Msk       (0x1ul << USBD_EPCRSPCTL_ZEROLEN_Pos)             /*!< USBD_T::EPCRSPCTL: ZEROLEN Mask           */
+
+#define USBD_EPCRSPCTL_SHORTTXEN_Pos     (6)                                               /*!< USBD_T::EPCRSPCTL: SHORTTXEN Position     */
+#define USBD_EPCRSPCTL_SHORTTXEN_Msk     (0x1ul << USBD_EPCRSPCTL_SHORTTXEN_Pos)           /*!< USBD_T::EPCRSPCTL: SHORTTXEN Mask         */
+
+#define USBD_EPCRSPCTL_DISBUF_Pos        (7)                                               /*!< USBD_T::EPCRSPCTL: DISBUF Position        */
+#define USBD_EPCRSPCTL_DISBUF_Msk        (0x1ul << USBD_EPCRSPCTL_DISBUF_Pos)              /*!< USBD_T::EPCRSPCTL: DISBUF Mask            */
+
+#define USBD_EPCMPS_EPMPS_Pos            (0)                                               /*!< USBD_T::EPCMPS: EPMPS Position            */
+#define USBD_EPCMPS_EPMPS_Msk            (0x7fful << USBD_EPCMPS_EPMPS_Pos)                /*!< USBD_T::EPCMPS: EPMPS Mask                */
+
+#define USBD_EPCTXCNT_TXCNT_Pos          (0)                                               /*!< USBD_T::EPCTXCNT: TXCNT Position          */
+#define USBD_EPCTXCNT_TXCNT_Msk          (0x7fful << USBD_EPCTXCNT_TXCNT_Pos)              /*!< USBD_T::EPCTXCNT: TXCNT Mask              */
+
+#define USBD_EPCCFG_EPEN_Pos             (0)                                               /*!< USBD_T::EPCCFG: EPEN Position             */
+#define USBD_EPCCFG_EPEN_Msk             (0x1ul << USBD_EPCCFG_EPEN_Pos)                   /*!< USBD_T::EPCCFG: EPEN Mask                 */
+
+#define USBD_EPCCFG_EPTYPE_Pos           (1)                                               /*!< USBD_T::EPCCFG: EPTYPE Position           */
+#define USBD_EPCCFG_EPTYPE_Msk           (0x3ul << USBD_EPCCFG_EPTYPE_Pos)                 /*!< USBD_T::EPCCFG: EPTYPE Mask               */
+
+#define USBD_EPCCFG_EPDIR_Pos            (3)                                               /*!< USBD_T::EPCCFG: EPDIR Position            */
+#define USBD_EPCCFG_EPDIR_Msk            (0x1ul << USBD_EPCCFG_EPDIR_Pos)                  /*!< USBD_T::EPCCFG: EPDIR Mask                */
+
+#define USBD_EPCCFG_EPNUM_Pos            (4)                                               /*!< USBD_T::EPCCFG: EPNUM Position            */
+#define USBD_EPCCFG_EPNUM_Msk            (0xful << USBD_EPCCFG_EPNUM_Pos)                  /*!< USBD_T::EPCCFG: EPNUM Mask                */
+
+#define USBD_EPCBUFSTART_SADDR_Pos       (0)                                               /*!< USBD_T::EPCBUFSTART: SADDR Position       */
+#define USBD_EPCBUFSTART_SADDR_Msk       (0xffful << USBD_EPCBUFSTART_SADDR_Pos)           /*!< USBD_T::EPCBUFSTART: SADDR Mask           */
+
+#define USBD_EPCBUFEND_EADDR_Pos         (0)                                               /*!< USBD_T::EPCBUFEND: EADDR Position         */
+#define USBD_EPCBUFEND_EADDR_Msk         (0xffful << USBD_EPCBUFEND_EADDR_Pos)             /*!< USBD_T::EPCBUFEND: EADDR Mask             */
+
+#define USBD_EPDDAT_EPDAT_Pos            (0)                                               /*!< USBD_T::EPDDAT: EPDAT Position            */
+#define USBD_EPDDAT_EPDAT_Msk            (0xfffffffful << USBD_EPDDAT_EPDAT_Pos)           /*!< USBD_T::EPDDAT: EPDAT Mask                */
+
+#define USBD_EPDINTSTS_BUFFULLIF_Pos     (0)                                               /*!< USBD_T::EPDINTSTS: BUFFULLIF Position     */
+#define USBD_EPDINTSTS_BUFFULLIF_Msk     (0x1ul << USBD_EPDINTSTS_BUFFULLIF_Pos)           /*!< USBD_T::EPDINTSTS: BUFFULLIF Mask         */
+
+#define USBD_EPDINTSTS_BUFEMPTYIF_Pos    (1)                                               /*!< USBD_T::EPDINTSTS: BUFEMPTYIF Position    */
+#define USBD_EPDINTSTS_BUFEMPTYIF_Msk    (0x1ul << USBD_EPDINTSTS_BUFEMPTYIF_Pos)          /*!< USBD_T::EPDINTSTS: BUFEMPTYIF Mask        */
+
+#define USBD_EPDINTSTS_SHORTTXIF_Pos     (2)                                               /*!< USBD_T::EPDINTSTS: SHORTTXIF Position     */
+#define USBD_EPDINTSTS_SHORTTXIF_Msk     (0x1ul << USBD_EPDINTSTS_SHORTTXIF_Pos)           /*!< USBD_T::EPDINTSTS: SHORTTXIF Mask         */
+
+#define USBD_EPDINTSTS_TXPKIF_Pos        (3)                                               /*!< USBD_T::EPDINTSTS: TXPKIF Position        */
+#define USBD_EPDINTSTS_TXPKIF_Msk        (0x1ul << USBD_EPDINTSTS_TXPKIF_Pos)              /*!< USBD_T::EPDINTSTS: TXPKIF Mask            */
+
+#define USBD_EPDINTSTS_RXPKIF_Pos        (4)                                               /*!< USBD_T::EPDINTSTS: RXPKIF Position        */
+#define USBD_EPDINTSTS_RXPKIF_Msk        (0x1ul << USBD_EPDINTSTS_RXPKIF_Pos)              /*!< USBD_T::EPDINTSTS: RXPKIF Mask            */
+
+#define USBD_EPDINTSTS_OUTTKIF_Pos       (5)                                               /*!< USBD_T::EPDINTSTS: OUTTKIF Position       */
+#define USBD_EPDINTSTS_OUTTKIF_Msk       (0x1ul << USBD_EPDINTSTS_OUTTKIF_Pos)             /*!< USBD_T::EPDINTSTS: OUTTKIF Mask           */
+
+#define USBD_EPDINTSTS_INTKIF_Pos        (6)                                               /*!< USBD_T::EPDINTSTS: INTKIF Position        */
+#define USBD_EPDINTSTS_INTKIF_Msk        (0x1ul << USBD_EPDINTSTS_INTKIF_Pos)              /*!< USBD_T::EPDINTSTS: INTKIF Mask            */
+
+#define USBD_EPDINTSTS_PINGIF_Pos        (7)                                               /*!< USBD_T::EPDINTSTS: PINGIF Position        */
+#define USBD_EPDINTSTS_PINGIF_Msk        (0x1ul << USBD_EPDINTSTS_PINGIF_Pos)              /*!< USBD_T::EPDINTSTS: PINGIF Mask            */
+
+#define USBD_EPDINTSTS_NAKIF_Pos         (8)                                               /*!< USBD_T::EPDINTSTS: NAKIF Position         */
+#define USBD_EPDINTSTS_NAKIF_Msk         (0x1ul << USBD_EPDINTSTS_NAKIF_Pos)               /*!< USBD_T::EPDINTSTS: NAKIF Mask             */
+
+#define USBD_EPDINTSTS_STALLIF_Pos       (9)                                               /*!< USBD_T::EPDINTSTS: STALLIF Position       */
+#define USBD_EPDINTSTS_STALLIF_Msk       (0x1ul << USBD_EPDINTSTS_STALLIF_Pos)             /*!< USBD_T::EPDINTSTS: STALLIF Mask           */
+
+#define USBD_EPDINTSTS_NYETIF_Pos        (10)                                              /*!< USBD_T::EPDINTSTS: NYETIF Position        */
+#define USBD_EPDINTSTS_NYETIF_Msk        (0x1ul << USBD_EPDINTSTS_NYETIF_Pos)              /*!< USBD_T::EPDINTSTS: NYETIF Mask            */
+
+#define USBD_EPDINTSTS_ERRIF_Pos         (11)                                              /*!< USBD_T::EPDINTSTS: ERRIF Position         */
+#define USBD_EPDINTSTS_ERRIF_Msk         (0x1ul << USBD_EPDINTSTS_ERRIF_Pos)               /*!< USBD_T::EPDINTSTS: ERRIF Mask             */
+
+#define USBD_EPDINTSTS_SHORTRXIF_Pos     (12)                                              /*!< USBD_T::EPDINTSTS: SHORTRXIF Position     */
+#define USBD_EPDINTSTS_SHORTRXIF_Msk     (0x1ul << USBD_EPDINTSTS_SHORTRXIF_Pos)           /*!< USBD_T::EPDINTSTS: SHORTRXIF Mask         */
+
+#define USBD_EPDINTEN_BUFFULLIEN_Pos     (0)                                               /*!< USBD_T::EPDINTEN: BUFFULLIEN Position     */
+#define USBD_EPDINTEN_BUFFULLIEN_Msk     (0x1ul << USBD_EPDINTEN_BUFFULLIEN_Pos)           /*!< USBD_T::EPDINTEN: BUFFULLIEN Mask         */
+
+#define USBD_EPDINTEN_BUFEMPTYIEN_Pos    (1)                                               /*!< USBD_T::EPDINTEN: BUFEMPTYIEN Position    */
+#define USBD_EPDINTEN_BUFEMPTYIEN_Msk    (0x1ul << USBD_EPDINTEN_BUFEMPTYIEN_Pos)          /*!< USBD_T::EPDINTEN: BUFEMPTYIEN Mask        */
+
+#define USBD_EPDINTEN_SHORTTXIEN_Pos     (2)                                               /*!< USBD_T::EPDINTEN: SHORTTXIEN Position     */
+#define USBD_EPDINTEN_SHORTTXIEN_Msk     (0x1ul << USBD_EPDINTEN_SHORTTXIEN_Pos)           /*!< USBD_T::EPDINTEN: SHORTTXIEN Mask         */
+
+#define USBD_EPDINTEN_TXPKIEN_Pos        (3)                                               /*!< USBD_T::EPDINTEN: TXPKIEN Position        */
+#define USBD_EPDINTEN_TXPKIEN_Msk        (0x1ul << USBD_EPDINTEN_TXPKIEN_Pos)              /*!< USBD_T::EPDINTEN: TXPKIEN Mask            */
+
+#define USBD_EPDINTEN_RXPKIEN_Pos        (4)                                               /*!< USBD_T::EPDINTEN: RXPKIEN Position        */
+#define USBD_EPDINTEN_RXPKIEN_Msk        (0x1ul << USBD_EPDINTEN_RXPKIEN_Pos)              /*!< USBD_T::EPDINTEN: RXPKIEN Mask            */
+
+#define USBD_EPDINTEN_OUTTKIEN_Pos       (5)                                               /*!< USBD_T::EPDINTEN: OUTTKIEN Position       */
+#define USBD_EPDINTEN_OUTTKIEN_Msk       (0x1ul << USBD_EPDINTEN_OUTTKIEN_Pos)             /*!< USBD_T::EPDINTEN: OUTTKIEN Mask           */
+
+#define USBD_EPDINTEN_INTKIEN_Pos        (6)                                               /*!< USBD_T::EPDINTEN: INTKIEN Position        */
+#define USBD_EPDINTEN_INTKIEN_Msk        (0x1ul << USBD_EPDINTEN_INTKIEN_Pos)              /*!< USBD_T::EPDINTEN: INTKIEN Mask            */
+
+#define USBD_EPDINTEN_PINGIEN_Pos        (7)                                               /*!< USBD_T::EPDINTEN: PINGIEN Position        */
+#define USBD_EPDINTEN_PINGIEN_Msk        (0x1ul << USBD_EPDINTEN_PINGIEN_Pos)              /*!< USBD_T::EPDINTEN: PINGIEN Mask            */
+
+#define USBD_EPDINTEN_NAKIEN_Pos         (8)                                               /*!< USBD_T::EPDINTEN: NAKIEN Position         */
+#define USBD_EPDINTEN_NAKIEN_Msk         (0x1ul << USBD_EPDINTEN_NAKIEN_Pos)               /*!< USBD_T::EPDINTEN: NAKIEN Mask             */
+
+#define USBD_EPDINTEN_STALLIEN_Pos       (9)                                               /*!< USBD_T::EPDINTEN: STALLIEN Position       */
+#define USBD_EPDINTEN_STALLIEN_Msk       (0x1ul << USBD_EPDINTEN_STALLIEN_Pos)             /*!< USBD_T::EPDINTEN: STALLIEN Mask           */
+
+#define USBD_EPDINTEN_NYETIEN_Pos        (10)                                              /*!< USBD_T::EPDINTEN: NYETIEN Position        */
+#define USBD_EPDINTEN_NYETIEN_Msk        (0x1ul << USBD_EPDINTEN_NYETIEN_Pos)              /*!< USBD_T::EPDINTEN: NYETIEN Mask            */
+
+#define USBD_EPDINTEN_ERRIEN_Pos         (11)                                              /*!< USBD_T::EPDINTEN: ERRIEN Position         */
+#define USBD_EPDINTEN_ERRIEN_Msk         (0x1ul << USBD_EPDINTEN_ERRIEN_Pos)               /*!< USBD_T::EPDINTEN: ERRIEN Mask             */
+
+#define USBD_EPDINTEN_SHORTRXIEN_Pos     (12)                                              /*!< USBD_T::EPDINTEN: SHORTRXIEN Position     */
+#define USBD_EPDINTEN_SHORTRXIEN_Msk     (0x1ul << USBD_EPDINTEN_SHORTRXIEN_Pos)           /*!< USBD_T::EPDINTEN: SHORTRXIEN Mask         */
+
+#define USBD_EPDDATCNT_DATCNT_Pos        (0)                                               /*!< USBD_T::EPDDATCNT: DATCNT Position        */
+#define USBD_EPDDATCNT_DATCNT_Msk        (0xfffful << USBD_EPDDATCNT_DATCNT_Pos)           /*!< USBD_T::EPDDATCNT: DATCNT Mask            */
+
+#define USBD_EPDDATCNT_DMALOOP_Pos       (16)                                              /*!< USBD_T::EPDDATCNT: DMALOOP Position       */
+#define USBD_EPDDATCNT_DMALOOP_Msk       (0x7ffful << USBD_EPDDATCNT_DMALOOP_Pos)          /*!< USBD_T::EPDDATCNT: DMALOOP Mask           */
+
+#define USBD_EPDRSPCTL_FLUSH_Pos         (0)                                               /*!< USBD_T::EPDRSPCTL: FLUSH Position         */
+#define USBD_EPDRSPCTL_FLUSH_Msk         (0x1ul << USBD_EPDRSPCTL_FLUSH_Pos)               /*!< USBD_T::EPDRSPCTL: FLUSH Mask             */
+
+#define USBD_EPDRSPCTL_MODE_Pos          (1)                                               /*!< USBD_T::EPDRSPCTL: MODE Position          */
+#define USBD_EPDRSPCTL_MODE_Msk          (0x3ul << USBD_EPDRSPCTL_MODE_Pos)                /*!< USBD_T::EPDRSPCTL: MODE Mask              */
+
+#define USBD_EPDRSPCTL_TOGGLE_Pos        (3)                                               /*!< USBD_T::EPDRSPCTL: TOGGLE Position        */
+#define USBD_EPDRSPCTL_TOGGLE_Msk        (0x1ul << USBD_EPDRSPCTL_TOGGLE_Pos)              /*!< USBD_T::EPDRSPCTL: TOGGLE Mask            */
+
+#define USBD_EPDRSPCTL_HALT_Pos          (4)                                               /*!< USBD_T::EPDRSPCTL: HALT Position          */
+#define USBD_EPDRSPCTL_HALT_Msk          (0x1ul << USBD_EPDRSPCTL_HALT_Pos)                /*!< USBD_T::EPDRSPCTL: HALT Mask              */
+
+#define USBD_EPDRSPCTL_ZEROLEN_Pos       (5)                                               /*!< USBD_T::EPDRSPCTL: ZEROLEN Position       */
+#define USBD_EPDRSPCTL_ZEROLEN_Msk       (0x1ul << USBD_EPDRSPCTL_ZEROLEN_Pos)             /*!< USBD_T::EPDRSPCTL: ZEROLEN Mask           */
+
+#define USBD_EPDRSPCTL_SHORTTXEN_Pos     (6)                                               /*!< USBD_T::EPDRSPCTL: SHORTTXEN Position     */
+#define USBD_EPDRSPCTL_SHORTTXEN_Msk     (0x1ul << USBD_EPDRSPCTL_SHORTTXEN_Pos)           /*!< USBD_T::EPDRSPCTL: SHORTTXEN Mask         */
+
+#define USBD_EPDRSPCTL_DISBUF_Pos        (7)                                               /*!< USBD_T::EPDRSPCTL: DISBUF Position        */
+#define USBD_EPDRSPCTL_DISBUF_Msk        (0x1ul << USBD_EPDRSPCTL_DISBUF_Pos)              /*!< USBD_T::EPDRSPCTL: DISBUF Mask            */
+
+#define USBD_EPDMPS_EPMPS_Pos            (0)                                               /*!< USBD_T::EPDMPS: EPMPS Position            */
+#define USBD_EPDMPS_EPMPS_Msk            (0x7fful << USBD_EPDMPS_EPMPS_Pos)                /*!< USBD_T::EPDMPS: EPMPS Mask                */
+
+#define USBD_EPDTXCNT_TXCNT_Pos          (0)                                               /*!< USBD_T::EPDTXCNT: TXCNT Position          */
+#define USBD_EPDTXCNT_TXCNT_Msk          (0x7fful << USBD_EPDTXCNT_TXCNT_Pos)              /*!< USBD_T::EPDTXCNT: TXCNT Mask              */
+
+#define USBD_EPDCFG_EPEN_Pos             (0)                                               /*!< USBD_T::EPDCFG: EPEN Position             */
+#define USBD_EPDCFG_EPEN_Msk             (0x1ul << USBD_EPDCFG_EPEN_Pos)                   /*!< USBD_T::EPDCFG: EPEN Mask                 */
+
+#define USBD_EPDCFG_EPTYPE_Pos           (1)                                               /*!< USBD_T::EPDCFG: EPTYPE Position           */
+#define USBD_EPDCFG_EPTYPE_Msk           (0x3ul << USBD_EPDCFG_EPTYPE_Pos)                 /*!< USBD_T::EPDCFG: EPTYPE Mask               */
+
+#define USBD_EPDCFG_EPDIR_Pos            (3)                                               /*!< USBD_T::EPDCFG: EPDIR Position            */
+#define USBD_EPDCFG_EPDIR_Msk            (0x1ul << USBD_EPDCFG_EPDIR_Pos)                  /*!< USBD_T::EPDCFG: EPDIR Mask                */
+
+#define USBD_EPDCFG_EPNUM_Pos            (4)                                               /*!< USBD_T::EPDCFG: EPNUM Position            */
+#define USBD_EPDCFG_EPNUM_Msk            (0xful << USBD_EPDCFG_EPNUM_Pos)                  /*!< USBD_T::EPDCFG: EPNUM Mask                */
+
+#define USBD_EPDBUFSTART_SADDR_Pos       (0)                                               /*!< USBD_T::EPDBUFSTART: SADDR Position       */
+#define USBD_EPDBUFSTART_SADDR_Msk       (0xffful << USBD_EPDBUFSTART_SADDR_Pos)           /*!< USBD_T::EPDBUFSTART: SADDR Mask           */
+
+#define USBD_EPDBUFEND_EADDR_Pos         (0)                                               /*!< USBD_T::EPDBUFEND: EADDR Position         */
+#define USBD_EPDBUFEND_EADDR_Msk         (0xffful << USBD_EPDBUFEND_EADDR_Pos)             /*!< USBD_T::EPDBUFEND: EADDR Mask             */
+
+#define USBD_EPEDAT_EPDAT_Pos            (0)                                               /*!< USBD_T::EPEDAT: EPDAT Position            */
+#define USBD_EPEDAT_EPDAT_Msk            (0xfffffffful << USBD_EPEDAT_EPDAT_Pos)           /*!< USBD_T::EPEDAT: EPDAT Mask                */
+
+#define USBD_EPEINTSTS_BUFFULLIF_Pos     (0)                                               /*!< USBD_T::EPEINTSTS: BUFFULLIF Position     */
+#define USBD_EPEINTSTS_BUFFULLIF_Msk     (0x1ul << USBD_EPEINTSTS_BUFFULLIF_Pos)           /*!< USBD_T::EPEINTSTS: BUFFULLIF Mask         */
+
+#define USBD_EPEINTSTS_BUFEMPTYIF_Pos    (1)                                               /*!< USBD_T::EPEINTSTS: BUFEMPTYIF Position    */
+#define USBD_EPEINTSTS_BUFEMPTYIF_Msk    (0x1ul << USBD_EPEINTSTS_BUFEMPTYIF_Pos)          /*!< USBD_T::EPEINTSTS: BUFEMPTYIF Mask        */
+
+#define USBD_EPEINTSTS_SHORTTXIF_Pos     (2)                                               /*!< USBD_T::EPEINTSTS: SHORTTXIF Position     */
+#define USBD_EPEINTSTS_SHORTTXIF_Msk     (0x1ul << USBD_EPEINTSTS_SHORTTXIF_Pos)           /*!< USBD_T::EPEINTSTS: SHORTTXIF Mask         */
+
+#define USBD_EPEINTSTS_TXPKIF_Pos        (3)                                               /*!< USBD_T::EPEINTSTS: TXPKIF Position        */
+#define USBD_EPEINTSTS_TXPKIF_Msk        (0x1ul << USBD_EPEINTSTS_TXPKIF_Pos)              /*!< USBD_T::EPEINTSTS: TXPKIF Mask            */
+
+#define USBD_EPEINTSTS_RXPKIF_Pos        (4)                                               /*!< USBD_T::EPEINTSTS: RXPKIF Position        */
+#define USBD_EPEINTSTS_RXPKIF_Msk        (0x1ul << USBD_EPEINTSTS_RXPKIF_Pos)              /*!< USBD_T::EPEINTSTS: RXPKIF Mask            */
+
+#define USBD_EPEINTSTS_OUTTKIF_Pos       (5)                                               /*!< USBD_T::EPEINTSTS: OUTTKIF Position       */
+#define USBD_EPEINTSTS_OUTTKIF_Msk       (0x1ul << USBD_EPEINTSTS_OUTTKIF_Pos)             /*!< USBD_T::EPEINTSTS: OUTTKIF Mask           */
+
+#define USBD_EPEINTSTS_INTKIF_Pos        (6)                                               /*!< USBD_T::EPEINTSTS: INTKIF Position        */
+#define USBD_EPEINTSTS_INTKIF_Msk        (0x1ul << USBD_EPEINTSTS_INTKIF_Pos)              /*!< USBD_T::EPEINTSTS: INTKIF Mask            */
+
+#define USBD_EPEINTSTS_PINGIF_Pos        (7)                                               /*!< USBD_T::EPEINTSTS: PINGIF Position        */
+#define USBD_EPEINTSTS_PINGIF_Msk        (0x1ul << USBD_EPEINTSTS_PINGIF_Pos)              /*!< USBD_T::EPEINTSTS: PINGIF Mask            */
+
+#define USBD_EPEINTSTS_NAKIF_Pos         (8)                                               /*!< USBD_T::EPEINTSTS: NAKIF Position         */
+#define USBD_EPEINTSTS_NAKIF_Msk         (0x1ul << USBD_EPEINTSTS_NAKIF_Pos)               /*!< USBD_T::EPEINTSTS: NAKIF Mask             */
+
+#define USBD_EPEINTSTS_STALLIF_Pos       (9)                                               /*!< USBD_T::EPEINTSTS: STALLIF Position       */
+#define USBD_EPEINTSTS_STALLIF_Msk       (0x1ul << USBD_EPEINTSTS_STALLIF_Pos)             /*!< USBD_T::EPEINTSTS: STALLIF Mask           */
+
+#define USBD_EPEINTSTS_NYETIF_Pos        (10)                                              /*!< USBD_T::EPEINTSTS: NYETIF Position        */
+#define USBD_EPEINTSTS_NYETIF_Msk        (0x1ul << USBD_EPEINTSTS_NYETIF_Pos)              /*!< USBD_T::EPEINTSTS: NYETIF Mask            */
+
+#define USBD_EPEINTSTS_ERRIF_Pos         (11)                                              /*!< USBD_T::EPEINTSTS: ERRIF Position         */
+#define USBD_EPEINTSTS_ERRIF_Msk         (0x1ul << USBD_EPEINTSTS_ERRIF_Pos)               /*!< USBD_T::EPEINTSTS: ERRIF Mask             */
+
+#define USBD_EPEINTSTS_SHORTRXIF_Pos     (12)                                              /*!< USBD_T::EPEINTSTS: SHORTRXIF Position     */
+#define USBD_EPEINTSTS_SHORTRXIF_Msk     (0x1ul << USBD_EPEINTSTS_SHORTRXIF_Pos)           /*!< USBD_T::EPEINTSTS: SHORTRXIF Mask         */
+
+#define USBD_EPEINTEN_BUFFULLIEN_Pos     (0)                                               /*!< USBD_T::EPEINTEN: BUFFULLIEN Position     */
+#define USBD_EPEINTEN_BUFFULLIEN_Msk     (0x1ul << USBD_EPEINTEN_BUFFULLIEN_Pos)           /*!< USBD_T::EPEINTEN: BUFFULLIEN Mask         */
+
+#define USBD_EPEINTEN_BUFEMPTYIEN_Pos    (1)                                               /*!< USBD_T::EPEINTEN: BUFEMPTYIEN Position    */
+#define USBD_EPEINTEN_BUFEMPTYIEN_Msk    (0x1ul << USBD_EPEINTEN_BUFEMPTYIEN_Pos)          /*!< USBD_T::EPEINTEN: BUFEMPTYIEN Mask        */
+
+#define USBD_EPEINTEN_SHORTTXIEN_Pos     (2)                                               /*!< USBD_T::EPEINTEN: SHORTTXIEN Position     */
+#define USBD_EPEINTEN_SHORTTXIEN_Msk     (0x1ul << USBD_EPEINTEN_SHORTTXIEN_Pos)           /*!< USBD_T::EPEINTEN: SHORTTXIEN Mask         */
+
+#define USBD_EPEINTEN_TXPKIEN_Pos        (3)                                               /*!< USBD_T::EPEINTEN: TXPKIEN Position        */
+#define USBD_EPEINTEN_TXPKIEN_Msk        (0x1ul << USBD_EPEINTEN_TXPKIEN_Pos)              /*!< USBD_T::EPEINTEN: TXPKIEN Mask            */
+
+#define USBD_EPEINTEN_RXPKIEN_Pos        (4)                                               /*!< USBD_T::EPEINTEN: RXPKIEN Position        */
+#define USBD_EPEINTEN_RXPKIEN_Msk        (0x1ul << USBD_EPEINTEN_RXPKIEN_Pos)              /*!< USBD_T::EPEINTEN: RXPKIEN Mask            */
+
+#define USBD_EPEINTEN_OUTTKIEN_Pos       (5)                                               /*!< USBD_T::EPEINTEN: OUTTKIEN Position       */
+#define USBD_EPEINTEN_OUTTKIEN_Msk       (0x1ul << USBD_EPEINTEN_OUTTKIEN_Pos)             /*!< USBD_T::EPEINTEN: OUTTKIEN Mask           */
+
+#define USBD_EPEINTEN_INTKIEN_Pos        (6)                                               /*!< USBD_T::EPEINTEN: INTKIEN Position        */
+#define USBD_EPEINTEN_INTKIEN_Msk        (0x1ul << USBD_EPEINTEN_INTKIEN_Pos)              /*!< USBD_T::EPEINTEN: INTKIEN Mask            */
+
+#define USBD_EPEINTEN_PINGIEN_Pos        (7)                                               /*!< USBD_T::EPEINTEN: PINGIEN Position        */
+#define USBD_EPEINTEN_PINGIEN_Msk        (0x1ul << USBD_EPEINTEN_PINGIEN_Pos)              /*!< USBD_T::EPEINTEN: PINGIEN Mask            */
+
+#define USBD_EPEINTEN_NAKIEN_Pos         (8)                                               /*!< USBD_T::EPEINTEN: NAKIEN Position         */
+#define USBD_EPEINTEN_NAKIEN_Msk         (0x1ul << USBD_EPEINTEN_NAKIEN_Pos)               /*!< USBD_T::EPEINTEN: NAKIEN Mask             */
+
+#define USBD_EPEINTEN_STALLIEN_Pos       (9)                                               /*!< USBD_T::EPEINTEN: STALLIEN Position       */
+#define USBD_EPEINTEN_STALLIEN_Msk       (0x1ul << USBD_EPEINTEN_STALLIEN_Pos)             /*!< USBD_T::EPEINTEN: STALLIEN Mask           */
+
+#define USBD_EPEINTEN_NYETIEN_Pos        (10)                                              /*!< USBD_T::EPEINTEN: NYETIEN Position        */
+#define USBD_EPEINTEN_NYETIEN_Msk        (0x1ul << USBD_EPEINTEN_NYETIEN_Pos)              /*!< USBD_T::EPEINTEN: NYETIEN Mask            */
+
+#define USBD_EPEINTEN_ERRIEN_Pos         (11)                                              /*!< USBD_T::EPEINTEN: ERRIEN Position         */
+#define USBD_EPEINTEN_ERRIEN_Msk         (0x1ul << USBD_EPEINTEN_ERRIEN_Pos)               /*!< USBD_T::EPEINTEN: ERRIEN Mask             */
+
+#define USBD_EPEINTEN_SHORTRXIEN_Pos     (12)                                              /*!< USBD_T::EPEINTEN: SHORTRXIEN Position     */
+#define USBD_EPEINTEN_SHORTRXIEN_Msk     (0x1ul << USBD_EPEINTEN_SHORTRXIEN_Pos)           /*!< USBD_T::EPEINTEN: SHORTRXIEN Mask         */
+
+#define USBD_EPEDATCNT_DATCNT_Pos        (0)                                               /*!< USBD_T::EPEDATCNT: DATCNT Position        */
+#define USBD_EPEDATCNT_DATCNT_Msk        (0xfffful << USBD_EPEDATCNT_DATCNT_Pos)           /*!< USBD_T::EPEDATCNT: DATCNT Mask            */
+
+#define USBD_EPEDATCNT_DMALOOP_Pos       (16)                                              /*!< USBD_T::EPEDATCNT: DMALOOP Position       */
+#define USBD_EPEDATCNT_DMALOOP_Msk       (0x7ffful << USBD_EPEDATCNT_DMALOOP_Pos)          /*!< USBD_T::EPEDATCNT: DMALOOP Mask           */
+
+#define USBD_EPERSPCTL_FLUSH_Pos         (0)                                               /*!< USBD_T::EPERSPCTL: FLUSH Position         */
+#define USBD_EPERSPCTL_FLUSH_Msk         (0x1ul << USBD_EPERSPCTL_FLUSH_Pos)               /*!< USBD_T::EPERSPCTL: FLUSH Mask             */
+
+#define USBD_EPERSPCTL_MODE_Pos          (1)                                               /*!< USBD_T::EPERSPCTL: MODE Position          */
+#define USBD_EPERSPCTL_MODE_Msk          (0x3ul << USBD_EPERSPCTL_MODE_Pos)                /*!< USBD_T::EPERSPCTL: MODE Mask              */
+
+#define USBD_EPERSPCTL_TOGGLE_Pos        (3)                                               /*!< USBD_T::EPERSPCTL: TOGGLE Position        */
+#define USBD_EPERSPCTL_TOGGLE_Msk        (0x1ul << USBD_EPERSPCTL_TOGGLE_Pos)              /*!< USBD_T::EPERSPCTL: TOGGLE Mask            */
+
+#define USBD_EPERSPCTL_HALT_Pos          (4)                                               /*!< USBD_T::EPERSPCTL: HALT Position          */
+#define USBD_EPERSPCTL_HALT_Msk          (0x1ul << USBD_EPERSPCTL_HALT_Pos)                /*!< USBD_T::EPERSPCTL: HALT Mask              */
+
+#define USBD_EPERSPCTL_ZEROLEN_Pos       (5)                                               /*!< USBD_T::EPERSPCTL: ZEROLEN Position       */
+#define USBD_EPERSPCTL_ZEROLEN_Msk       (0x1ul << USBD_EPERSPCTL_ZEROLEN_Pos)             /*!< USBD_T::EPERSPCTL: ZEROLEN Mask           */
+
+#define USBD_EPERSPCTL_SHORTTXEN_Pos     (6)                                               /*!< USBD_T::EPERSPCTL: SHORTTXEN Position     */
+#define USBD_EPERSPCTL_SHORTTXEN_Msk     (0x1ul << USBD_EPERSPCTL_SHORTTXEN_Pos)           /*!< USBD_T::EPERSPCTL: SHORTTXEN Mask         */
+
+#define USBD_EPERSPCTL_DISBUF_Pos        (7)                                               /*!< USBD_T::EPERSPCTL: DISBUF Position        */
+#define USBD_EPERSPCTL_DISBUF_Msk        (0x1ul << USBD_EPERSPCTL_DISBUF_Pos)              /*!< USBD_T::EPERSPCTL: DISBUF Mask            */
+
+#define USBD_EPEMPS_EPMPS_Pos            (0)                                               /*!< USBD_T::EPEMPS: EPMPS Position            */
+#define USBD_EPEMPS_EPMPS_Msk            (0x7fful << USBD_EPEMPS_EPMPS_Pos)                /*!< USBD_T::EPEMPS: EPMPS Mask                */
+
+#define USBD_EPETXCNT_TXCNT_Pos          (0)                                               /*!< USBD_T::EPETXCNT: TXCNT Position          */
+#define USBD_EPETXCNT_TXCNT_Msk          (0x7fful << USBD_EPETXCNT_TXCNT_Pos)              /*!< USBD_T::EPETXCNT: TXCNT Mask              */
+
+#define USBD_EPECFG_EPEN_Pos             (0)                                               /*!< USBD_T::EPECFG: EPEN Position             */
+#define USBD_EPECFG_EPEN_Msk             (0x1ul << USBD_EPECFG_EPEN_Pos)                   /*!< USBD_T::EPECFG: EPEN Mask                 */
+
+#define USBD_EPECFG_EPTYPE_Pos           (1)                                               /*!< USBD_T::EPECFG: EPTYPE Position           */
+#define USBD_EPECFG_EPTYPE_Msk           (0x3ul << USBD_EPECFG_EPTYPE_Pos)                 /*!< USBD_T::EPECFG: EPTYPE Mask               */
+
+#define USBD_EPECFG_EPDIR_Pos            (3)                                               /*!< USBD_T::EPECFG: EPDIR Position            */
+#define USBD_EPECFG_EPDIR_Msk            (0x1ul << USBD_EPECFG_EPDIR_Pos)                  /*!< USBD_T::EPECFG: EPDIR Mask                */
+
+#define USBD_EPECFG_EPNUM_Pos            (4)                                               /*!< USBD_T::EPECFG: EPNUM Position            */
+#define USBD_EPECFG_EPNUM_Msk            (0xful << USBD_EPECFG_EPNUM_Pos)                  /*!< USBD_T::EPECFG: EPNUM Mask                */
+
+#define USBD_EPEBUFSTART_SADDR_Pos       (0)                                               /*!< USBD_T::EPEBUFSTART: SADDR Position       */
+#define USBD_EPEBUFSTART_SADDR_Msk       (0xffful << USBD_EPEBUFSTART_SADDR_Pos)           /*!< USBD_T::EPEBUFSTART: SADDR Mask           */
+
+#define USBD_EPEBUFEND_EADDR_Pos         (0)                                               /*!< USBD_T::EPEBUFEND: EADDR Position         */
+#define USBD_EPEBUFEND_EADDR_Msk         (0xffful << USBD_EPEBUFEND_EADDR_Pos)             /*!< USBD_T::EPEBUFEND: EADDR Mask             */
+
+#define USBD_EPFDAT_EPDAT_Pos            (0)                                               /*!< USBD_T::EPFDAT: EPDAT Position            */
+#define USBD_EPFDAT_EPDAT_Msk            (0xfffffffful << USBD_EPFDAT_EPDAT_Pos)           /*!< USBD_T::EPFDAT: EPDAT Mask                */
+
+#define USBD_EPFINTSTS_BUFFULLIF_Pos     (0)                                               /*!< USBD_T::EPFINTSTS: BUFFULLIF Position     */
+#define USBD_EPFINTSTS_BUFFULLIF_Msk     (0x1ul << USBD_EPFINTSTS_BUFFULLIF_Pos)           /*!< USBD_T::EPFINTSTS: BUFFULLIF Mask         */
+
+#define USBD_EPFINTSTS_BUFEMPTYIF_Pos    (1)                                               /*!< USBD_T::EPFINTSTS: BUFEMPTYIF Position    */
+#define USBD_EPFINTSTS_BUFEMPTYIF_Msk    (0x1ul << USBD_EPFINTSTS_BUFEMPTYIF_Pos)          /*!< USBD_T::EPFINTSTS: BUFEMPTYIF Mask        */
+
+#define USBD_EPFINTSTS_SHORTTXIF_Pos     (2)                                               /*!< USBD_T::EPFINTSTS: SHORTTXIF Position     */
+#define USBD_EPFINTSTS_SHORTTXIF_Msk     (0x1ul << USBD_EPFINTSTS_SHORTTXIF_Pos)           /*!< USBD_T::EPFINTSTS: SHORTTXIF Mask         */
+
+#define USBD_EPFINTSTS_TXPKIF_Pos        (3)                                               /*!< USBD_T::EPFINTSTS: TXPKIF Position        */
+#define USBD_EPFINTSTS_TXPKIF_Msk        (0x1ul << USBD_EPFINTSTS_TXPKIF_Pos)              /*!< USBD_T::EPFINTSTS: TXPKIF Mask            */
+
+#define USBD_EPFINTSTS_RXPKIF_Pos        (4)                                               /*!< USBD_T::EPFINTSTS: RXPKIF Position        */
+#define USBD_EPFINTSTS_RXPKIF_Msk        (0x1ul << USBD_EPFINTSTS_RXPKIF_Pos)              /*!< USBD_T::EPFINTSTS: RXPKIF Mask            */
+
+#define USBD_EPFINTSTS_OUTTKIF_Pos       (5)                                               /*!< USBD_T::EPFINTSTS: OUTTKIF Position       */
+#define USBD_EPFINTSTS_OUTTKIF_Msk       (0x1ul << USBD_EPFINTSTS_OUTTKIF_Pos)             /*!< USBD_T::EPFINTSTS: OUTTKIF Mask           */
+
+#define USBD_EPFINTSTS_INTKIF_Pos        (6)                                               /*!< USBD_T::EPFINTSTS: INTKIF Position        */
+#define USBD_EPFINTSTS_INTKIF_Msk        (0x1ul << USBD_EPFINTSTS_INTKIF_Pos)              /*!< USBD_T::EPFINTSTS: INTKIF Mask            */
+
+#define USBD_EPFINTSTS_PINGIF_Pos        (7)                                               /*!< USBD_T::EPFINTSTS: PINGIF Position        */
+#define USBD_EPFINTSTS_PINGIF_Msk        (0x1ul << USBD_EPFINTSTS_PINGIF_Pos)              /*!< USBD_T::EPFINTSTS: PINGIF Mask            */
+
+#define USBD_EPFINTSTS_NAKIF_Pos         (8)                                               /*!< USBD_T::EPFINTSTS: NAKIF Position         */
+#define USBD_EPFINTSTS_NAKIF_Msk         (0x1ul << USBD_EPFINTSTS_NAKIF_Pos)               /*!< USBD_T::EPFINTSTS: NAKIF Mask             */
+
+#define USBD_EPFINTSTS_STALLIF_Pos       (9)                                               /*!< USBD_T::EPFINTSTS: STALLIF Position       */
+#define USBD_EPFINTSTS_STALLIF_Msk       (0x1ul << USBD_EPFINTSTS_STALLIF_Pos)             /*!< USBD_T::EPFINTSTS: STALLIF Mask           */
+
+#define USBD_EPFINTSTS_NYETIF_Pos        (10)                                              /*!< USBD_T::EPFINTSTS: NYETIF Position        */
+#define USBD_EPFINTSTS_NYETIF_Msk        (0x1ul << USBD_EPFINTSTS_NYETIF_Pos)              /*!< USBD_T::EPFINTSTS: NYETIF Mask            */
+
+#define USBD_EPFINTSTS_ERRIF_Pos         (11)                                              /*!< USBD_T::EPFINTSTS: ERRIF Position         */
+#define USBD_EPFINTSTS_ERRIF_Msk         (0x1ul << USBD_EPFINTSTS_ERRIF_Pos)               /*!< USBD_T::EPFINTSTS: ERRIF Mask             */
+
+#define USBD_EPFINTSTS_SHORTRXIF_Pos     (12)                                              /*!< USBD_T::EPFINTSTS: SHORTRXIF Position     */
+#define USBD_EPFINTSTS_SHORTRXIF_Msk     (0x1ul << USBD_EPFINTSTS_SHORTRXIF_Pos)           /*!< USBD_T::EPFINTSTS: SHORTRXIF Mask         */
+
+#define USBD_EPFINTEN_BUFFULLIEN_Pos     (0)                                               /*!< USBD_T::EPFINTEN: BUFFULLIEN Position     */
+#define USBD_EPFINTEN_BUFFULLIEN_Msk     (0x1ul << USBD_EPFINTEN_BUFFULLIEN_Pos)           /*!< USBD_T::EPFINTEN: BUFFULLIEN Mask         */
+
+#define USBD_EPFINTEN_BUFEMPTYIEN_Pos    (1)                                               /*!< USBD_T::EPFINTEN: BUFEMPTYIEN Position    */
+#define USBD_EPFINTEN_BUFEMPTYIEN_Msk    (0x1ul << USBD_EPFINTEN_BUFEMPTYIEN_Pos)          /*!< USBD_T::EPFINTEN: BUFEMPTYIEN Mask        */
+
+#define USBD_EPFINTEN_SHORTTXIEN_Pos     (2)                                               /*!< USBD_T::EPFINTEN: SHORTTXIEN Position     */
+#define USBD_EPFINTEN_SHORTTXIEN_Msk     (0x1ul << USBD_EPFINTEN_SHORTTXIEN_Pos)           /*!< USBD_T::EPFINTEN: SHORTTXIEN Mask         */
+
+#define USBD_EPFINTEN_TXPKIEN_Pos        (3)                                               /*!< USBD_T::EPFINTEN: TXPKIEN Position        */
+#define USBD_EPFINTEN_TXPKIEN_Msk        (0x1ul << USBD_EPFINTEN_TXPKIEN_Pos)              /*!< USBD_T::EPFINTEN: TXPKIEN Mask            */
+
+#define USBD_EPFINTEN_RXPKIEN_Pos        (4)                                               /*!< USBD_T::EPFINTEN: RXPKIEN Position        */
+#define USBD_EPFINTEN_RXPKIEN_Msk        (0x1ul << USBD_EPFINTEN_RXPKIEN_Pos)              /*!< USBD_T::EPFINTEN: RXPKIEN Mask            */
+
+#define USBD_EPFINTEN_OUTTKIEN_Pos       (5)                                               /*!< USBD_T::EPFINTEN: OUTTKIEN Position       */
+#define USBD_EPFINTEN_OUTTKIEN_Msk       (0x1ul << USBD_EPFINTEN_OUTTKIEN_Pos)             /*!< USBD_T::EPFINTEN: OUTTKIEN Mask           */
+
+#define USBD_EPFINTEN_INTKIEN_Pos        (6)                                               /*!< USBD_T::EPFINTEN: INTKIEN Position        */
+#define USBD_EPFINTEN_INTKIEN_Msk        (0x1ul << USBD_EPFINTEN_INTKIEN_Pos)              /*!< USBD_T::EPFINTEN: INTKIEN Mask            */
+
+#define USBD_EPFINTEN_PINGIEN_Pos        (7)                                               /*!< USBD_T::EPFINTEN: PINGIEN Position        */
+#define USBD_EPFINTEN_PINGIEN_Msk        (0x1ul << USBD_EPFINTEN_PINGIEN_Pos)              /*!< USBD_T::EPFINTEN: PINGIEN Mask            */
+
+#define USBD_EPFINTEN_NAKIEN_Pos         (8)                                               /*!< USBD_T::EPFINTEN: NAKIEN Position         */
+#define USBD_EPFINTEN_NAKIEN_Msk         (0x1ul << USBD_EPFINTEN_NAKIEN_Pos)               /*!< USBD_T::EPFINTEN: NAKIEN Mask             */
+
+#define USBD_EPFINTEN_STALLIEN_Pos       (9)                                               /*!< USBD_T::EPFINTEN: STALLIEN Position       */
+#define USBD_EPFINTEN_STALLIEN_Msk       (0x1ul << USBD_EPFINTEN_STALLIEN_Pos)             /*!< USBD_T::EPFINTEN: STALLIEN Mask           */
+
+#define USBD_EPFINTEN_NYETIEN_Pos        (10)                                              /*!< USBD_T::EPFINTEN: NYETIEN Position        */
+#define USBD_EPFINTEN_NYETIEN_Msk        (0x1ul << USBD_EPFINTEN_NYETIEN_Pos)              /*!< USBD_T::EPFINTEN: NYETIEN Mask            */
+
+#define USBD_EPFINTEN_ERRIEN_Pos         (11)                                              /*!< USBD_T::EPFINTEN: ERRIEN Position         */
+#define USBD_EPFINTEN_ERRIEN_Msk         (0x1ul << USBD_EPFINTEN_ERRIEN_Pos)               /*!< USBD_T::EPFINTEN: ERRIEN Mask             */
+
+#define USBD_EPFINTEN_SHORTRXIEN_Pos     (12)                                              /*!< USBD_T::EPFINTEN: SHORTRXIEN Position     */
+#define USBD_EPFINTEN_SHORTRXIEN_Msk     (0x1ul << USBD_EPFINTEN_SHORTRXIEN_Pos)           /*!< USBD_T::EPFINTEN: SHORTRXIEN Mask         */
+
+#define USBD_EPFDATCNT_DATCNT_Pos        (0)                                               /*!< USBD_T::EPFDATCNT: DATCNT Position        */
+#define USBD_EPFDATCNT_DATCNT_Msk        (0xfffful << USBD_EPFDATCNT_DATCNT_Pos)           /*!< USBD_T::EPFDATCNT: DATCNT Mask            */
+
+#define USBD_EPFDATCNT_DMALOOP_Pos       (16)                                              /*!< USBD_T::EPFDATCNT: DMALOOP Position       */
+#define USBD_EPFDATCNT_DMALOOP_Msk       (0x7ffful << USBD_EPFDATCNT_DMALOOP_Pos)          /*!< USBD_T::EPFDATCNT: DMALOOP Mask           */
+
+#define USBD_EPFRSPCTL_FLUSH_Pos         (0)                                               /*!< USBD_T::EPFRSPCTL: FLUSH Position         */
+#define USBD_EPFRSPCTL_FLUSH_Msk         (0x1ul << USBD_EPFRSPCTL_FLUSH_Pos)               /*!< USBD_T::EPFRSPCTL: FLUSH Mask             */
+
+#define USBD_EPFRSPCTL_MODE_Pos          (1)                                               /*!< USBD_T::EPFRSPCTL: MODE Position          */
+#define USBD_EPFRSPCTL_MODE_Msk          (0x3ul << USBD_EPFRSPCTL_MODE_Pos)                /*!< USBD_T::EPFRSPCTL: MODE Mask              */
+
+#define USBD_EPFRSPCTL_TOGGLE_Pos        (3)                                               /*!< USBD_T::EPFRSPCTL: TOGGLE Position        */
+#define USBD_EPFRSPCTL_TOGGLE_Msk        (0x1ul << USBD_EPFRSPCTL_TOGGLE_Pos)              /*!< USBD_T::EPFRSPCTL: TOGGLE Mask            */
+
+#define USBD_EPFRSPCTL_HALT_Pos          (4)                                               /*!< USBD_T::EPFRSPCTL: HALT Position          */
+#define USBD_EPFRSPCTL_HALT_Msk          (0x1ul << USBD_EPFRSPCTL_HALT_Pos)                /*!< USBD_T::EPFRSPCTL: HALT Mask              */
+
+#define USBD_EPFRSPCTL_ZEROLEN_Pos       (5)                                               /*!< USBD_T::EPFRSPCTL: ZEROLEN Position       */
+#define USBD_EPFRSPCTL_ZEROLEN_Msk       (0x1ul << USBD_EPFRSPCTL_ZEROLEN_Pos)             /*!< USBD_T::EPFRSPCTL: ZEROLEN Mask           */
+
+#define USBD_EPFRSPCTL_SHORTTXEN_Pos     (6)                                               /*!< USBD_T::EPFRSPCTL: SHORTTXEN Position     */
+#define USBD_EPFRSPCTL_SHORTTXEN_Msk     (0x1ul << USBD_EPFRSPCTL_SHORTTXEN_Pos)           /*!< USBD_T::EPFRSPCTL: SHORTTXEN Mask         */
+
+#define USBD_EPFRSPCTL_DISBUF_Pos        (7)                                               /*!< USBD_T::EPFRSPCTL: DISBUF Position        */
+#define USBD_EPFRSPCTL_DISBUF_Msk        (0x1ul << USBD_EPFRSPCTL_DISBUF_Pos)              /*!< USBD_T::EPFRSPCTL: DISBUF Mask            */
+
+#define USBD_EPFMPS_EPMPS_Pos            (0)                                               /*!< USBD_T::EPFMPS: EPMPS Position            */
+#define USBD_EPFMPS_EPMPS_Msk            (0x7fful << USBD_EPFMPS_EPMPS_Pos)                /*!< USBD_T::EPFMPS: EPMPS Mask                */
+
+#define USBD_EPFTXCNT_TXCNT_Pos          (0)                                               /*!< USBD_T::EPFTXCNT: TXCNT Position          */
+#define USBD_EPFTXCNT_TXCNT_Msk          (0x7fful << USBD_EPFTXCNT_TXCNT_Pos)              /*!< USBD_T::EPFTXCNT: TXCNT Mask              */
+
+#define USBD_EPFCFG_EPEN_Pos             (0)                                               /*!< USBD_T::EPFCFG: EPEN Position             */
+#define USBD_EPFCFG_EPEN_Msk             (0x1ul << USBD_EPFCFG_EPEN_Pos)                   /*!< USBD_T::EPFCFG: EPEN Mask                 */
+
+#define USBD_EPFCFG_EPTYPE_Pos           (1)                                               /*!< USBD_T::EPFCFG: EPTYPE Position           */
+#define USBD_EPFCFG_EPTYPE_Msk           (0x3ul << USBD_EPFCFG_EPTYPE_Pos)                 /*!< USBD_T::EPFCFG: EPTYPE Mask               */
+
+#define USBD_EPFCFG_EPDIR_Pos            (3)                                               /*!< USBD_T::EPFCFG: EPDIR Position            */
+#define USBD_EPFCFG_EPDIR_Msk            (0x1ul << USBD_EPFCFG_EPDIR_Pos)                  /*!< USBD_T::EPFCFG: EPDIR Mask                */
+
+#define USBD_EPFCFG_EPNUM_Pos            (4)                                               /*!< USBD_T::EPFCFG: EPNUM Position            */
+#define USBD_EPFCFG_EPNUM_Msk            (0xful << USBD_EPFCFG_EPNUM_Pos)                  /*!< USBD_T::EPFCFG: EPNUM Mask                */
+
+#define USBD_EPFBUFSTART_SADDR_Pos       (0)                                               /*!< USBD_T::EPFBUFSTART: SADDR Position       */
+#define USBD_EPFBUFSTART_SADDR_Msk       (0xffful << USBD_EPFBUFSTART_SADDR_Pos)           /*!< USBD_T::EPFBUFSTART: SADDR Mask           */
+
+#define USBD_EPFBUFEND_EADDR_Pos         (0)                                               /*!< USBD_T::EPFBUFEND: EADDR Position         */
+#define USBD_EPFBUFEND_EADDR_Msk         (0xffful << USBD_EPFBUFEND_EADDR_Pos)             /*!< USBD_T::EPFBUFEND: EADDR Mask             */
+
+#define USBD_EPGDAT_EPDAT_Pos            (0)                                               /*!< USBD_T::EPGDAT: EPDAT Position            */
+#define USBD_EPGDAT_EPDAT_Msk            (0xfffffffful << USBD_EPGDAT_EPDAT_Pos)           /*!< USBD_T::EPGDAT: EPDAT Mask                */
+
+#define USBD_EPGINTSTS_BUFFULLIF_Pos     (0)                                               /*!< USBD_T::EPGINTSTS: BUFFULLIF Position     */
+#define USBD_EPGINTSTS_BUFFULLIF_Msk     (0x1ul << USBD_EPGINTSTS_BUFFULLIF_Pos)           /*!< USBD_T::EPGINTSTS: BUFFULLIF Mask         */
+
+#define USBD_EPGINTSTS_BUFEMPTYIF_Pos    (1)                                               /*!< USBD_T::EPGINTSTS: BUFEMPTYIF Position    */
+#define USBD_EPGINTSTS_BUFEMPTYIF_Msk    (0x1ul << USBD_EPGINTSTS_BUFEMPTYIF_Pos)          /*!< USBD_T::EPGINTSTS: BUFEMPTYIF Mask        */
+
+#define USBD_EPGINTSTS_SHORTTXIF_Pos     (2)                                               /*!< USBD_T::EPGINTSTS: SHORTTXIF Position     */
+#define USBD_EPGINTSTS_SHORTTXIF_Msk     (0x1ul << USBD_EPGINTSTS_SHORTTXIF_Pos)           /*!< USBD_T::EPGINTSTS: SHORTTXIF Mask         */
+
+#define USBD_EPGINTSTS_TXPKIF_Pos        (3)                                               /*!< USBD_T::EPGINTSTS: TXPKIF Position        */
+#define USBD_EPGINTSTS_TXPKIF_Msk        (0x1ul << USBD_EPGINTSTS_TXPKIF_Pos)              /*!< USBD_T::EPGINTSTS: TXPKIF Mask            */
+
+#define USBD_EPGINTSTS_RXPKIF_Pos        (4)                                               /*!< USBD_T::EPGINTSTS: RXPKIF Position        */
+#define USBD_EPGINTSTS_RXPKIF_Msk        (0x1ul << USBD_EPGINTSTS_RXPKIF_Pos)              /*!< USBD_T::EPGINTSTS: RXPKIF Mask            */
+
+#define USBD_EPGINTSTS_OUTTKIF_Pos       (5)                                               /*!< USBD_T::EPGINTSTS: OUTTKIF Position       */
+#define USBD_EPGINTSTS_OUTTKIF_Msk       (0x1ul << USBD_EPGINTSTS_OUTTKIF_Pos)             /*!< USBD_T::EPGINTSTS: OUTTKIF Mask           */
+
+#define USBD_EPGINTSTS_INTKIF_Pos        (6)                                               /*!< USBD_T::EPGINTSTS: INTKIF Position        */
+#define USBD_EPGINTSTS_INTKIF_Msk        (0x1ul << USBD_EPGINTSTS_INTKIF_Pos)              /*!< USBD_T::EPGINTSTS: INTKIF Mask            */
+
+#define USBD_EPGINTSTS_PINGIF_Pos        (7)                                               /*!< USBD_T::EPGINTSTS: PINGIF Position        */
+#define USBD_EPGINTSTS_PINGIF_Msk        (0x1ul << USBD_EPGINTSTS_PINGIF_Pos)              /*!< USBD_T::EPGINTSTS: PINGIF Mask            */
+
+#define USBD_EPGINTSTS_NAKIF_Pos         (8)                                               /*!< USBD_T::EPGINTSTS: NAKIF Position         */
+#define USBD_EPGINTSTS_NAKIF_Msk         (0x1ul << USBD_EPGINTSTS_NAKIF_Pos)               /*!< USBD_T::EPGINTSTS: NAKIF Mask             */
+
+#define USBD_EPGINTSTS_STALLIF_Pos       (9)                                               /*!< USBD_T::EPGINTSTS: STALLIF Position       */
+#define USBD_EPGINTSTS_STALLIF_Msk       (0x1ul << USBD_EPGINTSTS_STALLIF_Pos)             /*!< USBD_T::EPGINTSTS: STALLIF Mask           */
+
+#define USBD_EPGINTSTS_NYETIF_Pos        (10)                                              /*!< USBD_T::EPGINTSTS: NYETIF Position        */
+#define USBD_EPGINTSTS_NYETIF_Msk        (0x1ul << USBD_EPGINTSTS_NYETIF_Pos)              /*!< USBD_T::EPGINTSTS: NYETIF Mask            */
+
+#define USBD_EPGINTSTS_ERRIF_Pos         (11)                                              /*!< USBD_T::EPGINTSTS: ERRIF Position         */
+#define USBD_EPGINTSTS_ERRIF_Msk         (0x1ul << USBD_EPGINTSTS_ERRIF_Pos)               /*!< USBD_T::EPGINTSTS: ERRIF Mask             */
+
+#define USBD_EPGINTSTS_SHORTRXIF_Pos     (12)                                              /*!< USBD_T::EPGINTSTS: SHORTRXIF Position     */
+#define USBD_EPGINTSTS_SHORTRXIF_Msk     (0x1ul << USBD_EPGINTSTS_SHORTRXIF_Pos)           /*!< USBD_T::EPGINTSTS: SHORTRXIF Mask         */
+
+#define USBD_EPGINTEN_BUFFULLIEN_Pos     (0)                                               /*!< USBD_T::EPGINTEN: BUFFULLIEN Position     */
+#define USBD_EPGINTEN_BUFFULLIEN_Msk     (0x1ul << USBD_EPGINTEN_BUFFULLIEN_Pos)           /*!< USBD_T::EPGINTEN: BUFFULLIEN Mask         */
+
+#define USBD_EPGINTEN_BUFEMPTYIEN_Pos    (1)                                               /*!< USBD_T::EPGINTEN: BUFEMPTYIEN Position    */
+#define USBD_EPGINTEN_BUFEMPTYIEN_Msk    (0x1ul << USBD_EPGINTEN_BUFEMPTYIEN_Pos)          /*!< USBD_T::EPGINTEN: BUFEMPTYIEN Mask        */
+
+#define USBD_EPGINTEN_SHORTTXIEN_Pos     (2)                                               /*!< USBD_T::EPGINTEN: SHORTTXIEN Position     */
+#define USBD_EPGINTEN_SHORTTXIEN_Msk     (0x1ul << USBD_EPGINTEN_SHORTTXIEN_Pos)           /*!< USBD_T::EPGINTEN: SHORTTXIEN Mask         */
+
+#define USBD_EPGINTEN_TXPKIEN_Pos        (3)                                               /*!< USBD_T::EPGINTEN: TXPKIEN Position        */
+#define USBD_EPGINTEN_TXPKIEN_Msk        (0x1ul << USBD_EPGINTEN_TXPKIEN_Pos)              /*!< USBD_T::EPGINTEN: TXPKIEN Mask            */
+
+#define USBD_EPGINTEN_RXPKIEN_Pos        (4)                                               /*!< USBD_T::EPGINTEN: RXPKIEN Position        */
+#define USBD_EPGINTEN_RXPKIEN_Msk        (0x1ul << USBD_EPGINTEN_RXPKIEN_Pos)              /*!< USBD_T::EPGINTEN: RXPKIEN Mask            */
+
+#define USBD_EPGINTEN_OUTTKIEN_Pos       (5)                                               /*!< USBD_T::EPGINTEN: OUTTKIEN Position       */
+#define USBD_EPGINTEN_OUTTKIEN_Msk       (0x1ul << USBD_EPGINTEN_OUTTKIEN_Pos)             /*!< USBD_T::EPGINTEN: OUTTKIEN Mask           */
+
+#define USBD_EPGINTEN_INTKIEN_Pos        (6)                                               /*!< USBD_T::EPGINTEN: INTKIEN Position        */
+#define USBD_EPGINTEN_INTKIEN_Msk        (0x1ul << USBD_EPGINTEN_INTKIEN_Pos)              /*!< USBD_T::EPGINTEN: INTKIEN Mask            */
+
+#define USBD_EPGINTEN_PINGIEN_Pos        (7)                                               /*!< USBD_T::EPGINTEN: PINGIEN Position        */
+#define USBD_EPGINTEN_PINGIEN_Msk        (0x1ul << USBD_EPGINTEN_PINGIEN_Pos)              /*!< USBD_T::EPGINTEN: PINGIEN Mask            */
+
+#define USBD_EPGINTEN_NAKIEN_Pos         (8)                                               /*!< USBD_T::EPGINTEN: NAKIEN Position         */
+#define USBD_EPGINTEN_NAKIEN_Msk         (0x1ul << USBD_EPGINTEN_NAKIEN_Pos)               /*!< USBD_T::EPGINTEN: NAKIEN Mask             */
+
+#define USBD_EPGINTEN_STALLIEN_Pos       (9)                                               /*!< USBD_T::EPGINTEN: STALLIEN Position       */
+#define USBD_EPGINTEN_STALLIEN_Msk       (0x1ul << USBD_EPGINTEN_STALLIEN_Pos)             /*!< USBD_T::EPGINTEN: STALLIEN Mask           */
+
+#define USBD_EPGINTEN_NYETIEN_Pos        (10)                                              /*!< USBD_T::EPGINTEN: NYETIEN Position        */
+#define USBD_EPGINTEN_NYETIEN_Msk        (0x1ul << USBD_EPGINTEN_NYETIEN_Pos)              /*!< USBD_T::EPGINTEN: NYETIEN Mask            */
+
+#define USBD_EPGINTEN_ERRIEN_Pos         (11)                                              /*!< USBD_T::EPGINTEN: ERRIEN Position         */
+#define USBD_EPGINTEN_ERRIEN_Msk         (0x1ul << USBD_EPGINTEN_ERRIEN_Pos)               /*!< USBD_T::EPGINTEN: ERRIEN Mask             */
+
+#define USBD_EPGINTEN_SHORTRXIEN_Pos     (12)                                              /*!< USBD_T::EPGINTEN: SHORTRXIEN Position     */
+#define USBD_EPGINTEN_SHORTRXIEN_Msk     (0x1ul << USBD_EPGINTEN_SHORTRXIEN_Pos)           /*!< USBD_T::EPGINTEN: SHORTRXIEN Mask         */
+
+#define USBD_EPGDATCNT_DATCNT_Pos        (0)                                               /*!< USBD_T::EPGDATCNT: DATCNT Position        */
+#define USBD_EPGDATCNT_DATCNT_Msk        (0xfffful << USBD_EPGDATCNT_DATCNT_Pos)           /*!< USBD_T::EPGDATCNT: DATCNT Mask            */
+
+#define USBD_EPGDATCNT_DMALOOP_Pos       (16)                                              /*!< USBD_T::EPGDATCNT: DMALOOP Position       */
+#define USBD_EPGDATCNT_DMALOOP_Msk       (0x7ffful << USBD_EPGDATCNT_DMALOOP_Pos)          /*!< USBD_T::EPGDATCNT: DMALOOP Mask           */
+
+#define USBD_EPGRSPCTL_FLUSH_Pos         (0)                                               /*!< USBD_T::EPGRSPCTL: FLUSH Position         */
+#define USBD_EPGRSPCTL_FLUSH_Msk         (0x1ul << USBD_EPGRSPCTL_FLUSH_Pos)               /*!< USBD_T::EPGRSPCTL: FLUSH Mask             */
+
+#define USBD_EPGRSPCTL_MODE_Pos          (1)                                               /*!< USBD_T::EPGRSPCTL: MODE Position          */
+#define USBD_EPGRSPCTL_MODE_Msk          (0x3ul << USBD_EPGRSPCTL_MODE_Pos)                /*!< USBD_T::EPGRSPCTL: MODE Mask              */
+
+#define USBD_EPGRSPCTL_TOGGLE_Pos        (3)                                               /*!< USBD_T::EPGRSPCTL: TOGGLE Position        */
+#define USBD_EPGRSPCTL_TOGGLE_Msk        (0x1ul << USBD_EPGRSPCTL_TOGGLE_Pos)              /*!< USBD_T::EPGRSPCTL: TOGGLE Mask            */
+
+#define USBD_EPGRSPCTL_HALT_Pos          (4)                                               /*!< USBD_T::EPGRSPCTL: HALT Position          */
+#define USBD_EPGRSPCTL_HALT_Msk          (0x1ul << USBD_EPGRSPCTL_HALT_Pos)                /*!< USBD_T::EPGRSPCTL: HALT Mask              */
+
+#define USBD_EPGRSPCTL_ZEROLEN_Pos       (5)                                               /*!< USBD_T::EPGRSPCTL: ZEROLEN Position       */
+#define USBD_EPGRSPCTL_ZEROLEN_Msk       (0x1ul << USBD_EPGRSPCTL_ZEROLEN_Pos)             /*!< USBD_T::EPGRSPCTL: ZEROLEN Mask           */
+
+#define USBD_EPGRSPCTL_SHORTTXEN_Pos     (6)                                               /*!< USBD_T::EPGRSPCTL: SHORTTXEN Position     */
+#define USBD_EPGRSPCTL_SHORTTXEN_Msk     (0x1ul << USBD_EPGRSPCTL_SHORTTXEN_Pos)           /*!< USBD_T::EPGRSPCTL: SHORTTXEN Mask         */
+
+#define USBD_EPGRSPCTL_DISBUF_Pos        (7)                                               /*!< USBD_T::EPGRSPCTL: DISBUF Position        */
+#define USBD_EPGRSPCTL_DISBUF_Msk        (0x1ul << USBD_EPGRSPCTL_DISBUF_Pos)              /*!< USBD_T::EPGRSPCTL: DISBUF Mask            */
+
+#define USBD_EPGMPS_EPMPS_Pos            (0)                                               /*!< USBD_T::EPGMPS: EPMPS Position            */
+#define USBD_EPGMPS_EPMPS_Msk            (0x7fful << USBD_EPGMPS_EPMPS_Pos)                /*!< USBD_T::EPGMPS: EPMPS Mask                */
+
+#define USBD_EPGTXCNT_TXCNT_Pos          (0)                                               /*!< USBD_T::EPGTXCNT: TXCNT Position          */
+#define USBD_EPGTXCNT_TXCNT_Msk          (0x7fful << USBD_EPGTXCNT_TXCNT_Pos)              /*!< USBD_T::EPGTXCNT: TXCNT Mask              */
+
+#define USBD_EPGCFG_EPEN_Pos             (0)                                               /*!< USBD_T::EPGCFG: EPEN Position             */
+#define USBD_EPGCFG_EPEN_Msk             (0x1ul << USBD_EPGCFG_EPEN_Pos)                   /*!< USBD_T::EPGCFG: EPEN Mask                 */
+
+#define USBD_EPGCFG_EPTYPE_Pos           (1)                                               /*!< USBD_T::EPGCFG: EPTYPE Position           */
+#define USBD_EPGCFG_EPTYPE_Msk           (0x3ul << USBD_EPGCFG_EPTYPE_Pos)                 /*!< USBD_T::EPGCFG: EPTYPE Mask               */
+
+#define USBD_EPGCFG_EPDIR_Pos            (3)                                               /*!< USBD_T::EPGCFG: EPDIR Position            */
+#define USBD_EPGCFG_EPDIR_Msk            (0x1ul << USBD_EPGCFG_EPDIR_Pos)                  /*!< USBD_T::EPGCFG: EPDIR Mask                */
+
+#define USBD_EPGCFG_EPNUM_Pos            (4)                                               /*!< USBD_T::EPGCFG: EPNUM Position            */
+#define USBD_EPGCFG_EPNUM_Msk            (0xful << USBD_EPGCFG_EPNUM_Pos)                  /*!< USBD_T::EPGCFG: EPNUM Mask                */
+
+#define USBD_EPGBUFSTART_SADDR_Pos       (0)                                               /*!< USBD_T::EPGBUFSTART: SADDR Position       */
+#define USBD_EPGBUFSTART_SADDR_Msk       (0xffful << USBD_EPGBUFSTART_SADDR_Pos)           /*!< USBD_T::EPGBUFSTART: SADDR Mask           */
+
+#define USBD_EPGBUFEND_EADDR_Pos         (0)                                               /*!< USBD_T::EPGBUFEND: EADDR Position         */
+#define USBD_EPGBUFEND_EADDR_Msk         (0xffful << USBD_EPGBUFEND_EADDR_Pos)             /*!< USBD_T::EPGBUFEND: EADDR Mask             */
+
+#define USBD_EPHDAT_EPDAT_Pos            (0)                                               /*!< USBD_T::EPHDAT: EPDAT Position            */
+#define USBD_EPHDAT_EPDAT_Msk            (0xfffffffful << USBD_EPHDAT_EPDAT_Pos)           /*!< USBD_T::EPHDAT: EPDAT Mask                */
+
+#define USBD_EPHINTSTS_BUFFULLIF_Pos     (0)                                               /*!< USBD_T::EPHINTSTS: BUFFULLIF Position     */
+#define USBD_EPHINTSTS_BUFFULLIF_Msk     (0x1ul << USBD_EPHINTSTS_BUFFULLIF_Pos)           /*!< USBD_T::EPHINTSTS: BUFFULLIF Mask         */
+
+#define USBD_EPHINTSTS_BUFEMPTYIF_Pos    (1)                                               /*!< USBD_T::EPHINTSTS: BUFEMPTYIF Position    */
+#define USBD_EPHINTSTS_BUFEMPTYIF_Msk    (0x1ul << USBD_EPHINTSTS_BUFEMPTYIF_Pos)          /*!< USBD_T::EPHINTSTS: BUFEMPTYIF Mask        */
+
+#define USBD_EPHINTSTS_SHORTTXIF_Pos     (2)                                               /*!< USBD_T::EPHINTSTS: SHORTTXIF Position     */
+#define USBD_EPHINTSTS_SHORTTXIF_Msk     (0x1ul << USBD_EPHINTSTS_SHORTTXIF_Pos)           /*!< USBD_T::EPHINTSTS: SHORTTXIF Mask         */
+
+#define USBD_EPHINTSTS_TXPKIF_Pos        (3)                                               /*!< USBD_T::EPHINTSTS: TXPKIF Position        */
+#define USBD_EPHINTSTS_TXPKIF_Msk        (0x1ul << USBD_EPHINTSTS_TXPKIF_Pos)              /*!< USBD_T::EPHINTSTS: TXPKIF Mask            */
+
+#define USBD_EPHINTSTS_RXPKIF_Pos        (4)                                               /*!< USBD_T::EPHINTSTS: RXPKIF Position        */
+#define USBD_EPHINTSTS_RXPKIF_Msk        (0x1ul << USBD_EPHINTSTS_RXPKIF_Pos)              /*!< USBD_T::EPHINTSTS: RXPKIF Mask            */
+
+#define USBD_EPHINTSTS_OUTTKIF_Pos       (5)                                               /*!< USBD_T::EPHINTSTS: OUTTKIF Position       */
+#define USBD_EPHINTSTS_OUTTKIF_Msk       (0x1ul << USBD_EPHINTSTS_OUTTKIF_Pos)             /*!< USBD_T::EPHINTSTS: OUTTKIF Mask           */
+
+#define USBD_EPHINTSTS_INTKIF_Pos        (6)                                               /*!< USBD_T::EPHINTSTS: INTKIF Position        */
+#define USBD_EPHINTSTS_INTKIF_Msk        (0x1ul << USBD_EPHINTSTS_INTKIF_Pos)              /*!< USBD_T::EPHINTSTS: INTKIF Mask            */
+
+#define USBD_EPHINTSTS_PINGIF_Pos        (7)                                               /*!< USBD_T::EPHINTSTS: PINGIF Position        */
+#define USBD_EPHINTSTS_PINGIF_Msk        (0x1ul << USBD_EPHINTSTS_PINGIF_Pos)              /*!< USBD_T::EPHINTSTS: PINGIF Mask            */
+
+#define USBD_EPHINTSTS_NAKIF_Pos         (8)                                               /*!< USBD_T::EPHINTSTS: NAKIF Position         */
+#define USBD_EPHINTSTS_NAKIF_Msk         (0x1ul << USBD_EPHINTSTS_NAKIF_Pos)               /*!< USBD_T::EPHINTSTS: NAKIF Mask             */
+
+#define USBD_EPHINTSTS_STALLIF_Pos       (9)                                               /*!< USBD_T::EPHINTSTS: STALLIF Position       */
+#define USBD_EPHINTSTS_STALLIF_Msk       (0x1ul << USBD_EPHINTSTS_STALLIF_Pos)             /*!< USBD_T::EPHINTSTS: STALLIF Mask           */
+
+#define USBD_EPHINTSTS_NYETIF_Pos        (10)                                              /*!< USBD_T::EPHINTSTS: NYETIF Position        */
+#define USBD_EPHINTSTS_NYETIF_Msk        (0x1ul << USBD_EPHINTSTS_NYETIF_Pos)              /*!< USBD_T::EPHINTSTS: NYETIF Mask            */
+
+#define USBD_EPHINTSTS_ERRIF_Pos         (11)                                              /*!< USBD_T::EPHINTSTS: ERRIF Position         */
+#define USBD_EPHINTSTS_ERRIF_Msk         (0x1ul << USBD_EPHINTSTS_ERRIF_Pos)               /*!< USBD_T::EPHINTSTS: ERRIF Mask             */
+
+#define USBD_EPHINTSTS_SHORTRXIF_Pos     (12)                                              /*!< USBD_T::EPHINTSTS: SHORTRXIF Position     */
+#define USBD_EPHINTSTS_SHORTRXIF_Msk     (0x1ul << USBD_EPHINTSTS_SHORTRXIF_Pos)           /*!< USBD_T::EPHINTSTS: SHORTRXIF Mask         */
+
+#define USBD_EPHINTEN_BUFFULLIEN_Pos     (0)                                               /*!< USBD_T::EPHINTEN: BUFFULLIEN Position     */
+#define USBD_EPHINTEN_BUFFULLIEN_Msk     (0x1ul << USBD_EPHINTEN_BUFFULLIEN_Pos)           /*!< USBD_T::EPHINTEN: BUFFULLIEN Mask         */
+
+#define USBD_EPHINTEN_BUFEMPTYIEN_Pos    (1)                                               /*!< USBD_T::EPHINTEN: BUFEMPTYIEN Position    */
+#define USBD_EPHINTEN_BUFEMPTYIEN_Msk    (0x1ul << USBD_EPHINTEN_BUFEMPTYIEN_Pos)          /*!< USBD_T::EPHINTEN: BUFEMPTYIEN Mask        */
+
+#define USBD_EPHINTEN_SHORTTXIEN_Pos     (2)                                               /*!< USBD_T::EPHINTEN: SHORTTXIEN Position     */
+#define USBD_EPHINTEN_SHORTTXIEN_Msk     (0x1ul << USBD_EPHINTEN_SHORTTXIEN_Pos)           /*!< USBD_T::EPHINTEN: SHORTTXIEN Mask         */
+
+#define USBD_EPHINTEN_TXPKIEN_Pos        (3)                                               /*!< USBD_T::EPHINTEN: TXPKIEN Position        */
+#define USBD_EPHINTEN_TXPKIEN_Msk        (0x1ul << USBD_EPHINTEN_TXPKIEN_Pos)              /*!< USBD_T::EPHINTEN: TXPKIEN Mask            */
+
+#define USBD_EPHINTEN_RXPKIEN_Pos        (4)                                               /*!< USBD_T::EPHINTEN: RXPKIEN Position        */
+#define USBD_EPHINTEN_RXPKIEN_Msk        (0x1ul << USBD_EPHINTEN_RXPKIEN_Pos)              /*!< USBD_T::EPHINTEN: RXPKIEN Mask            */
+
+#define USBD_EPHINTEN_OUTTKIEN_Pos       (5)                                               /*!< USBD_T::EPHINTEN: OUTTKIEN Position       */
+#define USBD_EPHINTEN_OUTTKIEN_Msk       (0x1ul << USBD_EPHINTEN_OUTTKIEN_Pos)             /*!< USBD_T::EPHINTEN: OUTTKIEN Mask           */
+
+#define USBD_EPHINTEN_INTKIEN_Pos        (6)                                               /*!< USBD_T::EPHINTEN: INTKIEN Position        */
+#define USBD_EPHINTEN_INTKIEN_Msk        (0x1ul << USBD_EPHINTEN_INTKIEN_Pos)              /*!< USBD_T::EPHINTEN: INTKIEN Mask            */
+
+#define USBD_EPHINTEN_PINGIEN_Pos        (7)                                               /*!< USBD_T::EPHINTEN: PINGIEN Position        */
+#define USBD_EPHINTEN_PINGIEN_Msk        (0x1ul << USBD_EPHINTEN_PINGIEN_Pos)              /*!< USBD_T::EPHINTEN: PINGIEN Mask            */
+
+#define USBD_EPHINTEN_NAKIEN_Pos         (8)                                               /*!< USBD_T::EPHINTEN: NAKIEN Position         */
+#define USBD_EPHINTEN_NAKIEN_Msk         (0x1ul << USBD_EPHINTEN_NAKIEN_Pos)               /*!< USBD_T::EPHINTEN: NAKIEN Mask             */
+
+#define USBD_EPHINTEN_STALLIEN_Pos       (9)                                               /*!< USBD_T::EPHINTEN: STALLIEN Position       */
+#define USBD_EPHINTEN_STALLIEN_Msk       (0x1ul << USBD_EPHINTEN_STALLIEN_Pos)             /*!< USBD_T::EPHINTEN: STALLIEN Mask           */
+
+#define USBD_EPHINTEN_NYETIEN_Pos        (10)                                              /*!< USBD_T::EPHINTEN: NYETIEN Position        */
+#define USBD_EPHINTEN_NYETIEN_Msk        (0x1ul << USBD_EPHINTEN_NYETIEN_Pos)              /*!< USBD_T::EPHINTEN: NYETIEN Mask            */
+
+#define USBD_EPHINTEN_ERRIEN_Pos         (11)                                              /*!< USBD_T::EPHINTEN: ERRIEN Position         */
+#define USBD_EPHINTEN_ERRIEN_Msk         (0x1ul << USBD_EPHINTEN_ERRIEN_Pos)               /*!< USBD_T::EPHINTEN: ERRIEN Mask             */
+
+#define USBD_EPHINTEN_SHORTRXIEN_Pos     (12)                                              /*!< USBD_T::EPHINTEN: SHORTRXIEN Position     */
+#define USBD_EPHINTEN_SHORTRXIEN_Msk     (0x1ul << USBD_EPHINTEN_SHORTRXIEN_Pos)           /*!< USBD_T::EPHINTEN: SHORTRXIEN Mask         */
+
+#define USBD_EPHDATCNT_DATCNT_Pos        (0)                                               /*!< USBD_T::EPHDATCNT: DATCNT Position        */
+#define USBD_EPHDATCNT_DATCNT_Msk        (0xfffful << USBD_EPHDATCNT_DATCNT_Pos)           /*!< USBD_T::EPHDATCNT: DATCNT Mask            */
+
+#define USBD_EPHDATCNT_DMALOOP_Pos       (16)                                              /*!< USBD_T::EPHDATCNT: DMALOOP Position       */
+#define USBD_EPHDATCNT_DMALOOP_Msk       (0x7ffful << USBD_EPHDATCNT_DMALOOP_Pos)          /*!< USBD_T::EPHDATCNT: DMALOOP Mask           */
+
+#define USBD_EPHRSPCTL_FLUSH_Pos         (0)                                               /*!< USBD_T::EPHRSPCTL: FLUSH Position         */
+#define USBD_EPHRSPCTL_FLUSH_Msk         (0x1ul << USBD_EPHRSPCTL_FLUSH_Pos)               /*!< USBD_T::EPHRSPCTL: FLUSH Mask             */
+
+#define USBD_EPHRSPCTL_MODE_Pos          (1)                                               /*!< USBD_T::EPHRSPCTL: MODE Position          */
+#define USBD_EPHRSPCTL_MODE_Msk          (0x3ul << USBD_EPHRSPCTL_MODE_Pos)                /*!< USBD_T::EPHRSPCTL: MODE Mask              */
+
+#define USBD_EPHRSPCTL_TOGGLE_Pos        (3)                                               /*!< USBD_T::EPHRSPCTL: TOGGLE Position        */
+#define USBD_EPHRSPCTL_TOGGLE_Msk        (0x1ul << USBD_EPHRSPCTL_TOGGLE_Pos)              /*!< USBD_T::EPHRSPCTL: TOGGLE Mask            */
+
+#define USBD_EPHRSPCTL_HALT_Pos          (4)                                               /*!< USBD_T::EPHRSPCTL: HALT Position          */
+#define USBD_EPHRSPCTL_HALT_Msk          (0x1ul << USBD_EPHRSPCTL_HALT_Pos)                /*!< USBD_T::EPHRSPCTL: HALT Mask              */
+
+#define USBD_EPHRSPCTL_ZEROLEN_Pos       (5)                                               /*!< USBD_T::EPHRSPCTL: ZEROLEN Position       */
+#define USBD_EPHRSPCTL_ZEROLEN_Msk       (0x1ul << USBD_EPHRSPCTL_ZEROLEN_Pos)             /*!< USBD_T::EPHRSPCTL: ZEROLEN Mask           */
+
+#define USBD_EPHRSPCTL_SHORTTXEN_Pos     (6)                                               /*!< USBD_T::EPHRSPCTL: SHORTTXEN Position     */
+#define USBD_EPHRSPCTL_SHORTTXEN_Msk     (0x1ul << USBD_EPHRSPCTL_SHORTTXEN_Pos)           /*!< USBD_T::EPHRSPCTL: SHORTTXEN Mask         */
+
+#define USBD_EPHRSPCTL_DISBUF_Pos        (7)                                               /*!< USBD_T::EPHRSPCTL: DISBUF Position        */
+#define USBD_EPHRSPCTL_DISBUF_Msk        (0x1ul << USBD_EPHRSPCTL_DISBUF_Pos)              /*!< USBD_T::EPHRSPCTL: DISBUF Mask            */
+
+#define USBD_EPHMPS_EPMPS_Pos            (0)                                               /*!< USBD_T::EPHMPS: EPMPS Position            */
+#define USBD_EPHMPS_EPMPS_Msk            (0x7fful << USBD_EPHMPS_EPMPS_Pos)                /*!< USBD_T::EPHMPS: EPMPS Mask                */
+
+#define USBD_EPHTXCNT_TXCNT_Pos          (0)                                               /*!< USBD_T::EPHTXCNT: TXCNT Position          */
+#define USBD_EPHTXCNT_TXCNT_Msk          (0x7fful << USBD_EPHTXCNT_TXCNT_Pos)              /*!< USBD_T::EPHTXCNT: TXCNT Mask              */
+
+#define USBD_EPHCFG_EPEN_Pos             (0)                                               /*!< USBD_T::EPHCFG: EPEN Position             */
+#define USBD_EPHCFG_EPEN_Msk             (0x1ul << USBD_EPHCFG_EPEN_Pos)                   /*!< USBD_T::EPHCFG: EPEN Mask                 */
+
+#define USBD_EPHCFG_EPTYPE_Pos           (1)                                               /*!< USBD_T::EPHCFG: EPTYPE Position           */
+#define USBD_EPHCFG_EPTYPE_Msk           (0x3ul << USBD_EPHCFG_EPTYPE_Pos)                 /*!< USBD_T::EPHCFG: EPTYPE Mask               */
+
+#define USBD_EPHCFG_EPDIR_Pos            (3)                                               /*!< USBD_T::EPHCFG: EPDIR Position            */
+#define USBD_EPHCFG_EPDIR_Msk            (0x1ul << USBD_EPHCFG_EPDIR_Pos)                  /*!< USBD_T::EPHCFG: EPDIR Mask                */
+
+#define USBD_EPHCFG_EPNUM_Pos            (4)                                               /*!< USBD_T::EPHCFG: EPNUM Position            */
+#define USBD_EPHCFG_EPNUM_Msk            (0xful << USBD_EPHCFG_EPNUM_Pos)                  /*!< USBD_T::EPHCFG: EPNUM Mask                */
+
+#define USBD_EPHBUFSTART_SADDR_Pos       (0)                                               /*!< USBD_T::EPHBUFSTART: SADDR Position       */
+#define USBD_EPHBUFSTART_SADDR_Msk       (0xffful << USBD_EPHBUFSTART_SADDR_Pos)           /*!< USBD_T::EPHBUFSTART: SADDR Mask           */
+
+#define USBD_EPHBUFEND_EADDR_Pos         (0)                                               /*!< USBD_T::EPHBUFEND: EADDR Position         */
+#define USBD_EPHBUFEND_EADDR_Msk         (0xffful << USBD_EPHBUFEND_EADDR_Pos)             /*!< USBD_T::EPHBUFEND: EADDR Mask             */
+
+#define USBD_EPIDAT_EPDAT_Pos            (0)                                               /*!< USBD_T::EPIDAT: EPDAT Position            */
+#define USBD_EPIDAT_EPDAT_Msk            (0xfffffffful << USBD_EPIDAT_EPDAT_Pos)           /*!< USBD_T::EPIDAT: EPDAT Mask                */
+
+#define USBD_EPIINTSTS_BUFFULLIF_Pos     (0)                                               /*!< USBD_T::EPIINTSTS: BUFFULLIF Position     */
+#define USBD_EPIINTSTS_BUFFULLIF_Msk     (0x1ul << USBD_EPIINTSTS_BUFFULLIF_Pos)           /*!< USBD_T::EPIINTSTS: BUFFULLIF Mask         */
+
+#define USBD_EPIINTSTS_BUFEMPTYIF_Pos    (1)                                               /*!< USBD_T::EPIINTSTS: BUFEMPTYIF Position    */
+#define USBD_EPIINTSTS_BUFEMPTYIF_Msk    (0x1ul << USBD_EPIINTSTS_BUFEMPTYIF_Pos)          /*!< USBD_T::EPIINTSTS: BUFEMPTYIF Mask        */
+
+#define USBD_EPIINTSTS_SHORTTXIF_Pos     (2)                                               /*!< USBD_T::EPIINTSTS: SHORTTXIF Position     */
+#define USBD_EPIINTSTS_SHORTTXIF_Msk     (0x1ul << USBD_EPIINTSTS_SHORTTXIF_Pos)           /*!< USBD_T::EPIINTSTS: SHORTTXIF Mask         */
+
+#define USBD_EPIINTSTS_TXPKIF_Pos        (3)                                               /*!< USBD_T::EPIINTSTS: TXPKIF Position        */
+#define USBD_EPIINTSTS_TXPKIF_Msk        (0x1ul << USBD_EPIINTSTS_TXPKIF_Pos)              /*!< USBD_T::EPIINTSTS: TXPKIF Mask            */
+
+#define USBD_EPIINTSTS_RXPKIF_Pos        (4)                                               /*!< USBD_T::EPIINTSTS: RXPKIF Position        */
+#define USBD_EPIINTSTS_RXPKIF_Msk        (0x1ul << USBD_EPIINTSTS_RXPKIF_Pos)              /*!< USBD_T::EPIINTSTS: RXPKIF Mask            */
+
+#define USBD_EPIINTSTS_OUTTKIF_Pos       (5)                                               /*!< USBD_T::EPIINTSTS: OUTTKIF Position       */
+#define USBD_EPIINTSTS_OUTTKIF_Msk       (0x1ul << USBD_EPIINTSTS_OUTTKIF_Pos)             /*!< USBD_T::EPIINTSTS: OUTTKIF Mask           */
+
+#define USBD_EPIINTSTS_INTKIF_Pos        (6)                                               /*!< USBD_T::EPIINTSTS: INTKIF Position        */
+#define USBD_EPIINTSTS_INTKIF_Msk        (0x1ul << USBD_EPIINTSTS_INTKIF_Pos)              /*!< USBD_T::EPIINTSTS: INTKIF Mask            */
+
+#define USBD_EPIINTSTS_PINGIF_Pos        (7)                                               /*!< USBD_T::EPIINTSTS: PINGIF Position        */
+#define USBD_EPIINTSTS_PINGIF_Msk        (0x1ul << USBD_EPIINTSTS_PINGIF_Pos)              /*!< USBD_T::EPIINTSTS: PINGIF Mask            */
+
+#define USBD_EPIINTSTS_NAKIF_Pos         (8)                                               /*!< USBD_T::EPIINTSTS: NAKIF Position         */
+#define USBD_EPIINTSTS_NAKIF_Msk         (0x1ul << USBD_EPIINTSTS_NAKIF_Pos)               /*!< USBD_T::EPIINTSTS: NAKIF Mask             */
+
+#define USBD_EPIINTSTS_STALLIF_Pos       (9)                                               /*!< USBD_T::EPIINTSTS: STALLIF Position       */
+#define USBD_EPIINTSTS_STALLIF_Msk       (0x1ul << USBD_EPIINTSTS_STALLIF_Pos)             /*!< USBD_T::EPIINTSTS: STALLIF Mask           */
+
+#define USBD_EPIINTSTS_NYETIF_Pos        (10)                                              /*!< USBD_T::EPIINTSTS: NYETIF Position        */
+#define USBD_EPIINTSTS_NYETIF_Msk        (0x1ul << USBD_EPIINTSTS_NYETIF_Pos)              /*!< USBD_T::EPIINTSTS: NYETIF Mask            */
+
+#define USBD_EPIINTSTS_ERRIF_Pos         (11)                                              /*!< USBD_T::EPIINTSTS: ERRIF Position         */
+#define USBD_EPIINTSTS_ERRIF_Msk         (0x1ul << USBD_EPIINTSTS_ERRIF_Pos)               /*!< USBD_T::EPIINTSTS: ERRIF Mask             */
+
+#define USBD_EPIINTSTS_SHORTRXIF_Pos     (12)                                              /*!< USBD_T::EPIINTSTS: SHORTRXIF Position     */
+#define USBD_EPIINTSTS_SHORTRXIF_Msk     (0x1ul << USBD_EPIINTSTS_SHORTRXIF_Pos)           /*!< USBD_T::EPIINTSTS: SHORTRXIF Mask         */
+
+#define USBD_EPIINTEN_BUFFULLIEN_Pos     (0)                                               /*!< USBD_T::EPIINTEN: BUFFULLIEN Position     */
+#define USBD_EPIINTEN_BUFFULLIEN_Msk     (0x1ul << USBD_EPIINTEN_BUFFULLIEN_Pos)           /*!< USBD_T::EPIINTEN: BUFFULLIEN Mask         */
+
+#define USBD_EPIINTEN_BUFEMPTYIEN_Pos    (1)                                               /*!< USBD_T::EPIINTEN: BUFEMPTYIEN Position    */
+#define USBD_EPIINTEN_BUFEMPTYIEN_Msk    (0x1ul << USBD_EPIINTEN_BUFEMPTYIEN_Pos)          /*!< USBD_T::EPIINTEN: BUFEMPTYIEN Mask        */
+
+#define USBD_EPIINTEN_SHORTTXIEN_Pos     (2)                                               /*!< USBD_T::EPIINTEN: SHORTTXIEN Position     */
+#define USBD_EPIINTEN_SHORTTXIEN_Msk     (0x1ul << USBD_EPIINTEN_SHORTTXIEN_Pos)           /*!< USBD_T::EPIINTEN: SHORTTXIEN Mask         */
+
+#define USBD_EPIINTEN_TXPKIEN_Pos        (3)                                               /*!< USBD_T::EPIINTEN: TXPKIEN Position        */
+#define USBD_EPIINTEN_TXPKIEN_Msk        (0x1ul << USBD_EPIINTEN_TXPKIEN_Pos)              /*!< USBD_T::EPIINTEN: TXPKIEN Mask            */
+
+#define USBD_EPIINTEN_RXPKIEN_Pos        (4)                                               /*!< USBD_T::EPIINTEN: RXPKIEN Position        */
+#define USBD_EPIINTEN_RXPKIEN_Msk        (0x1ul << USBD_EPIINTEN_RXPKIEN_Pos)              /*!< USBD_T::EPIINTEN: RXPKIEN Mask            */
+
+#define USBD_EPIINTEN_OUTTKIEN_Pos       (5)                                               /*!< USBD_T::EPIINTEN: OUTTKIEN Position       */
+#define USBD_EPIINTEN_OUTTKIEN_Msk       (0x1ul << USBD_EPIINTEN_OUTTKIEN_Pos)             /*!< USBD_T::EPIINTEN: OUTTKIEN Mask           */
+
+#define USBD_EPIINTEN_INTKIEN_Pos        (6)                                               /*!< USBD_T::EPIINTEN: INTKIEN Position        */
+#define USBD_EPIINTEN_INTKIEN_Msk        (0x1ul << USBD_EPIINTEN_INTKIEN_Pos)              /*!< USBD_T::EPIINTEN: INTKIEN Mask            */
+
+#define USBD_EPIINTEN_PINGIEN_Pos        (7)                                               /*!< USBD_T::EPIINTEN: PINGIEN Position        */
+#define USBD_EPIINTEN_PINGIEN_Msk        (0x1ul << USBD_EPIINTEN_PINGIEN_Pos)              /*!< USBD_T::EPIINTEN: PINGIEN Mask            */
+
+#define USBD_EPIINTEN_NAKIEN_Pos         (8)                                               /*!< USBD_T::EPIINTEN: NAKIEN Position         */
+#define USBD_EPIINTEN_NAKIEN_Msk         (0x1ul << USBD_EPIINTEN_NAKIEN_Pos)               /*!< USBD_T::EPIINTEN: NAKIEN Mask             */
+
+#define USBD_EPIINTEN_STALLIEN_Pos       (9)                                               /*!< USBD_T::EPIINTEN: STALLIEN Position       */
+#define USBD_EPIINTEN_STALLIEN_Msk       (0x1ul << USBD_EPIINTEN_STALLIEN_Pos)             /*!< USBD_T::EPIINTEN: STALLIEN Mask           */
+
+#define USBD_EPIINTEN_NYETIEN_Pos        (10)                                              /*!< USBD_T::EPIINTEN: NYETIEN Position        */
+#define USBD_EPIINTEN_NYETIEN_Msk        (0x1ul << USBD_EPIINTEN_NYETIEN_Pos)              /*!< USBD_T::EPIINTEN: NYETIEN Mask            */
+
+#define USBD_EPIINTEN_ERRIEN_Pos         (11)                                              /*!< USBD_T::EPIINTEN: ERRIEN Position         */
+#define USBD_EPIINTEN_ERRIEN_Msk         (0x1ul << USBD_EPIINTEN_ERRIEN_Pos)               /*!< USBD_T::EPIINTEN: ERRIEN Mask             */
+
+#define USBD_EPIINTEN_SHORTRXIEN_Pos     (12)                                              /*!< USBD_T::EPIINTEN: SHORTRXIEN Position     */
+#define USBD_EPIINTEN_SHORTRXIEN_Msk     (0x1ul << USBD_EPIINTEN_SHORTRXIEN_Pos)           /*!< USBD_T::EPIINTEN: SHORTRXIEN Mask         */
+
+#define USBD_EPIDATCNT_DATCNT_Pos        (0)                                               /*!< USBD_T::EPIDATCNT: DATCNT Position        */
+#define USBD_EPIDATCNT_DATCNT_Msk        (0xfffful << USBD_EPIDATCNT_DATCNT_Pos)           /*!< USBD_T::EPIDATCNT: DATCNT Mask            */
+
+#define USBD_EPIDATCNT_DMALOOP_Pos       (16)                                              /*!< USBD_T::EPIDATCNT: DMALOOP Position       */
+#define USBD_EPIDATCNT_DMALOOP_Msk       (0x7ffful << USBD_EPIDATCNT_DMALOOP_Pos)          /*!< USBD_T::EPIDATCNT: DMALOOP Mask           */
+
+#define USBD_EPIRSPCTL_FLUSH_Pos         (0)                                               /*!< USBD_T::EPIRSPCTL: FLUSH Position         */
+#define USBD_EPIRSPCTL_FLUSH_Msk         (0x1ul << USBD_EPIRSPCTL_FLUSH_Pos)               /*!< USBD_T::EPIRSPCTL: FLUSH Mask             */
+
+#define USBD_EPIRSPCTL_MODE_Pos          (1)                                               /*!< USBD_T::EPIRSPCTL: MODE Position          */
+#define USBD_EPIRSPCTL_MODE_Msk          (0x3ul << USBD_EPIRSPCTL_MODE_Pos)                /*!< USBD_T::EPIRSPCTL: MODE Mask              */
+
+#define USBD_EPIRSPCTL_TOGGLE_Pos        (3)                                               /*!< USBD_T::EPIRSPCTL: TOGGLE Position        */
+#define USBD_EPIRSPCTL_TOGGLE_Msk        (0x1ul << USBD_EPIRSPCTL_TOGGLE_Pos)              /*!< USBD_T::EPIRSPCTL: TOGGLE Mask            */
+
+#define USBD_EPIRSPCTL_HALT_Pos          (4)                                               /*!< USBD_T::EPIRSPCTL: HALT Position          */
+#define USBD_EPIRSPCTL_HALT_Msk          (0x1ul << USBD_EPIRSPCTL_HALT_Pos)                /*!< USBD_T::EPIRSPCTL: HALT Mask              */
+
+#define USBD_EPIRSPCTL_ZEROLEN_Pos       (5)                                               /*!< USBD_T::EPIRSPCTL: ZEROLEN Position       */
+#define USBD_EPIRSPCTL_ZEROLEN_Msk       (0x1ul << USBD_EPIRSPCTL_ZEROLEN_Pos)             /*!< USBD_T::EPIRSPCTL: ZEROLEN Mask           */
+
+#define USBD_EPIRSPCTL_SHORTTXEN_Pos     (6)                                               /*!< USBD_T::EPIRSPCTL: SHORTTXEN Position     */
+#define USBD_EPIRSPCTL_SHORTTXEN_Msk     (0x1ul << USBD_EPIRSPCTL_SHORTTXEN_Pos)           /*!< USBD_T::EPIRSPCTL: SHORTTXEN Mask         */
+
+#define USBD_EPIRSPCTL_DISBUF_Pos        (7)                                               /*!< USBD_T::EPIRSPCTL: DISBUF Position        */
+#define USBD_EPIRSPCTL_DISBUF_Msk        (0x1ul << USBD_EPIRSPCTL_DISBUF_Pos)              /*!< USBD_T::EPIRSPCTL: DISBUF Mask            */
+
+#define USBD_EPIMPS_EPMPS_Pos            (0)                                               /*!< USBD_T::EPIMPS: EPMPS Position            */
+#define USBD_EPIMPS_EPMPS_Msk            (0x7fful << USBD_EPIMPS_EPMPS_Pos)                /*!< USBD_T::EPIMPS: EPMPS Mask                */
+
+#define USBD_EPITXCNT_TXCNT_Pos          (0)                                               /*!< USBD_T::EPITXCNT: TXCNT Position          */
+#define USBD_EPITXCNT_TXCNT_Msk          (0x7fful << USBD_EPITXCNT_TXCNT_Pos)              /*!< USBD_T::EPITXCNT: TXCNT Mask              */
+
+#define USBD_EPICFG_EPEN_Pos             (0)                                               /*!< USBD_T::EPICFG: EPEN Position             */
+#define USBD_EPICFG_EPEN_Msk             (0x1ul << USBD_EPICFG_EPEN_Pos)                   /*!< USBD_T::EPICFG: EPEN Mask                 */
+
+#define USBD_EPICFG_EPTYPE_Pos           (1)                                               /*!< USBD_T::EPICFG: EPTYPE Position           */
+#define USBD_EPICFG_EPTYPE_Msk           (0x3ul << USBD_EPICFG_EPTYPE_Pos)                 /*!< USBD_T::EPICFG: EPTYPE Mask               */
+
+#define USBD_EPICFG_EPDIR_Pos            (3)                                               /*!< USBD_T::EPICFG: EPDIR Position            */
+#define USBD_EPICFG_EPDIR_Msk            (0x1ul << USBD_EPICFG_EPDIR_Pos)                  /*!< USBD_T::EPICFG: EPDIR Mask                */
+
+#define USBD_EPICFG_EPNUM_Pos            (4)                                               /*!< USBD_T::EPICFG: EPNUM Position            */
+#define USBD_EPICFG_EPNUM_Msk            (0xful << USBD_EPICFG_EPNUM_Pos)                  /*!< USBD_T::EPICFG: EPNUM Mask                */
+
+#define USBD_EPIBUFSTART_SADDR_Pos       (0)                                               /*!< USBD_T::EPIBUFSTART: SADDR Position       */
+#define USBD_EPIBUFSTART_SADDR_Msk       (0xffful << USBD_EPIBUFSTART_SADDR_Pos)           /*!< USBD_T::EPIBUFSTART: SADDR Mask           */
+
+#define USBD_EPIBUFEND_EADDR_Pos         (0)                                               /*!< USBD_T::EPIBUFEND: EADDR Position         */
+#define USBD_EPIBUFEND_EADDR_Msk         (0xffful << USBD_EPIBUFEND_EADDR_Pos)             /*!< USBD_T::EPIBUFEND: EADDR Mask             */
+
+#define USBD_EPJDAT_EPDAT_Pos            (0)                                               /*!< USBD_T::EPJDAT: EPDAT Position            */
+#define USBD_EPJDAT_EPDAT_Msk            (0xfffffffful << USBD_EPJDAT_EPDAT_Pos)           /*!< USBD_T::EPJDAT: EPDAT Mask                */
+
+#define USBD_EPJINTSTS_BUFFULLIF_Pos     (0)                                               /*!< USBD_T::EPJINTSTS: BUFFULLIF Position     */
+#define USBD_EPJINTSTS_BUFFULLIF_Msk     (0x1ul << USBD_EPJINTSTS_BUFFULLIF_Pos)           /*!< USBD_T::EPJINTSTS: BUFFULLIF Mask         */
+
+#define USBD_EPJINTSTS_BUFEMPTYIF_Pos    (1)                                               /*!< USBD_T::EPJINTSTS: BUFEMPTYIF Position    */
+#define USBD_EPJINTSTS_BUFEMPTYIF_Msk    (0x1ul << USBD_EPJINTSTS_BUFEMPTYIF_Pos)          /*!< USBD_T::EPJINTSTS: BUFEMPTYIF Mask        */
+
+#define USBD_EPJINTSTS_SHORTTXIF_Pos     (2)                                               /*!< USBD_T::EPJINTSTS: SHORTTXIF Position     */
+#define USBD_EPJINTSTS_SHORTTXIF_Msk     (0x1ul << USBD_EPJINTSTS_SHORTTXIF_Pos)           /*!< USBD_T::EPJINTSTS: SHORTTXIF Mask         */
+
+#define USBD_EPJINTSTS_TXPKIF_Pos        (3)                                               /*!< USBD_T::EPJINTSTS: TXPKIF Position        */
+#define USBD_EPJINTSTS_TXPKIF_Msk        (0x1ul << USBD_EPJINTSTS_TXPKIF_Pos)              /*!< USBD_T::EPJINTSTS: TXPKIF Mask            */
+
+#define USBD_EPJINTSTS_RXPKIF_Pos        (4)                                               /*!< USBD_T::EPJINTSTS: RXPKIF Position        */
+#define USBD_EPJINTSTS_RXPKIF_Msk        (0x1ul << USBD_EPJINTSTS_RXPKIF_Pos)              /*!< USBD_T::EPJINTSTS: RXPKIF Mask            */
+
+#define USBD_EPJINTSTS_OUTTKIF_Pos       (5)                                               /*!< USBD_T::EPJINTSTS: OUTTKIF Position       */
+#define USBD_EPJINTSTS_OUTTKIF_Msk       (0x1ul << USBD_EPJINTSTS_OUTTKIF_Pos)             /*!< USBD_T::EPJINTSTS: OUTTKIF Mask           */
+
+#define USBD_EPJINTSTS_INTKIF_Pos        (6)                                               /*!< USBD_T::EPJINTSTS: INTKIF Position        */
+#define USBD_EPJINTSTS_INTKIF_Msk        (0x1ul << USBD_EPJINTSTS_INTKIF_Pos)              /*!< USBD_T::EPJINTSTS: INTKIF Mask            */
+
+#define USBD_EPJINTSTS_PINGIF_Pos        (7)                                               /*!< USBD_T::EPJINTSTS: PINGIF Position        */
+#define USBD_EPJINTSTS_PINGIF_Msk        (0x1ul << USBD_EPJINTSTS_PINGIF_Pos)              /*!< USBD_T::EPJINTSTS: PINGIF Mask            */
+
+#define USBD_EPJINTSTS_NAKIF_Pos         (8)                                               /*!< USBD_T::EPJINTSTS: NAKIF Position         */
+#define USBD_EPJINTSTS_NAKIF_Msk         (0x1ul << USBD_EPJINTSTS_NAKIF_Pos)               /*!< USBD_T::EPJINTSTS: NAKIF Mask             */
+
+#define USBD_EPJINTSTS_STALLIF_Pos       (9)                                               /*!< USBD_T::EPJINTSTS: STALLIF Position       */
+#define USBD_EPJINTSTS_STALLIF_Msk       (0x1ul << USBD_EPJINTSTS_STALLIF_Pos)             /*!< USBD_T::EPJINTSTS: STALLIF Mask           */
+
+#define USBD_EPJINTSTS_NYETIF_Pos        (10)                                              /*!< USBD_T::EPJINTSTS: NYETIF Position        */
+#define USBD_EPJINTSTS_NYETIF_Msk        (0x1ul << USBD_EPJINTSTS_NYETIF_Pos)              /*!< USBD_T::EPJINTSTS: NYETIF Mask            */
+
+#define USBD_EPJINTSTS_ERRIF_Pos         (11)                                              /*!< USBD_T::EPJINTSTS: ERRIF Position         */
+#define USBD_EPJINTSTS_ERRIF_Msk         (0x1ul << USBD_EPJINTSTS_ERRIF_Pos)               /*!< USBD_T::EPJINTSTS: ERRIF Mask             */
+
+#define USBD_EPJINTSTS_SHORTRXIF_Pos     (12)                                              /*!< USBD_T::EPJINTSTS: SHORTRXIF Position     */
+#define USBD_EPJINTSTS_SHORTRXIF_Msk     (0x1ul << USBD_EPJINTSTS_SHORTRXIF_Pos)           /*!< USBD_T::EPJINTSTS: SHORTRXIF Mask         */
+
+#define USBD_EPJINTEN_BUFFULLIEN_Pos     (0)                                               /*!< USBD_T::EPJINTEN: BUFFULLIEN Position     */
+#define USBD_EPJINTEN_BUFFULLIEN_Msk     (0x1ul << USBD_EPJINTEN_BUFFULLIEN_Pos)           /*!< USBD_T::EPJINTEN: BUFFULLIEN Mask         */
+
+#define USBD_EPJINTEN_BUFEMPTYIEN_Pos    (1)                                               /*!< USBD_T::EPJINTEN: BUFEMPTYIEN Position    */
+#define USBD_EPJINTEN_BUFEMPTYIEN_Msk    (0x1ul << USBD_EPJINTEN_BUFEMPTYIEN_Pos)          /*!< USBD_T::EPJINTEN: BUFEMPTYIEN Mask        */
+
+#define USBD_EPJINTEN_SHORTTXIEN_Pos     (2)                                               /*!< USBD_T::EPJINTEN: SHORTTXIEN Position     */
+#define USBD_EPJINTEN_SHORTTXIEN_Msk     (0x1ul << USBD_EPJINTEN_SHORTTXIEN_Pos)           /*!< USBD_T::EPJINTEN: SHORTTXIEN Mask         */
+
+#define USBD_EPJINTEN_TXPKIEN_Pos        (3)                                               /*!< USBD_T::EPJINTEN: TXPKIEN Position        */
+#define USBD_EPJINTEN_TXPKIEN_Msk        (0x1ul << USBD_EPJINTEN_TXPKIEN_Pos)              /*!< USBD_T::EPJINTEN: TXPKIEN Mask            */
+
+#define USBD_EPJINTEN_RXPKIEN_Pos        (4)                                               /*!< USBD_T::EPJINTEN: RXPKIEN Position        */
+#define USBD_EPJINTEN_RXPKIEN_Msk        (0x1ul << USBD_EPJINTEN_RXPKIEN_Pos)              /*!< USBD_T::EPJINTEN: RXPKIEN Mask            */
+
+#define USBD_EPJINTEN_OUTTKIEN_Pos       (5)                                               /*!< USBD_T::EPJINTEN: OUTTKIEN Position       */
+#define USBD_EPJINTEN_OUTTKIEN_Msk       (0x1ul << USBD_EPJINTEN_OUTTKIEN_Pos)             /*!< USBD_T::EPJINTEN: OUTTKIEN Mask           */
+
+#define USBD_EPJINTEN_INTKIEN_Pos        (6)                                               /*!< USBD_T::EPJINTEN: INTKIEN Position        */
+#define USBD_EPJINTEN_INTKIEN_Msk        (0x1ul << USBD_EPJINTEN_INTKIEN_Pos)              /*!< USBD_T::EPJINTEN: INTKIEN Mask            */
+
+#define USBD_EPJINTEN_PINGIEN_Pos        (7)                                               /*!< USBD_T::EPJINTEN: PINGIEN Position        */
+#define USBD_EPJINTEN_PINGIEN_Msk        (0x1ul << USBD_EPJINTEN_PINGIEN_Pos)              /*!< USBD_T::EPJINTEN: PINGIEN Mask            */
+
+#define USBD_EPJINTEN_NAKIEN_Pos         (8)                                               /*!< USBD_T::EPJINTEN: NAKIEN Position         */
+#define USBD_EPJINTEN_NAKIEN_Msk         (0x1ul << USBD_EPJINTEN_NAKIEN_Pos)               /*!< USBD_T::EPJINTEN: NAKIEN Mask             */
+
+#define USBD_EPJINTEN_STALLIEN_Pos       (9)                                               /*!< USBD_T::EPJINTEN: STALLIEN Position       */
+#define USBD_EPJINTEN_STALLIEN_Msk       (0x1ul << USBD_EPJINTEN_STALLIEN_Pos)             /*!< USBD_T::EPJINTEN: STALLIEN Mask           */
+
+#define USBD_EPJINTEN_NYETIEN_Pos        (10)                                              /*!< USBD_T::EPJINTEN: NYETIEN Position        */
+#define USBD_EPJINTEN_NYETIEN_Msk        (0x1ul << USBD_EPJINTEN_NYETIEN_Pos)              /*!< USBD_T::EPJINTEN: NYETIEN Mask            */
+
+#define USBD_EPJINTEN_ERRIEN_Pos         (11)                                              /*!< USBD_T::EPJINTEN: ERRIEN Position         */
+#define USBD_EPJINTEN_ERRIEN_Msk         (0x1ul << USBD_EPJINTEN_ERRIEN_Pos)               /*!< USBD_T::EPJINTEN: ERRIEN Mask             */
+
+#define USBD_EPJINTEN_SHORTRXIEN_Pos     (12)                                              /*!< USBD_T::EPJINTEN: SHORTRXIEN Position     */
+#define USBD_EPJINTEN_SHORTRXIEN_Msk     (0x1ul << USBD_EPJINTEN_SHORTRXIEN_Pos)           /*!< USBD_T::EPJINTEN: SHORTRXIEN Mask         */
+
+#define USBD_EPJDATCNT_DATCNT_Pos        (0)                                               /*!< USBD_T::EPJDATCNT: DATCNT Position        */
+#define USBD_EPJDATCNT_DATCNT_Msk        (0xfffful << USBD_EPJDATCNT_DATCNT_Pos)           /*!< USBD_T::EPJDATCNT: DATCNT Mask            */
+
+#define USBD_EPJDATCNT_DMALOOP_Pos       (16)                                              /*!< USBD_T::EPJDATCNT: DMALOOP Position       */
+#define USBD_EPJDATCNT_DMALOOP_Msk       (0x7ffful << USBD_EPJDATCNT_DMALOOP_Pos)          /*!< USBD_T::EPJDATCNT: DMALOOP Mask           */
+
+#define USBD_EPJRSPCTL_FLUSH_Pos         (0)                                               /*!< USBD_T::EPJRSPCTL: FLUSH Position         */
+#define USBD_EPJRSPCTL_FLUSH_Msk         (0x1ul << USBD_EPJRSPCTL_FLUSH_Pos)               /*!< USBD_T::EPJRSPCTL: FLUSH Mask             */
+
+#define USBD_EPJRSPCTL_MODE_Pos          (1)                                               /*!< USBD_T::EPJRSPCTL: MODE Position          */
+#define USBD_EPJRSPCTL_MODE_Msk          (0x3ul << USBD_EPJRSPCTL_MODE_Pos)                /*!< USBD_T::EPJRSPCTL: MODE Mask              */
+
+#define USBD_EPJRSPCTL_TOGGLE_Pos        (3)                                               /*!< USBD_T::EPJRSPCTL: TOGGLE Position        */
+#define USBD_EPJRSPCTL_TOGGLE_Msk        (0x1ul << USBD_EPJRSPCTL_TOGGLE_Pos)              /*!< USBD_T::EPJRSPCTL: TOGGLE Mask            */
+
+#define USBD_EPJRSPCTL_HALT_Pos          (4)                                               /*!< USBD_T::EPJRSPCTL: HALT Position          */
+#define USBD_EPJRSPCTL_HALT_Msk          (0x1ul << USBD_EPJRSPCTL_HALT_Pos)                /*!< USBD_T::EPJRSPCTL: HALT Mask              */
+
+#define USBD_EPJRSPCTL_ZEROLEN_Pos       (5)                                               /*!< USBD_T::EPJRSPCTL: ZEROLEN Position       */
+#define USBD_EPJRSPCTL_ZEROLEN_Msk       (0x1ul << USBD_EPJRSPCTL_ZEROLEN_Pos)             /*!< USBD_T::EPJRSPCTL: ZEROLEN Mask           */
+
+#define USBD_EPJRSPCTL_SHORTTXEN_Pos     (6)                                               /*!< USBD_T::EPJRSPCTL: SHORTTXEN Position     */
+#define USBD_EPJRSPCTL_SHORTTXEN_Msk     (0x1ul << USBD_EPJRSPCTL_SHORTTXEN_Pos)           /*!< USBD_T::EPJRSPCTL: SHORTTXEN Mask         */
+
+#define USBD_EPJRSPCTL_DISBUF_Pos        (7)                                               /*!< USBD_T::EPJRSPCTL: DISBUF Position        */
+#define USBD_EPJRSPCTL_DISBUF_Msk        (0x1ul << USBD_EPJRSPCTL_DISBUF_Pos)              /*!< USBD_T::EPJRSPCTL: DISBUF Mask            */
+
+#define USBD_EPJMPS_EPMPS_Pos            (0)                                               /*!< USBD_T::EPJMPS: EPMPS Position            */
+#define USBD_EPJMPS_EPMPS_Msk            (0x7fful << USBD_EPJMPS_EPMPS_Pos)                /*!< USBD_T::EPJMPS: EPMPS Mask                */
+
+#define USBD_EPJTXCNT_TXCNT_Pos          (0)                                               /*!< USBD_T::EPJTXCNT: TXCNT Position          */
+#define USBD_EPJTXCNT_TXCNT_Msk          (0x7fful << USBD_EPJTXCNT_TXCNT_Pos)              /*!< USBD_T::EPJTXCNT: TXCNT Mask              */
+
+#define USBD_EPJCFG_EPEN_Pos             (0)                                               /*!< USBD_T::EPJCFG: EPEN Position             */
+#define USBD_EPJCFG_EPEN_Msk             (0x1ul << USBD_EPJCFG_EPEN_Pos)                   /*!< USBD_T::EPJCFG: EPEN Mask                 */
+
+#define USBD_EPJCFG_EPTYPE_Pos           (1)                                               /*!< USBD_T::EPJCFG: EPTYPE Position           */
+#define USBD_EPJCFG_EPTYPE_Msk           (0x3ul << USBD_EPJCFG_EPTYPE_Pos)                 /*!< USBD_T::EPJCFG: EPTYPE Mask               */
+
+#define USBD_EPJCFG_EPDIR_Pos            (3)                                               /*!< USBD_T::EPJCFG: EPDIR Position            */
+#define USBD_EPJCFG_EPDIR_Msk            (0x1ul << USBD_EPJCFG_EPDIR_Pos)                  /*!< USBD_T::EPJCFG: EPDIR Mask                */
+
+#define USBD_EPJCFG_EPNUM_Pos            (4)                                               /*!< USBD_T::EPJCFG: EPNUM Position            */
+#define USBD_EPJCFG_EPNUM_Msk            (0xful << USBD_EPJCFG_EPNUM_Pos)                  /*!< USBD_T::EPJCFG: EPNUM Mask                */
+
+#define USBD_EPJBUFSTART_SADDR_Pos       (0)                                               /*!< USBD_T::EPJBUFSTART: SADDR Position       */
+#define USBD_EPJBUFSTART_SADDR_Msk       (0xffful << USBD_EPJBUFSTART_SADDR_Pos)           /*!< USBD_T::EPJBUFSTART: SADDR Mask           */
+
+#define USBD_EPJBUFEND_EADDR_Pos         (0)                                               /*!< USBD_T::EPJBUFEND: EADDR Position         */
+#define USBD_EPJBUFEND_EADDR_Msk         (0xffful << USBD_EPJBUFEND_EADDR_Pos)             /*!< USBD_T::EPJBUFEND: EADDR Mask             */
+
+#define USBD_EPKDAT_EPDAT_Pos            (0)                                               /*!< USBD_T::EPKDAT: EPDAT Position            */
+#define USBD_EPKDAT_EPDAT_Msk            (0xfffffffful << USBD_EPKDAT_EPDAT_Pos)           /*!< USBD_T::EPKDAT: EPDAT Mask                */
+
+#define USBD_EPKINTSTS_BUFFULLIF_Pos     (0)                                               /*!< USBD_T::EPKINTSTS: BUFFULLIF Position     */
+#define USBD_EPKINTSTS_BUFFULLIF_Msk     (0x1ul << USBD_EPKINTSTS_BUFFULLIF_Pos)           /*!< USBD_T::EPKINTSTS: BUFFULLIF Mask         */
+
+#define USBD_EPKINTSTS_BUFEMPTYIF_Pos    (1)                                               /*!< USBD_T::EPKINTSTS: BUFEMPTYIF Position    */
+#define USBD_EPKINTSTS_BUFEMPTYIF_Msk    (0x1ul << USBD_EPKINTSTS_BUFEMPTYIF_Pos)          /*!< USBD_T::EPKINTSTS: BUFEMPTYIF Mask        */
+
+#define USBD_EPKINTSTS_SHORTTXIF_Pos     (2)                                               /*!< USBD_T::EPKINTSTS: SHORTTXIF Position     */
+#define USBD_EPKINTSTS_SHORTTXIF_Msk     (0x1ul << USBD_EPKINTSTS_SHORTTXIF_Pos)           /*!< USBD_T::EPKINTSTS: SHORTTXIF Mask         */
+
+#define USBD_EPKINTSTS_TXPKIF_Pos        (3)                                               /*!< USBD_T::EPKINTSTS: TXPKIF Position        */
+#define USBD_EPKINTSTS_TXPKIF_Msk        (0x1ul << USBD_EPKINTSTS_TXPKIF_Pos)              /*!< USBD_T::EPKINTSTS: TXPKIF Mask            */
+
+#define USBD_EPKINTSTS_RXPKIF_Pos        (4)                                               /*!< USBD_T::EPKINTSTS: RXPKIF Position        */
+#define USBD_EPKINTSTS_RXPKIF_Msk        (0x1ul << USBD_EPKINTSTS_RXPKIF_Pos)              /*!< USBD_T::EPKINTSTS: RXPKIF Mask            */
+
+#define USBD_EPKINTSTS_OUTTKIF_Pos       (5)                                               /*!< USBD_T::EPKINTSTS: OUTTKIF Position       */
+#define USBD_EPKINTSTS_OUTTKIF_Msk       (0x1ul << USBD_EPKINTSTS_OUTTKIF_Pos)             /*!< USBD_T::EPKINTSTS: OUTTKIF Mask           */
+
+#define USBD_EPKINTSTS_INTKIF_Pos        (6)                                               /*!< USBD_T::EPKINTSTS: INTKIF Position        */
+#define USBD_EPKINTSTS_INTKIF_Msk        (0x1ul << USBD_EPKINTSTS_INTKIF_Pos)              /*!< USBD_T::EPKINTSTS: INTKIF Mask            */
+
+#define USBD_EPKINTSTS_PINGIF_Pos        (7)                                               /*!< USBD_T::EPKINTSTS: PINGIF Position        */
+#define USBD_EPKINTSTS_PINGIF_Msk        (0x1ul << USBD_EPKINTSTS_PINGIF_Pos)              /*!< USBD_T::EPKINTSTS: PINGIF Mask            */
+
+#define USBD_EPKINTSTS_NAKIF_Pos         (8)                                               /*!< USBD_T::EPKINTSTS: NAKIF Position         */
+#define USBD_EPKINTSTS_NAKIF_Msk         (0x1ul << USBD_EPKINTSTS_NAKIF_Pos)               /*!< USBD_T::EPKINTSTS: NAKIF Mask             */
+
+#define USBD_EPKINTSTS_STALLIF_Pos       (9)                                               /*!< USBD_T::EPKINTSTS: STALLIF Position       */
+#define USBD_EPKINTSTS_STALLIF_Msk       (0x1ul << USBD_EPKINTSTS_STALLIF_Pos)             /*!< USBD_T::EPKINTSTS: STALLIF Mask           */
+
+#define USBD_EPKINTSTS_NYETIF_Pos        (10)                                              /*!< USBD_T::EPKINTSTS: NYETIF Position        */
+#define USBD_EPKINTSTS_NYETIF_Msk        (0x1ul << USBD_EPKINTSTS_NYETIF_Pos)              /*!< USBD_T::EPKINTSTS: NYETIF Mask            */
+
+#define USBD_EPKINTSTS_ERRIF_Pos         (11)                                              /*!< USBD_T::EPKINTSTS: ERRIF Position         */
+#define USBD_EPKINTSTS_ERRIF_Msk         (0x1ul << USBD_EPKINTSTS_ERRIF_Pos)               /*!< USBD_T::EPKINTSTS: ERRIF Mask             */
+
+#define USBD_EPKINTSTS_SHORTRXIF_Pos     (12)                                              /*!< USBD_T::EPKINTSTS: SHORTRXIF Position     */
+#define USBD_EPKINTSTS_SHORTRXIF_Msk     (0x1ul << USBD_EPKINTSTS_SHORTRXIF_Pos)           /*!< USBD_T::EPKINTSTS: SHORTRXIF Mask         */
+
+#define USBD_EPKINTEN_BUFFULLIEN_Pos     (0)                                               /*!< USBD_T::EPKINTEN: BUFFULLIEN Position     */
+#define USBD_EPKINTEN_BUFFULLIEN_Msk     (0x1ul << USBD_EPKINTEN_BUFFULLIEN_Pos)           /*!< USBD_T::EPKINTEN: BUFFULLIEN Mask         */
+
+#define USBD_EPKINTEN_BUFEMPTYIEN_Pos    (1)                                               /*!< USBD_T::EPKINTEN: BUFEMPTYIEN Position    */
+#define USBD_EPKINTEN_BUFEMPTYIEN_Msk    (0x1ul << USBD_EPKINTEN_BUFEMPTYIEN_Pos)          /*!< USBD_T::EPKINTEN: BUFEMPTYIEN Mask        */
+
+#define USBD_EPKINTEN_SHORTTXIEN_Pos     (2)                                               /*!< USBD_T::EPKINTEN: SHORTTXIEN Position     */
+#define USBD_EPKINTEN_SHORTTXIEN_Msk     (0x1ul << USBD_EPKINTEN_SHORTTXIEN_Pos)           /*!< USBD_T::EPKINTEN: SHORTTXIEN Mask         */
+
+#define USBD_EPKINTEN_TXPKIEN_Pos        (3)                                               /*!< USBD_T::EPKINTEN: TXPKIEN Position        */
+#define USBD_EPKINTEN_TXPKIEN_Msk        (0x1ul << USBD_EPKINTEN_TXPKIEN_Pos)              /*!< USBD_T::EPKINTEN: TXPKIEN Mask            */
+
+#define USBD_EPKINTEN_RXPKIEN_Pos        (4)                                               /*!< USBD_T::EPKINTEN: RXPKIEN Position        */
+#define USBD_EPKINTEN_RXPKIEN_Msk        (0x1ul << USBD_EPKINTEN_RXPKIEN_Pos)              /*!< USBD_T::EPKINTEN: RXPKIEN Mask            */
+
+#define USBD_EPKINTEN_OUTTKIEN_Pos       (5)                                               /*!< USBD_T::EPKINTEN: OUTTKIEN Position       */
+#define USBD_EPKINTEN_OUTTKIEN_Msk       (0x1ul << USBD_EPKINTEN_OUTTKIEN_Pos)             /*!< USBD_T::EPKINTEN: OUTTKIEN Mask           */
+
+#define USBD_EPKINTEN_INTKIEN_Pos        (6)                                               /*!< USBD_T::EPKINTEN: INTKIEN Position        */
+#define USBD_EPKINTEN_INTKIEN_Msk        (0x1ul << USBD_EPKINTEN_INTKIEN_Pos)              /*!< USBD_T::EPKINTEN: INTKIEN Mask            */
+
+#define USBD_EPKINTEN_PINGIEN_Pos        (7)                                               /*!< USBD_T::EPKINTEN: PINGIEN Position        */
+#define USBD_EPKINTEN_PINGIEN_Msk        (0x1ul << USBD_EPKINTEN_PINGIEN_Pos)              /*!< USBD_T::EPKINTEN: PINGIEN Mask            */
+
+#define USBD_EPKINTEN_NAKIEN_Pos         (8)                                               /*!< USBD_T::EPKINTEN: NAKIEN Position         */
+#define USBD_EPKINTEN_NAKIEN_Msk         (0x1ul << USBD_EPKINTEN_NAKIEN_Pos)               /*!< USBD_T::EPKINTEN: NAKIEN Mask             */
+
+#define USBD_EPKINTEN_STALLIEN_Pos       (9)                                               /*!< USBD_T::EPKINTEN: STALLIEN Position       */
+#define USBD_EPKINTEN_STALLIEN_Msk       (0x1ul << USBD_EPKINTEN_STALLIEN_Pos)             /*!< USBD_T::EPKINTEN: STALLIEN Mask           */
+
+#define USBD_EPKINTEN_NYETIEN_Pos        (10)                                              /*!< USBD_T::EPKINTEN: NYETIEN Position        */
+#define USBD_EPKINTEN_NYETIEN_Msk        (0x1ul << USBD_EPKINTEN_NYETIEN_Pos)              /*!< USBD_T::EPKINTEN: NYETIEN Mask            */
+
+#define USBD_EPKINTEN_ERRIEN_Pos         (11)                                              /*!< USBD_T::EPKINTEN: ERRIEN Position         */
+#define USBD_EPKINTEN_ERRIEN_Msk         (0x1ul << USBD_EPKINTEN_ERRIEN_Pos)               /*!< USBD_T::EPKINTEN: ERRIEN Mask             */
+
+#define USBD_EPKINTEN_SHORTRXIEN_Pos     (12)                                              /*!< USBD_T::EPKINTEN: SHORTRXIEN Position     */
+#define USBD_EPKINTEN_SHORTRXIEN_Msk     (0x1ul << USBD_EPKINTEN_SHORTRXIEN_Pos)           /*!< USBD_T::EPKINTEN: SHORTRXIEN Mask         */
+
+#define USBD_EPKDATCNT_DATCNT_Pos        (0)                                               /*!< USBD_T::EPKDATCNT: DATCNT Position        */
+#define USBD_EPKDATCNT_DATCNT_Msk        (0xfffful << USBD_EPKDATCNT_DATCNT_Pos)           /*!< USBD_T::EPKDATCNT: DATCNT Mask            */
+
+#define USBD_EPKDATCNT_DMALOOP_Pos       (16)                                              /*!< USBD_T::EPKDATCNT: DMALOOP Position       */
+#define USBD_EPKDATCNT_DMALOOP_Msk       (0x7ffful << USBD_EPKDATCNT_DMALOOP_Pos)          /*!< USBD_T::EPKDATCNT: DMALOOP Mask           */
+
+#define USBD_EPKRSPCTL_FLUSH_Pos         (0)                                               /*!< USBD_T::EPKRSPCTL: FLUSH Position         */
+#define USBD_EPKRSPCTL_FLUSH_Msk         (0x1ul << USBD_EPKRSPCTL_FLUSH_Pos)               /*!< USBD_T::EPKRSPCTL: FLUSH Mask             */
+
+#define USBD_EPKRSPCTL_MODE_Pos          (1)                                               /*!< USBD_T::EPKRSPCTL: MODE Position          */
+#define USBD_EPKRSPCTL_MODE_Msk          (0x3ul << USBD_EPKRSPCTL_MODE_Pos)                /*!< USBD_T::EPKRSPCTL: MODE Mask              */
+
+#define USBD_EPKRSPCTL_TOGGLE_Pos        (3)                                               /*!< USBD_T::EPKRSPCTL: TOGGLE Position        */
+#define USBD_EPKRSPCTL_TOGGLE_Msk        (0x1ul << USBD_EPKRSPCTL_TOGGLE_Pos)              /*!< USBD_T::EPKRSPCTL: TOGGLE Mask            */
+
+#define USBD_EPKRSPCTL_HALT_Pos          (4)                                               /*!< USBD_T::EPKRSPCTL: HALT Position          */
+#define USBD_EPKRSPCTL_HALT_Msk          (0x1ul << USBD_EPKRSPCTL_HALT_Pos)                /*!< USBD_T::EPKRSPCTL: HALT Mask              */
+
+#define USBD_EPKRSPCTL_ZEROLEN_Pos       (5)                                               /*!< USBD_T::EPKRSPCTL: ZEROLEN Position       */
+#define USBD_EPKRSPCTL_ZEROLEN_Msk       (0x1ul << USBD_EPKRSPCTL_ZEROLEN_Pos)             /*!< USBD_T::EPKRSPCTL: ZEROLEN Mask           */
+
+#define USBD_EPKRSPCTL_SHORTTXEN_Pos     (6)                                               /*!< USBD_T::EPKRSPCTL: SHORTTXEN Position     */
+#define USBD_EPKRSPCTL_SHORTTXEN_Msk     (0x1ul << USBD_EPKRSPCTL_SHORTTXEN_Pos)           /*!< USBD_T::EPKRSPCTL: SHORTTXEN Mask         */
+
+#define USBD_EPKRSPCTL_DISBUF_Pos        (7)                                               /*!< USBD_T::EPKRSPCTL: DISBUF Position        */
+#define USBD_EPKRSPCTL_DISBUF_Msk        (0x1ul << USBD_EPKRSPCTL_DISBUF_Pos)              /*!< USBD_T::EPKRSPCTL: DISBUF Mask            */
+
+#define USBD_EPKMPS_EPMPS_Pos            (0)                                               /*!< USBD_T::EPKMPS: EPMPS Position            */
+#define USBD_EPKMPS_EPMPS_Msk            (0x7fful << USBD_EPKMPS_EPMPS_Pos)                /*!< USBD_T::EPKMPS: EPMPS Mask                */
+
+#define USBD_EPKTXCNT_TXCNT_Pos          (0)                                               /*!< USBD_T::EPKTXCNT: TXCNT Position          */
+#define USBD_EPKTXCNT_TXCNT_Msk          (0x7fful << USBD_EPKTXCNT_TXCNT_Pos)              /*!< USBD_T::EPKTXCNT: TXCNT Mask              */
+
+#define USBD_EPKCFG_EPEN_Pos             (0)                                               /*!< USBD_T::EPKCFG: EPEN Position             */
+#define USBD_EPKCFG_EPEN_Msk             (0x1ul << USBD_EPKCFG_EPEN_Pos)                   /*!< USBD_T::EPKCFG: EPEN Mask                 */
+
+#define USBD_EPKCFG_EPTYPE_Pos           (1)                                               /*!< USBD_T::EPKCFG: EPTYPE Position           */
+#define USBD_EPKCFG_EPTYPE_Msk           (0x3ul << USBD_EPKCFG_EPTYPE_Pos)                 /*!< USBD_T::EPKCFG: EPTYPE Mask               */
+
+#define USBD_EPKCFG_EPDIR_Pos            (3)                                               /*!< USBD_T::EPKCFG: EPDIR Position            */
+#define USBD_EPKCFG_EPDIR_Msk            (0x1ul << USBD_EPKCFG_EPDIR_Pos)                  /*!< USBD_T::EPKCFG: EPDIR Mask                */
+
+#define USBD_EPKCFG_EPNUM_Pos            (4)                                               /*!< USBD_T::EPKCFG: EPNUM Position            */
+#define USBD_EPKCFG_EPNUM_Msk            (0xful << USBD_EPKCFG_EPNUM_Pos)                  /*!< USBD_T::EPKCFG: EPNUM Mask                */
+
+#define USBD_EPKBUFSTART_SADDR_Pos       (0)                                               /*!< USBD_T::EPKBUFSTART: SADDR Position       */
+#define USBD_EPKBUFSTART_SADDR_Msk       (0xffful << USBD_EPKBUFSTART_SADDR_Pos)           /*!< USBD_T::EPKBUFSTART: SADDR Mask           */
+
+#define USBD_EPKBUFEND_EADDR_Pos         (0)                                               /*!< USBD_T::EPKBUFEND: EADDR Position         */
+#define USBD_EPKBUFEND_EADDR_Msk         (0xffful << USBD_EPKBUFEND_EADDR_Pos)             /*!< USBD_T::EPKBUFEND: EADDR Mask             */
+
+#define USBD_EPLDAT_EPDAT_Pos            (0)                                               /*!< USBD_T::EPLDAT: EPDAT Position            */
+#define USBD_EPLDAT_EPDAT_Msk            (0xfffffffful << USBD_EPLDAT_EPDAT_Pos)           /*!< USBD_T::EPLDAT: EPDAT Mask                */
+
+#define USBD_EPLINTSTS_BUFFULLIF_Pos     (0)                                               /*!< USBD_T::EPLINTSTS: BUFFULLIF Position     */
+#define USBD_EPLINTSTS_BUFFULLIF_Msk     (0x1ul << USBD_EPLINTSTS_BUFFULLIF_Pos)           /*!< USBD_T::EPLINTSTS: BUFFULLIF Mask         */
+
+#define USBD_EPLINTSTS_BUFEMPTYIF_Pos    (1)                                               /*!< USBD_T::EPLINTSTS: BUFEMPTYIF Position    */
+#define USBD_EPLINTSTS_BUFEMPTYIF_Msk    (0x1ul << USBD_EPLINTSTS_BUFEMPTYIF_Pos)          /*!< USBD_T::EPLINTSTS: BUFEMPTYIF Mask        */
+
+#define USBD_EPLINTSTS_SHORTTXIF_Pos     (2)                                               /*!< USBD_T::EPLINTSTS: SHORTTXIF Position     */
+#define USBD_EPLINTSTS_SHORTTXIF_Msk     (0x1ul << USBD_EPLINTSTS_SHORTTXIF_Pos)           /*!< USBD_T::EPLINTSTS: SHORTTXIF Mask         */
+
+#define USBD_EPLINTSTS_TXPKIF_Pos        (3)                                               /*!< USBD_T::EPLINTSTS: TXPKIF Position        */
+#define USBD_EPLINTSTS_TXPKIF_Msk        (0x1ul << USBD_EPLINTSTS_TXPKIF_Pos)              /*!< USBD_T::EPLINTSTS: TXPKIF Mask            */
+
+#define USBD_EPLINTSTS_RXPKIF_Pos        (4)                                               /*!< USBD_T::EPLINTSTS: RXPKIF Position        */
+#define USBD_EPLINTSTS_RXPKIF_Msk        (0x1ul << USBD_EPLINTSTS_RXPKIF_Pos)              /*!< USBD_T::EPLINTSTS: RXPKIF Mask            */
+
+#define USBD_EPLINTSTS_OUTTKIF_Pos       (5)                                               /*!< USBD_T::EPLINTSTS: OUTTKIF Position       */
+#define USBD_EPLINTSTS_OUTTKIF_Msk       (0x1ul << USBD_EPLINTSTS_OUTTKIF_Pos)             /*!< USBD_T::EPLINTSTS: OUTTKIF Mask           */
+
+#define USBD_EPLINTSTS_INTKIF_Pos        (6)                                               /*!< USBD_T::EPLINTSTS: INTKIF Position        */
+#define USBD_EPLINTSTS_INTKIF_Msk        (0x1ul << USBD_EPLINTSTS_INTKIF_Pos)              /*!< USBD_T::EPLINTSTS: INTKIF Mask            */
+
+#define USBD_EPLINTSTS_PINGIF_Pos        (7)                                               /*!< USBD_T::EPLINTSTS: PINGIF Position        */
+#define USBD_EPLINTSTS_PINGIF_Msk        (0x1ul << USBD_EPLINTSTS_PINGIF_Pos)              /*!< USBD_T::EPLINTSTS: PINGIF Mask            */
+
+#define USBD_EPLINTSTS_NAKIF_Pos         (8)                                               /*!< USBD_T::EPLINTSTS: NAKIF Position         */
+#define USBD_EPLINTSTS_NAKIF_Msk         (0x1ul << USBD_EPLINTSTS_NAKIF_Pos)               /*!< USBD_T::EPLINTSTS: NAKIF Mask             */
+
+#define USBD_EPLINTSTS_STALLIF_Pos       (9)                                               /*!< USBD_T::EPLINTSTS: STALLIF Position       */
+#define USBD_EPLINTSTS_STALLIF_Msk       (0x1ul << USBD_EPLINTSTS_STALLIF_Pos)             /*!< USBD_T::EPLINTSTS: STALLIF Mask           */
+
+#define USBD_EPLINTSTS_NYETIF_Pos        (10)                                              /*!< USBD_T::EPLINTSTS: NYETIF Position        */
+#define USBD_EPLINTSTS_NYETIF_Msk        (0x1ul << USBD_EPLINTSTS_NYETIF_Pos)              /*!< USBD_T::EPLINTSTS: NYETIF Mask            */
+
+#define USBD_EPLINTSTS_ERRIF_Pos         (11)                                              /*!< USBD_T::EPLINTSTS: ERRIF Position         */
+#define USBD_EPLINTSTS_ERRIF_Msk         (0x1ul << USBD_EPLINTSTS_ERRIF_Pos)               /*!< USBD_T::EPLINTSTS: ERRIF Mask             */
+
+#define USBD_EPLINTSTS_SHORTRXIF_Pos     (12)                                              /*!< USBD_T::EPLINTSTS: SHORTRXIF Position     */
+#define USBD_EPLINTSTS_SHORTRXIF_Msk     (0x1ul << USBD_EPLINTSTS_SHORTRXIF_Pos)           /*!< USBD_T::EPLINTSTS: SHORTRXIF Mask         */
+
+#define USBD_EPLINTEN_BUFFULLIEN_Pos     (0)                                               /*!< USBD_T::EPLINTEN: BUFFULLIEN Position     */
+#define USBD_EPLINTEN_BUFFULLIEN_Msk     (0x1ul << USBD_EPLINTEN_BUFFULLIEN_Pos)           /*!< USBD_T::EPLINTEN: BUFFULLIEN Mask         */
+
+#define USBD_EPLINTEN_BUFEMPTYIEN_Pos    (1)                                               /*!< USBD_T::EPLINTEN: BUFEMPTYIEN Position    */
+#define USBD_EPLINTEN_BUFEMPTYIEN_Msk    (0x1ul << USBD_EPLINTEN_BUFEMPTYIEN_Pos)          /*!< USBD_T::EPLINTEN: BUFEMPTYIEN Mask        */
+
+#define USBD_EPLINTEN_SHORTTXIEN_Pos     (2)                                               /*!< USBD_T::EPLINTEN: SHORTTXIEN Position     */
+#define USBD_EPLINTEN_SHORTTXIEN_Msk     (0x1ul << USBD_EPLINTEN_SHORTTXIEN_Pos)           /*!< USBD_T::EPLINTEN: SHORTTXIEN Mask         */
+
+#define USBD_EPLINTEN_TXPKIEN_Pos        (3)                                               /*!< USBD_T::EPLINTEN: TXPKIEN Position        */
+#define USBD_EPLINTEN_TXPKIEN_Msk        (0x1ul << USBD_EPLINTEN_TXPKIEN_Pos)              /*!< USBD_T::EPLINTEN: TXPKIEN Mask            */
+
+#define USBD_EPLINTEN_RXPKIEN_Pos        (4)                                               /*!< USBD_T::EPLINTEN: RXPKIEN Position        */
+#define USBD_EPLINTEN_RXPKIEN_Msk        (0x1ul << USBD_EPLINTEN_RXPKIEN_Pos)              /*!< USBD_T::EPLINTEN: RXPKIEN Mask            */
+
+#define USBD_EPLINTEN_OUTTKIEN_Pos       (5)                                               /*!< USBD_T::EPLINTEN: OUTTKIEN Position       */
+#define USBD_EPLINTEN_OUTTKIEN_Msk       (0x1ul << USBD_EPLINTEN_OUTTKIEN_Pos)             /*!< USBD_T::EPLINTEN: OUTTKIEN Mask           */
+
+#define USBD_EPLINTEN_INTKIEN_Pos        (6)                                               /*!< USBD_T::EPLINTEN: INTKIEN Position        */
+#define USBD_EPLINTEN_INTKIEN_Msk        (0x1ul << USBD_EPLINTEN_INTKIEN_Pos)              /*!< USBD_T::EPLINTEN: INTKIEN Mask            */
+
+#define USBD_EPLINTEN_PINGIEN_Pos        (7)                                               /*!< USBD_T::EPLINTEN: PINGIEN Position        */
+#define USBD_EPLINTEN_PINGIEN_Msk        (0x1ul << USBD_EPLINTEN_PINGIEN_Pos)              /*!< USBD_T::EPLINTEN: PINGIEN Mask            */
+
+#define USBD_EPLINTEN_NAKIEN_Pos         (8)                                               /*!< USBD_T::EPLINTEN: NAKIEN Position         */
+#define USBD_EPLINTEN_NAKIEN_Msk         (0x1ul << USBD_EPLINTEN_NAKIEN_Pos)               /*!< USBD_T::EPLINTEN: NAKIEN Mask             */
+
+#define USBD_EPLINTEN_STALLIEN_Pos       (9)                                               /*!< USBD_T::EPLINTEN: STALLIEN Position       */
+#define USBD_EPLINTEN_STALLIEN_Msk       (0x1ul << USBD_EPLINTEN_STALLIEN_Pos)             /*!< USBD_T::EPLINTEN: STALLIEN Mask           */
+
+#define USBD_EPLINTEN_NYETIEN_Pos        (10)                                              /*!< USBD_T::EPLINTEN: NYETIEN Position        */
+#define USBD_EPLINTEN_NYETIEN_Msk        (0x1ul << USBD_EPLINTEN_NYETIEN_Pos)              /*!< USBD_T::EPLINTEN: NYETIEN Mask            */
+
+#define USBD_EPLINTEN_ERRIEN_Pos         (11)                                              /*!< USBD_T::EPLINTEN: ERRIEN Position         */
+#define USBD_EPLINTEN_ERRIEN_Msk         (0x1ul << USBD_EPLINTEN_ERRIEN_Pos)               /*!< USBD_T::EPLINTEN: ERRIEN Mask             */
+
+#define USBD_EPLINTEN_SHORTRXIEN_Pos     (12)                                              /*!< USBD_T::EPLINTEN: SHORTRXIEN Position     */
+#define USBD_EPLINTEN_SHORTRXIEN_Msk     (0x1ul << USBD_EPLINTEN_SHORTRXIEN_Pos)           /*!< USBD_T::EPLINTEN: SHORTRXIEN Mask         */
+
+#define USBD_EPLDATCNT_DATCNT_Pos        (0)                                               /*!< USBD_T::EPLDATCNT: DATCNT Position        */
+#define USBD_EPLDATCNT_DATCNT_Msk        (0xfffful << USBD_EPLDATCNT_DATCNT_Pos)           /*!< USBD_T::EPLDATCNT: DATCNT Mask            */
+
+#define USBD_EPLDATCNT_DMALOOP_Pos       (16)                                              /*!< USBD_T::EPLDATCNT: DMALOOP Position       */
+#define USBD_EPLDATCNT_DMALOOP_Msk       (0x7ffful << USBD_EPLDATCNT_DMALOOP_Pos)          /*!< USBD_T::EPLDATCNT: DMALOOP Mask           */
+
+#define USBD_EPLRSPCTL_FLUSH_Pos         (0)                                               /*!< USBD_T::EPLRSPCTL: FLUSH Position         */
+#define USBD_EPLRSPCTL_FLUSH_Msk         (0x1ul << USBD_EPLRSPCTL_FLUSH_Pos)               /*!< USBD_T::EPLRSPCTL: FLUSH Mask             */
+
+#define USBD_EPLRSPCTL_MODE_Pos          (1)                                               /*!< USBD_T::EPLRSPCTL: MODE Position          */
+#define USBD_EPLRSPCTL_MODE_Msk          (0x3ul << USBD_EPLRSPCTL_MODE_Pos)                /*!< USBD_T::EPLRSPCTL: MODE Mask              */
+
+#define USBD_EPLRSPCTL_TOGGLE_Pos        (3)                                               /*!< USBD_T::EPLRSPCTL: TOGGLE Position        */
+#define USBD_EPLRSPCTL_TOGGLE_Msk        (0x1ul << USBD_EPLRSPCTL_TOGGLE_Pos)              /*!< USBD_T::EPLRSPCTL: TOGGLE Mask            */
+
+#define USBD_EPLRSPCTL_HALT_Pos          (4)                                               /*!< USBD_T::EPLRSPCTL: HALT Position          */
+#define USBD_EPLRSPCTL_HALT_Msk          (0x1ul << USBD_EPLRSPCTL_HALT_Pos)                /*!< USBD_T::EPLRSPCTL: HALT Mask              */
+
+#define USBD_EPLRSPCTL_ZEROLEN_Pos       (5)                                               /*!< USBD_T::EPLRSPCTL: ZEROLEN Position       */
+#define USBD_EPLRSPCTL_ZEROLEN_Msk       (0x1ul << USBD_EPLRSPCTL_ZEROLEN_Pos)             /*!< USBD_T::EPLRSPCTL: ZEROLEN Mask           */
+
+#define USBD_EPLRSPCTL_SHORTTXEN_Pos     (6)                                               /*!< USBD_T::EPLRSPCTL: SHORTTXEN Position     */
+#define USBD_EPLRSPCTL_SHORTTXEN_Msk     (0x1ul << USBD_EPLRSPCTL_SHORTTXEN_Pos)           /*!< USBD_T::EPLRSPCTL: SHORTTXEN Mask         */
+
+#define USBD_EPLRSPCTL_DISBUF_Pos        (7)                                               /*!< USBD_T::EPLRSPCTL: DISBUF Position        */
+#define USBD_EPLRSPCTL_DISBUF_Msk        (0x1ul << USBD_EPLRSPCTL_DISBUF_Pos)              /*!< USBD_T::EPLRSPCTL: DISBUF Mask            */
+
+#define USBD_EPLMPS_EPMPS_Pos            (0)                                               /*!< USBD_T::EPLMPS: EPMPS Position            */
+#define USBD_EPLMPS_EPMPS_Msk            (0x7fful << USBD_EPLMPS_EPMPS_Pos)                /*!< USBD_T::EPLMPS: EPMPS Mask                */
+
+#define USBD_EPLTXCNT_TXCNT_Pos          (0)                                               /*!< USBD_T::EPLTXCNT: TXCNT Position          */
+#define USBD_EPLTXCNT_TXCNT_Msk          (0x7fful << USBD_EPLTXCNT_TXCNT_Pos)              /*!< USBD_T::EPLTXCNT: TXCNT Mask              */
+
+#define USBD_EPLCFG_EPEN_Pos             (0)                                               /*!< USBD_T::EPLCFG: EPEN Position             */
+#define USBD_EPLCFG_EPEN_Msk             (0x1ul << USBD_EPLCFG_EPEN_Pos)                   /*!< USBD_T::EPLCFG: EPEN Mask                 */
+
+#define USBD_EPLCFG_EPTYPE_Pos           (1)                                               /*!< USBD_T::EPLCFG: EPTYPE Position           */
+#define USBD_EPLCFG_EPTYPE_Msk           (0x3ul << USBD_EPLCFG_EPTYPE_Pos)                 /*!< USBD_T::EPLCFG: EPTYPE Mask               */
+
+#define USBD_EPLCFG_EPDIR_Pos            (3)                                               /*!< USBD_T::EPLCFG: EPDIR Position            */
+#define USBD_EPLCFG_EPDIR_Msk            (0x1ul << USBD_EPLCFG_EPDIR_Pos)                  /*!< USBD_T::EPLCFG: EPDIR Mask                */
+
+#define USBD_EPLCFG_EPNUM_Pos            (4)                                               /*!< USBD_T::EPLCFG: EPNUM Position            */
+#define USBD_EPLCFG_EPNUM_Msk            (0xful << USBD_EPLCFG_EPNUM_Pos)                  /*!< USBD_T::EPLCFG: EPNUM Mask                */
+
+#define USBD_EPLBUFSTART_SADDR_Pos       (0)                                               /*!< USBD_T::EPLBUFSTART: SADDR Position       */
+#define USBD_EPLBUFSTART_SADDR_Msk       (0xffful << USBD_EPLBUFSTART_SADDR_Pos)           /*!< USBD_T::EPLBUFSTART: SADDR Mask           */
+
+#define USBD_EPLBUFEND_EADDR_Pos         (0)                                               /*!< USBD_T::EPLBUFEND: EADDR Position         */
+#define USBD_EPLBUFEND_EADDR_Msk         (0xffful << USBD_EPLBUFEND_EADDR_Pos)             /*!< USBD_T::EPLBUFEND: EADDR Mask             */
+
+#define USBD_UVCHDAT0_DAT_Pos            (0)                                               /*!< USBD_T::UVCHDAT0: DAT Position            */
+#define USBD_UVCHDAT0_DAT_Msk            (0xfffffffful << USBD_UVCHDAT0_DAT_Pos)           /*!< USBD_T::UVCHDAT0: DAT Mask                */
+
+#define USBD_UVCHDAT1_DAT_Pos            (0)                                               /*!< USBD_T::UVCHDAT1: DAT Position            */
+#define USBD_UVCHDAT1_DAT_Msk            (0xfffffffful << USBD_UVCHDAT1_DAT_Pos)           /*!< USBD_T::UVCHDAT1: DAT Mask                */
+
+#define USBD_UVCHDAT2_DAT_Pos            (0)                                               /*!< USBD_T::UVCHDAT2: DAT Position            */
+#define USBD_UVCHDAT2_DAT_Msk            (0xfffffffful << USBD_UVCHDAT2_DAT_Pos)           /*!< USBD_T::UVCHDAT2: DAT Mask                */
+
+#define USBD_UVCEPAHCNT_CNT_Pos          (0)                                               /*!< USBD_T::UVCEPAHCNT: CNT Position          */
+#define USBD_UVCEPAHCNT_CNT_Msk          (0xful << USBD_UVCEPAHCNT_CNT_Pos)                /*!< USBD_T::UVCEPAHCNT: CNT Mask              */
+
+#define USBD_UVCEPBHCNT_CNT_Pos          (0)                                               /*!< USBD_T::UVCEPBHCNT: CNT Position          */
+#define USBD_UVCEPBHCNT_CNT_Msk          (0xful << USBD_UVCEPBHCNT_CNT_Pos)                /*!< USBD_T::UVCEPBHCNT: CNT Mask              */
+
+#define USBD_UVCEPCHCNT_CNT_Pos          (0)                                               /*!< USBD_T::UVCEPCHCNT: CNT Position          */
+#define USBD_UVCEPCHCNT_CNT_Msk          (0xful << USBD_UVCEPCHCNT_CNT_Pos)                /*!< USBD_T::UVCEPCHCNT: CNT Mask              */
+
+#define USBD_UVCEPDHCNT_CNT_Pos          (0)                                               /*!< USBD_T::UVCEPDHCNT: CNT Position          */
+#define USBD_UVCEPDHCNT_CNT_Msk          (0xful << USBD_UVCEPDHCNT_CNT_Pos)                /*!< USBD_T::UVCEPDHCNT: CNT Mask              */
+
+#define USBD_UVCEPEHCNT_CNT_Pos          (0)                                               /*!< USBD_T::UVCEPEHCNT: CNT Position          */
+#define USBD_UVCEPEHCNT_CNT_Msk          (0xful << USBD_UVCEPEHCNT_CNT_Pos)                /*!< USBD_T::UVCEPEHCNT: CNT Mask              */
+
+#define USBD_UVCEPFHCNT_CNT_Pos          (0)                                               /*!< USBD_T::UVCEPFHCNT: CNT Position          */
+#define USBD_UVCEPFHCNT_CNT_Msk          (0xful << USBD_UVCEPFHCNT_CNT_Pos)                /*!< USBD_T::UVCEPFHCNT: CNT Mask              */
+
+#define USBD_UVCEPGHCNT_CNT_Pos          (0)                                               /*!< USBD_T::UVCEPGHCNT: CNT Position          */
+#define USBD_UVCEPGHCNT_CNT_Msk          (0xful << USBD_UVCEPGHCNT_CNT_Pos)                /*!< USBD_T::UVCEPGHCNT: CNT Mask              */
+
+#define USBD_UVCEPHHCNT_CNT_Pos          (0)                                               /*!< USBD_T::UVCEPHHCNT: CNT Position          */
+#define USBD_UVCEPHHCNT_CNT_Msk          (0xful << USBD_UVCEPHHCNT_CNT_Pos)                /*!< USBD_T::UVCEPHHCNT: CNT Mask              */
+
+#define USBD_UVCEPIHCNT_CNT_Pos          (0)                                               /*!< USBD_T::UVCEPIHCNT: CNT Position          */
+#define USBD_UVCEPIHCNT_CNT_Msk          (0xful << USBD_UVCEPIHCNT_CNT_Pos)                /*!< USBD_T::UVCEPIHCNT: CNT Mask              */
+
+#define USBD_UVCEPJHCNT_CNT_Pos          (0)                                               /*!< USBD_T::UVCEPJHCNT: CNT Position          */
+#define USBD_UVCEPJHCNT_CNT_Msk          (0xful << USBD_UVCEPJHCNT_CNT_Pos)                /*!< USBD_T::UVCEPJHCNT: CNT Mask              */
+
+#define USBD_UVCEPKHCNT_CNT_Pos          (0)                                               /*!< USBD_T::UVCEPKHCNT: CNT Position          */
+#define USBD_UVCEPKHCNT_CNT_Msk          (0xful << USBD_UVCEPKHCNT_CNT_Pos)                /*!< USBD_T::UVCEPKHCNT: CNT Mask              */
+
+#define USBD_UVCEPLHCNT_CNT_Pos          (0)                                               /*!< USBD_T::UVCEPLHCNT: CNT Position          */
+#define USBD_UVCEPLHCNT_CNT_Msk          (0xful << USBD_UVCEPLHCNT_CNT_Pos)                /*!< USBD_T::UVCEPLHCNT: CNT Mask              */
+
+#define USBD_DMAADDR_DMAADDR_Pos         (0)                                               /*!< USBD_T::DMAADDR: DMAADDR Position         */
+#define USBD_DMAADDR_DMAADDR_Msk         (0xfffffffful << USBD_DMAADDR_DMAADDR_Pos)        /*!< USBD_T::DMAADDR: DMAADDR Mask             */
+
+#define USBD_PHYCTL_DPPUEN_Pos           (8)                                               /*!< USBD_T::PHYCTL: DPPUEN Position           */
+#define USBD_PHYCTL_DPPUEN_Msk           (0x1ul << USBD_PHYCTL_DPPUEN_Pos)                 /*!< USBD_T::PHYCTL: DPPUEN Mask               */
+
+#define USBD_PHYCTL_PHYEN_Pos            (9)                                               /*!< USBD_T::PHYCTL: PHYEN Position            */
+#define USBD_PHYCTL_PHYEN_Msk            (0x1ul << USBD_PHYCTL_PHYEN_Pos)                  /*!< USBD_T::PHYCTL: PHYEN Mask                */
+
+#define USBD_PHYCTL_WKEN_Pos             (24)                                              /*!< USBD_T::PHYCTL: WKEN Position             */
+#define USBD_PHYCTL_WKEN_Msk             (0x1ul << USBD_PHYCTL_WKEN_Pos)                   /*!< USBD_T::PHYCTL: WKEN Mask                 */
+
+#define USBD_PHYCTL_VBUSDET_Pos          (31)                                              /*!< USBD_T::PHYCTL: VBUSDET Position          */
+#define USBD_PHYCTL_VBUSDET_Msk          (0x1ul << USBD_PHYCTL_VBUSDET_Pos)                /*!< USBD_T::PHYCTL: VBUSDET Mask              */
+
+#define USBD_EPDAT_EPDAT_Pos             (0)                                               /*!< USBD_T::EPDAT: EPDAT Position            */
+#define USBD_EPDAT_EPDAT_Msk             (0xfffffffful << USBD_EPDAT_EPDAT_Pos)            /*!< USBD_T::EPDAT: EPDAT Mask                */
+
+#define USBD_EPINTSTS_BUFFULLIF_Pos      (0)                                               /*!< USBD_T::EPINTSTS: BUFFULLIF Position     */
+#define USBD_EPINTSTS_BUFFULLIF_Msk      (0x1ul << USBD_EPINTSTS_BUFFULLIF_Pos)            /*!< USBD_T::EPINTSTS: BUFFULLIF Mask         */
+
+#define USBD_EPINTSTS_BUFEMPTYIF_Pos     (1)                                               /*!< USBD_T::EPINTSTS: BUFEMPTYIF Position    */
+#define USBD_EPINTSTS_BUFEMPTYIF_Msk     (0x1ul << USBD_EPINTSTS_BUFEMPTYIF_Pos)           /*!< USBD_T::EPINTSTS: BUFEMPTYIF Mask        */
+
+#define USBD_EPINTSTS_SHORTTXIF_Pos      (2)                                               /*!< USBD_T::EPINTSTS: SHORTTXIF Position     */
+#define USBD_EPINTSTS_SHORTTXIF_Msk      (0x1ul << USBD_EPINTSTS_SHORTTXIF_Pos)            /*!< USBD_T::EPINTSTS: SHORTTXIF Mask         */
+
+#define USBD_EPINTSTS_TXPKIF_Pos         (3)                                               /*!< USBD_T::EPINTSTS: TXPKIF Position        */
+#define USBD_EPINTSTS_TXPKIF_Msk         (0x1ul << USBD_EPINTSTS_TXPKIF_Pos)               /*!< USBD_T::EPINTSTS: TXPKIF Mask            */
+
+#define USBD_EPINTSTS_RXPKIF_Pos         (4)                                               /*!< USBD_T::EPINTSTS: RXPKIF Position        */
+#define USBD_EPINTSTS_RXPKIF_Msk         (0x1ul << USBD_EPINTSTS_RXPKIF_Pos)               /*!< USBD_T::EPINTSTS: RXPKIF Mask            */
+
+#define USBD_EPINTSTS_OUTTKIF_Pos        (5)                                               /*!< USBD_T::EPINTSTS: OUTTKIF Position       */
+#define USBD_EPINTSTS_OUTTKIF_Msk        (0x1ul << USBD_EPINTSTS_OUTTKIF_Pos)              /*!< USBD_T::EPINTSTS: OUTTKIF Mask           */
+
+#define USBD_EPINTSTS_INTKIF_Pos         (6)                                               /*!< USBD_T::EPINTSTS: INTKIF Position        */
+#define USBD_EPINTSTS_INTKIF_Msk         (0x1ul << USBD_EPINTSTS_INTKIF_Pos)               /*!< USBD_T::EPINTSTS: INTKIF Mask            */
+
+#define USBD_EPINTSTS_PINGIF_Pos         (7)                                               /*!< USBD_T::EPINTSTS: PINGIF Position        */
+#define USBD_EPINTSTS_PINGIF_Msk         (0x1ul << USBD_EPINTSTS_PINGIF_Pos)               /*!< USBD_T::EPINTSTS: PINGIF Mask            */
+
+#define USBD_EPINTSTS_NAKIF_Pos          (8)                                               /*!< USBD_T::EPINTSTS: NAKIF Position         */
+#define USBD_EPINTSTS_NAKIF_Msk          (0x1ul << USBD_EPINTSTS_NAKIF_Pos)                /*!< USBD_T::EPINTSTS: NAKIF Mask             */
+
+#define USBD_EPINTSTS_STALLIF_Pos        (9)                                               /*!< USBD_T::EPINTSTS: STALLIF Position       */
+#define USBD_EPINTSTS_STALLIF_Msk        (0x1ul << USBD_EPINTSTS_STALLIF_Pos)              /*!< USBD_T::EPINTSTS: STALLIF Mask           */
+
+#define USBD_EPINTSTS_NYETIF_Pos         (10)                                              /*!< USBD_T::EPINTSTS: NYETIF Position        */
+#define USBD_EPINTSTS_NYETIF_Msk         (0x1ul << USBD_EPINTSTS_NYETIF_Pos)               /*!< USBD_T::EPINTSTS: NYETIF Mask            */
+
+#define USBD_EPINTSTS_ERRIF_Pos          (11)                                              /*!< USBD_T::EPINTSTS: ERRIF Position         */
+#define USBD_EPINTSTS_ERRIF_Msk          (0x1ul << USBD_EPINTSTS_ERRIF_Pos)                /*!< USBD_T::EPINTSTS: ERRIF Mask             */
+
+#define USBD_EPINTSTS_SHORTRXIF_Pos      (12)                                              /*!< USBD_T::EPINTSTS: SHORTRXIF Position     */
+#define USBD_EPINTSTS_SHORTRXIF_Msk      (0x1ul << USBD_EPINTSTS_SHORTRXIF_Pos)            /*!< USBD_T::EPINTSTS: SHORTRXIF Mask         */
+
+#define USBD_EPINTEN_BUFFULLIEN_Pos      (0)                                               /*!< USBD_T::EPINTEN: BUFFULLIEN Position     */
+#define USBD_EPINTEN_BUFFULLIEN_Msk      (0x1ul << USBD_EPINTEN_BUFFULLIEN_Pos)            /*!< USBD_T::EPINTEN: BUFFULLIEN Mask         */
+
+#define USBD_EPINTEN_BUFEMPTYIEN_Pos     (1)                                               /*!< USBD_T::EPINTEN: BUFEMPTYIEN Position    */
+#define USBD_EPINTEN_BUFEMPTYIEN_Msk     (0x1ul << USBD_EPINTEN_BUFEMPTYIEN_Pos)           /*!< USBD_T::EPINTEN: BUFEMPTYIEN Mask        */
+
+#define USBD_EPINTEN_SHORTTXIEN_Pos      (2)                                               /*!< USBD_T::EPINTEN: SHORTTXIEN Position     */
+#define USBD_EPINTEN_SHORTTXIEN_Msk      (0x1ul << USBD_EPINTEN_SHORTTXIEN_Pos)            /*!< USBD_T::EPINTEN: SHORTTXIEN Mask         */
+
+#define USBD_EPINTEN_TXPKIEN_Pos         (3)                                               /*!< USBD_T::EPINTEN: TXPKIEN Position        */
+#define USBD_EPINTEN_TXPKIEN_Msk         (0x1ul << USBD_EPINTEN_TXPKIEN_Pos)               /*!< USBD_T::EPINTEN: TXPKIEN Mask            */
+
+#define USBD_EPINTEN_RXPKIEN_Pos         (4)                                               /*!< USBD_T::EPINTEN: RXPKIEN Position        */
+#define USBD_EPINTEN_RXPKIEN_Msk         (0x1ul << USBD_EPINTEN_RXPKIEN_Pos)               /*!< USBD_T::EPINTEN: RXPKIEN Mask            */
+
+#define USBD_EPINTEN_OUTTKIEN_Pos        (5)                                               /*!< USBD_T::EPINTEN: OUTTKIEN Position       */
+#define USBD_EPINTEN_OUTTKIEN_Msk        (0x1ul << USBD_EPINTEN_OUTTKIEN_Pos)              /*!< USBD_T::EPINTEN: OUTTKIEN Mask           */
+
+#define USBD_EPINTEN_INTKIEN_Pos         (6)                                               /*!< USBD_T::EPINTEN: INTKIEN Position        */
+#define USBD_EPINTEN_INTKIEN_Msk         (0x1ul << USBD_EPINTEN_INTKIEN_Pos)               /*!< USBD_T::EPINTEN: INTKIEN Mask            */
+
+#define USBD_EPINTEN_PINGIEN_Pos         (7)                                               /*!< USBD_T::EPINTEN: PINGIEN Position        */
+#define USBD_EPINTEN_PINGIEN_Msk         (0x1ul << USBD_EPINTEN_PINGIEN_Pos)               /*!< USBD_T::EPINTEN: PINGIEN Mask            */
+
+#define USBD_EPINTEN_NAKIEN_Pos          (8)                                               /*!< USBD_T::EPINTEN: NAKIEN Position         */
+#define USBD_EPINTEN_NAKIEN_Msk          (0x1ul << USBD_EPINTEN_NAKIEN_Pos)                /*!< USBD_T::EPINTEN: NAKIEN Mask             */
+
+#define USBD_EPINTEN_STALLIEN_Pos        (9)                                               /*!< USBD_T::EPINTEN: STALLIEN Position       */
+#define USBD_EPINTEN_STALLIEN_Msk        (0x1ul << USBD_EPINTEN_STALLIEN_Pos)              /*!< USBD_T::EPINTEN: STALLIEN Mask           */
+
+#define USBD_EPINTEN_NYETIEN_Pos         (10)                                              /*!< USBD_T::EPINTEN: NYETIEN Position        */
+#define USBD_EPINTEN_NYETIEN_Msk         (0x1ul << USBD_EPINTEN_NYETIEN_Pos)               /*!< USBD_T::EPINTEN: NYETIEN Mask            */
+
+#define USBD_EPINTEN_ERRIEN_Pos          (11)                                              /*!< USBD_T::EPINTEN: ERRIEN Position         */
+#define USBD_EPINTEN_ERRIEN_Msk          (0x1ul << USBD_EPINTEN_ERRIEN_Pos)                /*!< USBD_T::EPINTEN: ERRIEN Mask             */
+
+#define USBD_EPINTEN_SHORTRXIEN_Pos      (12)                                              /*!< USBD_T::EPINTEN: SHORTRXIEN Position     */
+#define USBD_EPINTEN_SHORTRXIEN_Msk      (0x1ul << USBD_EPINTEN_SHORTRXIEN_Pos)            /*!< USBD_T::EPINTEN: SHORTRXIEN Mask         */
+
+#define USBD_EPDATCNT_DATCNT_Pos         (0)                                               /*!< USBD_T::EPDATCNT: DATCNT Position        */
+#define USBD_EPDATCNT_DATCNT_Msk         (0xfffful << USBD_EPDATCNT_DATCNT_Pos)            /*!< USBD_T::EPDATCNT: DATCNT Mask            */
+
+#define USBD_EPDATCNT_DMALOOP_Pos        (16)                                              /*!< USBD_T::EPDATCNT: DMALOOP Position       */
+#define USBD_EPDATCNT_DMALOOP_Msk        (0x7ffful << USBD_EPDATCNT_DMALOOP_Pos)           /*!< USBD_T::EPDATCNT: DMALOOP Mask           */
+
+#define USBD_EPRSPCTL_FLUSH_Pos          (0)                                               /*!< USBD_T::EPRSPCTL: FLUSH Position         */
+#define USBD_EPRSPCTL_FLUSH_Msk          (0x1ul << USBD_EPRSPCTL_FLUSH_Pos)                /*!< USBD_T::EPRSPCTL: FLUSH Mask             */
+
+#define USBD_EPRSPCTL_MODE_Pos           (1)                                               /*!< USBD_T::EPRSPCTL: MODE Position          */
+#define USBD_EPRSPCTL_MODE_Msk           (0x3ul << USBD_EPRSPCTL_MODE_Pos)                 /*!< USBD_T::EPRSPCTL: MODE Mask              */
+
+#define USBD_EPRSPCTL_TOGGLE_Pos         (3)                                               /*!< USBD_T::EPRSPCTL: TOGGLE Position        */
+#define USBD_EPRSPCTL_TOGGLE_Msk         (0x1ul << USBD_EPRSPCTL_TOGGLE_Pos)               /*!< USBD_T::EPRSPCTL: TOGGLE Mask            */
+
+#define USBD_EPRSPCTL_HALT_Pos           (4)                                               /*!< USBD_T::EPRSPCTL: HALT Position          */
+#define USBD_EPRSPCTL_HALT_Msk           (0x1ul << USBD_EPRSPCTL_HALT_Pos)                 /*!< USBD_T::EPRSPCTL: HALT Mask              */
+
+#define USBD_EPRSPCTL_ZEROLEN_Pos        (5)                                               /*!< USBD_T::EPRSPCTL: ZEROLEN Position       */
+#define USBD_EPRSPCTL_ZEROLEN_Msk        (0x1ul << USBD_EPRSPCTL_ZEROLEN_Pos)              /*!< USBD_T::EPRSPCTL: ZEROLEN Mask           */
+
+#define USBD_EPRSPCTL_SHORTTXEN_Pos      (6)                                               /*!< USBD_T::EPRSPCTL: SHORTTXEN Position     */
+#define USBD_EPRSPCTL_SHORTTXEN_Msk      (0x1ul << USBD_EPRSPCTL_SHORTTXEN_Pos)            /*!< USBD_T::EPRSPCTL: SHORTTXEN Mask         */
+
+#define USBD_EPRSPCTL_DISBUF_Pos         (7)                                               /*!< USBD_T::EPRSPCTL: DISBUF Position        */
+#define USBD_EPRSPCTL_DISBUF_Msk         (0x1ul << USBD_EPRSPCTL_DISBUF_Pos)               /*!< USBD_T::EPRSPCTL: DISBUF Mask            */
+
+#define USBD_EPMPS_EPMPS_Pos             (0)                                               /*!< USBD_T::EPMPS: EPMPS Position            */
+#define USBD_EPMPS_EPMPS_Msk             (0x7fful << USBD_EPMPS_EPMPS_Pos)                 /*!< USBD_T::EPMPS: EPMPS Mask                */
+
+#define USBD_EPTXCNT_TXCNT_Pos           (0)                                               /*!< USBD_T::EPTXCNT: TXCNT Position          */
+#define USBD_EPTXCNT_TXCNT_Msk           (0x7fful << USBD_EPTXCNT_TXCNT_Pos)               /*!< USBD_T::EPTXCNT: TXCNT Mask              */
+
+#define USBD_EPCFG_EPEN_Pos              (0)                                               /*!< USBD_T::EPCFG: EPEN Position             */
+#define USBD_EPCFG_EPEN_Msk              (0x1ul << USBD_EPCFG_EPEN_Pos)                    /*!< USBD_T::EPCFG: EPEN Mask                 */
+
+#define USBD_EPCFG_EPTYPE_Pos            (1)                                               /*!< USBD_T::EPCFG: EPTYPE Position           */
+#define USBD_EPCFG_EPTYPE_Msk            (0x3ul << USBD_EPCFG_EPTYPE_Pos)                  /*!< USBD_T::EPCFG: EPTYPE Mask               */
+
+#define USBD_EPCFG_EPDIR_Pos             (3)                                               /*!< USBD_T::EPCFG: EPDIR Position            */
+#define USBD_EPCFG_EPDIR_Msk             (0x1ul << USBD_EPCFG_EPDIR_Pos)                   /*!< USBD_T::EPCFG: EPDIR Mask                */
+
+#define USBD_EPCFG_EPNUM_Pos             (4)                                               /*!< USBD_T::EPCFG: EPNUM Position            */
+#define USBD_EPCFG_EPNUM_Msk             (0xful << USBD_EPCFG_EPNUM_Pos)                   /*!< USBD_T::EPCFG: EPNUM Mask                */
+
+#define USBD_EPBUFSTART_SADDR_Pos        (0)                                               /*!< USBD_T::EPBUFSTART: SADDR Position       */
+#define USBD_EPBUFSTART_SADDR_Msk        (0xffful << USBD_EPBUFSTART_SADDR_Pos)            /*!< USBD_T::EPBUFSTART: SADDR Mask           */
+
+#define USBD_EPBUFEND_EADDR_Pos          (0)                                               /*!< USBD_T::EPBUFEND: EADDR Position         */
+#define USBD_EPBUFEND_EADDR_Msk          (0xffful << USBD_EPBUFEND_EADDR_Pos)              /*!< USBD_T::EPBUFEND: EADDR Mask             */
+
 
 /**@}*/ /* USBD_CONST */
 /**@}*/ /* end of USBD register group */

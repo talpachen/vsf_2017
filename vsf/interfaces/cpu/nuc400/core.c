@@ -249,14 +249,14 @@ vsf_err_t nuc400_interface_init(void *p)
 	CLK->AHBCLK |= CLK_AHBCLK_USBDCKEN_Msk;
 	SYS->USBPHY = 0x100;
 	USBD->PHYCTL |= USBD_PHYCTL_PHYEN_Msk;
-	while (USBD->EPAMPS != 0x20)
+	while (USBD->EP[0].EPMPS != 0x20)
 	{
-		USBD->EPAMPS = 0x20;
+		USBD->EP[0].EPMPS = 0x20;
+	}
+	while (USBD->EP[0].EPMPS != 0)
+	{
+		USBD->EP[0].EPMPS= 0;
 	}	
-	while (USBD->EPAMPS != 0)
-	{
-		USBD->EPAMPS = 0;
-	}		
 #endif
 	
 	nuc400_lock_reg();

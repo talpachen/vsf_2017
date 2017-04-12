@@ -17,7 +17,7 @@
 extern const uint8_t nuc400_usbd_ep_num;
 extern struct interface_usbd_callback_t nuc400_usbd_callback;
 
-vsf_err_t nuc400_usbd_init(uint32_t int_priority);
+vsf_err_t nuc400_usbd_init(int32_t int_priority);
 vsf_err_t nuc400_usbd_fini(void);
 vsf_err_t nuc400_usbd_reset(void);
 vsf_err_t nuc400_usbd_poll(void);
@@ -30,6 +30,7 @@ vsf_err_t nuc400_usbd_resume(void);
 vsf_err_t nuc400_usbd_lowpower(uint8_t level);
 uint32_t nuc400_usbd_get_frame_number(void);
 vsf_err_t nuc400_usbd_get_setup(uint8_t *buffer);
+vsf_err_t nuc400_usbd_prepare_buffer(void);
 
 vsf_err_t nuc400_usbd_ep_reset(uint8_t idx);
 vsf_err_t nuc400_usbd_ep_set_type(uint8_t idx,
