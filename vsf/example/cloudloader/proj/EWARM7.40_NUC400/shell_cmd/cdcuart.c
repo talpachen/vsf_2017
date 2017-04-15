@@ -6,9 +6,6 @@
 #define VSFSM_EVT_CDCUART_EXIT		(VSFSM_EVT_USER_LOCAL + 1)
 #define USART_BUF_SIZE				16
 
-const uint8_t uart_index_board_to_chip[2] = {0, 2};
-const uint8_t uart_index_chip_to_board[3] = {0, 255, 1};
-
 static void uart_rx_int(void *p, uint16_t data)
 {
 	uint8_t buf[USART_BUF_SIZE];
@@ -90,7 +87,8 @@ static vsf_err_t cdcuart_thread(struct vsfsm_pt_t *pt, vsfsm_evt_t evt)
 			(struct vsfshell_handler_param_t *)pt->user_data;
 	struct cdcuart_param_t *cdcuart_param = param->context;
 	struct vsfsm_pt_t *outpt = &param->output_pt;
-	uint8_t i;
+	uint8_t index, i;
+	uint32_t baud;
 
 	vsfsm_pt_begin(pt);
 
@@ -98,26 +96,32 @@ static vsf_err_t cdcuart_thread(struct vsfsm_pt_t *pt, vsfsm_evt_t evt)
 	{
 		vsfshell_printf(outpt, "Connect CDC to UART\n\r");
 		vsfshell_printf(outpt, "    Usage:\n\r");
-		vsfshell_printf(outpt, "    \"cdcuart\" Connect uart%d(default) with CDC baudrate\n\r", uart_index_chip_to_board[cdcuart_param->index]);
-		vsfshell_printf(outpt, "    \"cdcuart -u 0\" Connect uart0 with CDC baudrate\n\r");
-		vsfshell_printf(outpt, "    \"cdcuart -u 1\" Connect uart1 with CDC baudrate\n\r");
-		vsfshell_printf(outpt, "    \"cdcuart -b 115200\" Connect uart%d with custom baudrate\n\r", uart_index_chip_to_board[cdcuart_param->index]);
+		vsfshell_printf(outpt, "    \"cdcuart\" Connect uart%d(default) with CDC baudrate\n\r", cdcuart_param->index_table[0]);
+		cdcuart_param->index = 0;
+		while (cdcuart_param->index < cdcuart_param->index_num)
+		{
+			vsfshell_printf(outpt, "    \"cdcuart -u %d\" Connect uart%d with CDC baudrate\n\r", cdcuart_param->index, cdcuart_param->index);
+			cdcuart_param->index++;
+		}
+		vsfshell_printf(outpt, "    \"cdcuart -b 115200\" Connect uart%d with custom baudrate\n\r", cdcuart_param->index_table[0]);
 		goto exit;
 	}
 
-	cdcuart_param->baudrate = cdcuart_param->param->line_coding.bitrate;
+	index = 0;
+	baud = cdcuart_param->param->line_coding.bitrate;
 
 	for (i = 1; i < param->argc - 1; i += 2)
 	{
 		if (memcmp("-u", param->argv[i], 2) == 0)
 		{
-			if (param->argv[i + 1][0] == '0')
+			if (param->argv[i + 1][0] >= '0' && param->argv[i + 1][0] <= '9')
 			{
-				cdcuart_param->index = uart_index_board_to_chip[0];
-			}
-			else if (param->argv[i + 1][0] == '1')
-			{
-				cdcuart_param->index = uart_index_board_to_chip[1];
+				index = param->argv[i + 1][0] - '0';
+				
+				if (index < cdcuart_param->index_num)
+					cdcuart_param->index = cdcuart_param->index_table[index];
+				else
+					goto invalid;
 			}
 			else
 				goto invalid;
@@ -125,7 +129,7 @@ static vsf_err_t cdcuart_thread(struct vsfsm_pt_t *pt, vsfsm_evt_t evt)
 		else if (memcmp("-b", param->argv[i], 2) == 0)
 		{
 			uint8_t j;
-			uint32_t baud = 0;
+			baud = 0;
 			for (j = 0; j < 6; j++)
 			{
 				if (param->argv[i + 1][j] != '\0')
@@ -139,14 +143,15 @@ static vsf_err_t cdcuart_thread(struct vsfsm_pt_t *pt, vsfsm_evt_t evt)
 				else
 					break;
 			}
-			cdcuart_param->baudrate = baud;
 		}
 		else
 			goto invalid;
 	}
 	
-	vsfshell_printf(outpt, "Connect UART%d, Baudrate: %d\n\r",
-			uart_index_chip_to_board[cdcuart_param->index], cdcuart_param->baudrate);
+	cdcuart_param->index = cdcuart_param->index_table[index];
+	cdcuart_param->baudrate = baud;
+	
+	vsfshell_printf(outpt, "Connect UART%d, Baudrate: %d\n\r", index, baud);
 	
 	vsfsm_pt_delay(pt, 100);
 	uart_active(cdcuart_param);

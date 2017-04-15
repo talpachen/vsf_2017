@@ -1,8 +1,12 @@
 #ifndef __CDCUART_H__
 #define __CDCUART_H__
 
+#define CDCUART_NUM_MAX		7
+
 struct cdcuart_param_t
 {
+	uint8_t index_table[CDCUART_NUM_MAX];
+	uint8_t index_num;
 	uint8_t index;
 	uint8_t mode;
 	uint16_t int_priority;

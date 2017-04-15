@@ -17,7 +17,7 @@ struct usrapp_t usrapp =
 	.usbd.ifaces[0].protocol_param			= &usrapp.usbd.cdc.param,
 	.usbd.ifaces[1].class_protocol			= (struct vsfusbd_class_protocol_t *)&vsfusbd_CDCACMData_class,
 	.usbd.ifaces[1].protocol_param			= &usrapp.usbd.cdc.param,
-	
+
 	.usbd.cdc.param.CDC.ep_notify			= 1,
 	.usbd.cdc.param.CDC.ep_out				= 2,
 	.usbd.cdc.param.CDC.ep_in				= 2,
@@ -38,7 +38,8 @@ struct usrapp_t usrapp =
 	.shell.stream_tx						= (struct vsf_stream_t *)&usrapp.usbd.cdc.stream_tx,
 	.shell.stream_rx						= (struct vsf_stream_t *)&usrapp.usbd.cdc.stream_rx,
 
-	.cdcuart_param.index					= (0x3 << 4),
+	.cdcuart_param.index_table				= {0x3 << 4, 0x0 << 4, 0x1 << 4, 0x4 << 4},
+	.cdcuart_param.index_num				= 4,
 	.cdcuart_param.mode						= 0,
 	.cdcuart_param.int_priority				= 0,
 	.cdcuart_param.baudrate					= 115200,
