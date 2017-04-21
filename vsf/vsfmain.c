@@ -98,8 +98,6 @@ static void vsfapp_init(struct vsfapp_t *app)
 #if defined(APPCFG_BUFMGR_SIZE) && (APPCFG_BUFMGR_SIZE > 0)
 	vsf_bufmgr_init(app->bufmgr_buffer, sizeof(app->bufmgr_buffer));
 #endif
-
-	usrapp_init(app->usrapp);
 }
 
 #if defined(APPCFG_VSFSM_PENDSVQ_LEN) && (APPCFG_VSFSM_PENDSVQ_LEN > 0)
@@ -120,26 +118,28 @@ static void app_pendsv_activate(struct vsfsm_evtq_t *q)
 
 int main(void)
 {
-	vsf_enter_critical();
-#if defined(APPCFG_VSFSM_MAINQ_LEN) && (APPCFG_VSFSM_MAINQ_LEN > 0)
-	vsfsm_evtq_init(&app.mainq);
-	vsfsm_evtq_set(&app.mainq);
-#endif
+	vsf_enter_critical();	
+	usrapp_init(app.usrapp, VSFMAIN_PHASE_INITIAL);
+
+	vsfapp_init(&app);
+	
 #if defined(APPCFG_VSFSM_PENDSVQ_LEN) && (APPCFG_VSFSM_PENDSVQ_LEN > 0)
 	vsfsm_evtq_init(&app.pendsvq);
 	vsfsm_evtq_set(&app.pendsvq);
 	vsfhal_core_pendsv_config(app_on_pendsv, &app.pendsvq);
+	usrapp_init(app.usrapp, VSFMAIN_PHASE_PENDSV);
 #endif
 
-	vsfapp_init(&app);
-
-	vsf_leave_critical();
-
 #if defined(APPCFG_VSFSM_MAINQ_LEN) && (APPCFG_VSFSM_MAINQ_LEN > 0)
+	vsfsm_evtq_init(&app.mainq);
 	vsfsm_evtq_set(&app.mainq);
+	usrapp_init(app.usrapp, VSFMAIN_PHASE_MAIN);
 #else
 	vsfsm_evtq_set(NULL);
 #endif
+
+	vsf_leave_critical();
+
 	while (1)
 	{
 #ifdef APPCFG_VSFSM_MAINQ_POLLING

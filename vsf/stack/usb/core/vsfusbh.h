@@ -12,6 +12,8 @@
 #endif
 
 #define USBH_INTERFACE_RAM_OPTIMIZE		1
+#define USBH_INTERFACE_MULTI_SUPPORT	0
+#define USBH_ID_TABLE_OPTIMIZE			1
 
 #include "stack/usb/common/usb_common.h"
 #include "stack/usb/common/usb_ch11.h"
@@ -20,6 +22,9 @@
 #define VSFSM_EVT_URB_COMPLETE	(VSFSM_EVT_USER_LOCAL + 1)
 #define VSFSM_EVT_NEW_DEVICE	(VSFSM_EVT_USER_LOCAL + 2)
 #define VSFSM_EVT_EP0_CRIT		(VSFSM_EVT_USER_LOCAL + 3)
+#define VSFSM_EVT_RST_REQUEST	(VSFSM_EVT_USER_LOCAL + 4)
+#define VSFSM_EVT_RST_CANCEL	(VSFSM_EVT_USER_LOCAL + 5)
+#define VSFSM_EVT_RST_COMPLETE	(VSFSM_EVT_USER_LOCAL + 6)
 
 #define DEFAULT_TIMEOUT			50	// 50ms
 
@@ -68,14 +73,18 @@ struct vsfusbh_device_id_t
 	uint16_t match_flags;
 	uint16_t idVendor;
 	uint16_t idProduct;
+#if USBH_ID_TABLE_OPTIMIZE == 0
 	uint16_t bcdDevice_lo, bcdDevice_hi;
 	uint8_t bDeviceClass;
 	uint8_t bDeviceSubClass;
 	uint8_t bDeviceProtocol;
+#endif
 	uint8_t bInterfaceClass;
 	uint8_t bInterfaceSubClass;
+#if USBH_ID_TABLE_OPTIMIZE == 0
 	uint8_t bInterfaceProtocol;
 	//uint32_t driver_info;
+#endif
 };
 
 struct iso_packet_descriptor_t
@@ -170,12 +179,16 @@ struct vsfusbh_t
 	const struct vsfusbh_hcddrv_t *hcd;
 	void *hcd_param;
 
+	void (*new_device_callback)(void *p, uint8_t addr);
+	void *new_device_cb_param;
+	
 	// private
 	uint8_t hcd_rh_speed;
 	void *hcd_data;
 	uint32_t device_bitmap[4];
 	struct vsfusbh_device_t *rh_dev;
 	struct vsfusbh_device_t *new_dev;
+	struct vsfsm_t *parent_sm;
 	struct sllist drv_list;
 
 	struct vsfsm_t sm;

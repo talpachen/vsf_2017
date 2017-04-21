@@ -66,6 +66,7 @@ struct vsfusbh_device_t *vsfusbh_alloc_device(struct vsfusbh_t *usbh)
 		vsf_bufmgr_free(dev);
 		return NULL;
 	}
+	
 	mskarr_set(usbh->device_bitmap, dev->devnum);
 	return dev;
 }
@@ -122,6 +123,9 @@ static const struct vsfusbh_device_id_t *vsfusbh_match_id(
 	if (id == NULL)
 		return NULL;
 
+	intf = &iface->altsetting[iface->act_altsetting];
+	
+#if USBH_ID_TABLE_OPTIMIZE == 0
 	for (; id->idVendor || id->bDeviceClass || id->bInterfaceClass; id++)
 	{
 		if ((id->match_flags & USB_DEVICE_ID_MATCH_VENDOR) &&
@@ -139,16 +143,12 @@ static const struct vsfusbh_device_id_t *vsfusbh_match_id(
 		if ((id->match_flags & USB_DEVICE_ID_MATCH_DEV_CLASS) &&
 				(id->bDeviceClass != dev->descriptor.bDeviceClass))
 			continue;
-
 		if ((id->match_flags & USB_DEVICE_ID_MATCH_DEV_SUBCLASS) &&
 				(id->bDeviceSubClass!= dev->descriptor.bDeviceSubClass))
 			continue;
-
 		if ((id->match_flags & USB_DEVICE_ID_MATCH_DEV_PROTOCOL) &&
 				(id->bDeviceProtocol != dev->descriptor.bDeviceProtocol))
-			continue;
-
-		intf = &iface->altsetting[iface->act_altsetting];
+			continue;		
 		if ((id->match_flags & USB_DEVICE_ID_MATCH_INT_CLASS) &&
 				(id->bInterfaceClass != intf->bInterfaceClass))
 			continue;
@@ -160,6 +160,25 @@ static const struct vsfusbh_device_id_t *vsfusbh_match_id(
 			continue;
 		return id;
 	}
+#else
+	for (; id->idVendor || id->bInterfaceClass; id++)
+	{
+		if ((id->match_flags & USB_DEVICE_ID_MATCH_VENDOR) &&
+				id->idVendor != dev->descriptor.idVendor)
+			continue;
+		if ((id->match_flags & USB_DEVICE_ID_MATCH_PRODUCT) &&
+				id->idProduct != dev->descriptor.idProduct)
+			continue;
+		if ((id->match_flags & USB_DEVICE_ID_MATCH_INT_CLASS) &&
+				(id->bInterfaceClass != intf->bInterfaceClass))
+			continue;
+		if ((id->match_flags & USB_DEVICE_ID_MATCH_INT_SUBCLASS) &&
+				(id->bInterfaceSubClass != intf->bInterfaceSubClass))
+			continue;
+		return id;
+	}
+#endif
+	
 	return NULL;
 }
 
@@ -280,7 +299,12 @@ vsf_err_t vsfusbh_add_device(struct vsfusbh_t *usbh,
 				(dev->actconfig->interface[i].driver == NULL))
 		{
 			if (vsfusbh_find_intrface_driver(usbh, dev, i) == VSFERR_NONE)
+			{
 				claimed++;
+#if USBH_INTERFACE_MULTI_SUPPORT == 0
+				break;
+#endif
+			}
 #if 0
 			else
 				rejected++;
@@ -1100,13 +1124,27 @@ vsf_err_t vsfusbh_probe_thread(struct vsfsm_pt_t *pt, vsfsm_evt_t evt)
 	probe_urb->transfer_length = 8;
 	err = vsfusbh_get_descriptor(usbh, probe_urb, USB_DT_DEVICE, 0);
 	if (err != VSFERR_NONE)
+	{
+		vsfsm_post_evt_pending(usbh->parent_sm, VSFSM_EVT_RST_CANCEL);
 		return err;
+	}
 	vsfsm_pt_wfe(pt, VSFSM_EVT_URB_COMPLETE);
 	if (probe_urb->status != URB_OK)
+	{
+		vsfsm_post_evt_pending(usbh->parent_sm, VSFSM_EVT_RST_CANCEL);
 		return VSFERR_FAIL;
+	}
 	dev->epmaxpacketin[0] = dev->descriptor.bMaxPacketSize0;
 	dev->epmaxpacketout[0] = dev->descriptor.bMaxPacketSize0;
-
+	
+	if (usbh->parent_sm)
+	{
+		vsfsm_post_evt_pending(usbh->parent_sm, VSFSM_EVT_RST_REQUEST);
+		vsfsm_pt_wfe(pt, VSFSM_EVT_RST_COMPLETE);
+	}
+	
+	vsfsm_pt_delay(pt, 10);
+	
 	// set address
 	dev->devnum = dev->devnum_temp;
 	probe_urb->transfer_buffer = NULL;
@@ -1117,9 +1155,12 @@ vsf_err_t vsfusbh_probe_thread(struct vsfsm_pt_t *pt, vsfsm_evt_t evt)
 	vsfsm_pt_wfe(pt, VSFSM_EVT_URB_COMPLETE);
 	if (probe_urb->status != URB_OK)
 		return VSFERR_FAIL;
+	
+	if (usbh->new_device_callback)
+		usbh->new_device_callback(usbh->new_device_cb_param, dev->devnum);
 
 	vsfsm_pt_delay(pt, 10);
-
+	
 	// get full device descriptor
 	probe_urb->transfer_buffer = &dev->descriptor;
 	probe_urb->transfer_length = sizeof(dev->descriptor);
@@ -1318,6 +1359,7 @@ vsf_err_t vsfusbh_init(struct vsfusbh_t *usbh)
 	usbh->device_bitmap[3] = 0;
 	usbh->sm.init_state.evt_handler = vsfusbh_init_evt_handler;
 	usbh->sm.user_data = (void*)usbh;
+	usbh->parent_sm = NULL;
 	return vsfsm_init(&usbh->sm);
 }
 

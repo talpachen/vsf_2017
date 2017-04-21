@@ -39,9 +39,17 @@ static struct vsfusbd_HID_report_t* vsfusbd_HID_find_report(
 
 	for(i = 0; i < param->num_of_report; i++)
 	{
-		if ((param->reports[i].type == type) && (param->reports[i].id == id))
+		if (param->reports[i].type == type)
 		{
-			return &param->reports[i];
+			if (param->reports[i].on_get_report != NULL)
+			{
+				param->reports[i].on_get_report(param, &param->reports[i], id);
+			}
+			
+			if (param->reports[i].id == id)
+			{
+				return &param->reports[i];
+			}
 		}
 	}
 
@@ -51,7 +59,7 @@ static struct vsfusbd_HID_report_t* vsfusbd_HID_find_report(
 static vsf_err_t vsfusbd_HID_OUT_hanlder(struct vsfusbd_device_t *device,
 											uint8_t ep)
 {
-	struct interface_usbd_t *drv = device->drv;
+	struct vsfhal_usbd_t *drv = device->drv;
 	struct vsfusbd_config_t *config = &device->config[device->configuration];
 	int8_t iface = config->ep_OUT_iface_map[ep];
 	struct vsfusbd_HID_param_t *param;
@@ -98,7 +106,7 @@ static vsf_err_t vsfusbd_HID_OUT_hanlder(struct vsfusbd_device_t *device,
 		}
 		else if (report->on_set_report != NULL)
 		{
-			report->on_set_report(param, report);
+			report->on_set_report(param, report, 0);
 		}
 		break;
 	case HID_OUTPUT_STATE_RECEIVING:
@@ -118,7 +126,7 @@ static vsf_err_t vsfusbd_HID_OUT_hanlder(struct vsfusbd_device_t *device,
 			report->pos = 0;
 			if (report->on_set_report != NULL)
 			{
-				report->on_set_report(param, report);
+				report->on_set_report(param, report, 0);
 			}
 			param->output_state = HID_OUTPUT_STATE_WAIT;
 		}
@@ -343,7 +351,7 @@ static vsf_err_t vsfusbd_HID_request_prepare(struct vsfusbd_device_t *device)
 			if ((param->reports[i].type == USB_HID_REPORT_INPUT) &&
 				((0 == id) || (param->reports[i].id == id)))
 			{
-				param->reports[i].idle = request->wValue >> 8;
+				//param->reports[i].idle = request->wValue >> 8;
 			}
 		}
 		break;
@@ -385,18 +393,17 @@ static vsf_err_t vsfusbd_HID_request_process(struct vsfusbd_device_t *device)
 
 		if (report->on_set_report != NULL)
 		{
-			return report->on_set_report(param, report);
+			return report->on_set_report(param, report, id);
 		}
 	}
 	return VSFERR_NONE;
 }
 
 #ifdef VSFCFG_STANDALONE_MODULE
-vsf_err_t vsfusbd_HID_modexit(struct vsf_module_t *module)
+void vsfusbd_HID_modexit(struct vsf_module_t *module)
 {
 	vsf_bufmgr_free(module->ifs);
 	module->ifs = NULL;
-	return VSFERR_NONE;
 }
 
 vsf_err_t vsfusbd_HID_modinit(struct vsf_module_t *module,

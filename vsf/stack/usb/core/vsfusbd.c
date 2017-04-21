@@ -1045,8 +1045,8 @@ vsfusbd_evt_handler(struct vsfsm_t *sm, vsfsm_evt_t evt)
 			if (drv->callback != NULL)
 			{
 				drv->callback->param = (void *)device;
-				drv->callback->on_attach = NULL;
-				drv->callback->on_detach = NULL;
+				drv->callback->on_attach = vsfusbd_on_ATTACH;
+				drv->callback->on_detach = vsfusbd_on_DETACH;
 				drv->callback->on_reset = vsfusbd_on_RESET;
 				drv->callback->on_setup = vsfusbd_on_SETUP;
 				drv->callback->on_error = vsfusbd_on_ERROR;

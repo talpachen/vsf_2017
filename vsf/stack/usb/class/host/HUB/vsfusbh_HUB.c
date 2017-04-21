@@ -82,7 +82,7 @@ static vsf_err_t hub_reset_thread(struct vsfsm_pt_t *pt, vsfsm_evt_t evt)
 
 	hub->retry = 0;
 
-	vsfsm_pt_delay(pt, 50);
+	vsfsm_pt_delay(pt, 10);
 	
 	do
 	{
@@ -97,8 +97,8 @@ static vsf_err_t hub_reset_thread(struct vsfsm_pt_t *pt, vsfsm_evt_t evt)
 		if (vsfurb->status != URB_OK)
 			return VSFERR_FAIL;
 
-		/* delay 100ms after port reset*/
-		vsfsm_pt_delay(pt, 100);
+		/* delay 10ms after port reset*/
+		vsfsm_pt_delay(pt, 10);
 
 		// clear reset
 		vsfurb->transfer_buffer = NULL;
@@ -111,8 +111,7 @@ static vsf_err_t hub_reset_thread(struct vsfsm_pt_t *pt, vsfsm_evt_t evt)
 		if (vsfurb->status != URB_OK)
 			return VSFERR_FAIL;
 
-		/* delay 100ms after port reset*/
-		vsfsm_pt_delay(pt, 50);
+		vsfsm_pt_delay(pt, 20);
 
 		/* get port status for check */
 		vsfurb->transfer_buffer = &hub->hub_portsts;
@@ -218,8 +217,22 @@ static vsf_err_t hub_connect_thread(struct vsfsm_pt_t *pt, vsfsm_evt_t evt)
 	dev->parent = hub->dev;
 
 	hub->usbh->new_dev = dev;
+	hub->usbh->parent_sm = pt->sm;
 	vsfsm_post_evt_pending(&hub->usbh->sm, VSFSM_EVT_NEW_DEVICE);
 
+	
+	evt = VSFSM_EVT_INVALID;
+	vsfsm_pt_entry(pt);
+	if (evt == VSFSM_EVT_RST_REQUEST)
+	{
+		vsfsm_pt_wfpt(pt, &hub->drv_reset_pt);
+	}
+	else if (evt != VSFSM_EVT_RST_CANCEL)
+		return VSFERR_NOT_READY;
+
+	hub->usbh->parent_sm = NULL;
+	vsfsm_post_evt_pending(&hub->usbh->sm, VSFSM_EVT_RST_COMPLETE);
+	
 	vsfsm_pt_end(pt);
 
 	return VSFERR_NONE;
@@ -442,15 +455,16 @@ static struct vsfsm_state_t *vsfusbh_hub_evt_handler_init(struct vsfsm_t *sm,
 		hub->drv_scan_pt.state = 0;
 		hub->drv_connect_pt.thread = hub_connect_thread;
 		hub->drv_connect_pt.user_data = hub;
-		hub->drv_connect_pt.sm = &hub->sm;
+		hub->drv_connect_pt.sm = sm;
 		hub->drv_connect_pt.state = 0;
 		hub->drv_reset_pt.thread = hub_reset_thread;
 		hub->drv_reset_pt.user_data = hub;
-		hub->drv_reset_pt.sm = &hub->sm;
+		hub->drv_reset_pt.sm = sm;
 		hub->drv_reset_pt.state = 0;
 		hub->inited = 0;
 
 	case VSFSM_EVT_URB_COMPLETE:
+	case VSFSM_EVT_RST_REQUEST:
 	case VSFSM_EVT_DELAY_DONE:
 		if (hub->inited == 0)
 		{
