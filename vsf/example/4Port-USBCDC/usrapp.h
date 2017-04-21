@@ -26,7 +26,7 @@ struct usrapp_t
 
 extern struct usrapp_t usrapp;
 
-void usrapp_init(struct usrapp_t *app);
+void usrapp_init(struct usrapp_t *app, int32_t level);
 
 #endif // __USRAPP_H__
 

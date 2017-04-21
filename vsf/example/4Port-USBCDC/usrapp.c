@@ -167,7 +167,17 @@ static void cdc_uart_init(struct usrapp_cdc_uart_t *usrapp_cdc_uart)
 	STREAM_INIT(&usrapp_cdc_uart->stream_tx);	
 }
 
-void usrapp_init(struct usrapp_t *app)
+static void usrapp_init_initial(struct usrapp_t *app)
+{
+	// null
+}
+
+static void usrapp_init_pendsv(struct usrapp_t *app)
+{
+	// null
+}
+
+static void usrapp_init_main(struct usrapp_t *app)
 {
 	// vsfcdc init
 	cdc_uart_init(&app->usbd.cdc[0]);
@@ -179,5 +189,17 @@ void usrapp_init(struct usrapp_t *app)
 	vsfusbd_device_init(&app->usbd.device);		
 	app->usbd.device.drv->disconnect();
 	vsftimer_create_cb(200, 1, usbd_connect, app);
+}
+
+void usrapp_init(struct usrapp_t *app, int32_t level)
+{
+	if (level == VSFMAIN_PHASE_INITIAL)
+		usrapp_init_initial(app);
+	else if (level == VSFMAIN_PHASE_PENDSV)
+		usrapp_init_pendsv(app);
+	else if (level == VSFMAIN_PHASE_MAIN)
+		usrapp_init_main(app);
+	else
+		return;
 }
 
