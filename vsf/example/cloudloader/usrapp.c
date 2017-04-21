@@ -44,6 +44,12 @@ struct usrapp_t usrapp =
 	.cdcuart_param.int_priority				= 0,
 	.cdcuart_param.baudrate					= 115200,
 	.cdcuart_param.param 					= &usrapp.usbd.cdc.param,
+	
+	.ota_param.recovery.index				= 0,
+	.ota_param.recovery.addr				= 0x000a0000,
+	.ota_param.recovery.size				= 0x1000,
+	.ota_param.recovery.character			= 0x12345678,
+	.ota_param.recovery.playload_size_max	= 252,
 };
 
 static void usbd_connect(void *p)
@@ -62,6 +68,7 @@ void usrapp_init(struct usrapp_t *app)
 	vsfshell_init(&app->shell);
 	help_init(&app->shell);
 	cdcuart_init(&app->shell, &usrapp.cdcuart_param);
+	ota_init(&app->shell, &usrapp.ota_param);
 	
 	// usbd init
 	vsfusbd_device_init(&app->usbd.device);		

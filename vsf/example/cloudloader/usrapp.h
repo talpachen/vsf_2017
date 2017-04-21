@@ -3,6 +3,7 @@
 
 #include "shell_cmd/help.h"
 #include "shell_cmd/cdcuart.h"
+#include "shell_cmd/ota.h"
 
 struct usrapp_t
 {
@@ -24,6 +25,7 @@ struct usrapp_t
 	
 	struct vsfshell_t shell;
 	struct cdcuart_param_t cdcuart_param;
+	struct ota_param_t ota_param;
 };
 
 extern struct usrapp_t usrapp;
