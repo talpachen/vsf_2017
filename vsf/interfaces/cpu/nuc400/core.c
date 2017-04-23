@@ -1,6 +1,7 @@
 #include "vsf.h"
-
 #include "core.h"
+
+#include "flash/NUC400_FLASH.h"
 
 #define CORE_SYSTICK_TIMER					TIMER0
 
@@ -268,27 +269,48 @@ vsf_err_t vsfhal_core_init(void *p)
 
 uint32_t vsfhal_uid_get(uint8_t *buffer, uint32_t size)
 {
-	return 0;
+	uint32_t buf[3], i;
+	
+	for (i = 0 ; i < 3; i++)
+	{
+		nuc400_unlock_reg();
+		FMC->ISPCMD = FMC_ISPCMD_READ_UID;
+		FMC->ISPADDR = 0x04 * i;
+		FMC->ISPTRG = FMC_ISPTRG_ISPGO_Msk;
+		while (FMC->ISPTRG & FMC_ISPTRG_ISPGO_Msk);
+		buf[i] = FMC->ISPDAT;
+		nuc400_lock_reg();
+	}
+	
+	size = min(size, 12);
+	memcpy(buffer, (uint8_t *)buf, size);
+	return size;
 }
 
 static void (*tickclk_callback)(void *param) = NULL;
 static void *tickclk_param = NULL;
 static volatile uint32_t tickcnt = 0;
 
-static uint32_t tickclk_get_count_local(void)
+static uint32_t tickclk_get_ms_local(void)
 {
 	return tickcnt;
 }
 
-uint32_t vsfhal_tickclk_get_count(void)
+uint32_t vsfhal_tickclk_get_ms(void)
 {
 	uint32_t count1, count2;
 
 	do {
-		count1 = tickclk_get_count_local();
-		count2 = tickclk_get_count_local();
+		count1 = tickclk_get_ms_local();
+		count2 = tickclk_get_ms_local();
 	} while (count1 != count2);
 	return count1;
+}
+
+uint16_t vsfhal_tickclk_get_us(void)
+{
+	uint32_t temp = SysTick->VAL * 1000;
+	return temp / SysTick->LOAD;
 }
 
 ROOTFUNC void SysTick_Handler(void)

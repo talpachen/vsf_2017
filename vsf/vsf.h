@@ -450,7 +450,7 @@ struct vsf_t
 #define vsfhal_tickclk_fini				vsfhal_tickclk_if->fini
 #define vsfhal_tickclk_start			vsfhal_tickclk_if->start
 #define vsfhal_tickclk_stop				vsfhal_tickclk_if->stop
-#define vsfhal_tickclk_get_count		vsfhal_tickclk_if->get_count
+#define vsfhal_tickclk_get_ms		vsfhal_tickclk_if->get_count
 #define vsfhal_tickclk_config_cb		vsfhal_tickclk_if->config_cb
 
 #define vsfhal_spi_if					((struct interface_spi_t *)vafhal_getif("spi"))

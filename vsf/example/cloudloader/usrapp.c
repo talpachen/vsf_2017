@@ -45,8 +45,11 @@ struct usrapp_t usrapp =
 	.cdcuart_param.baudrate					= 115200,
 	.cdcuart_param.param 					= &usrapp.usbd.cdc.param,
 	
+	.ota_param.target_area_index			= 0,
+	.ota_param.target_area_addr				= 0x00010000,
+	.ota_param.target_area_size				= 0x00030000,
 	.ota_param.recovery.index				= 0,
-	.ota_param.recovery.addr				= 0x000a0000,
+	.ota_param.recovery.addr				= 0x0000f000,
 	.ota_param.recovery.size				= 0x1000,
 	.ota_param.recovery.character			= 0x12345678,
 	.ota_param.recovery.playload_size_max	= 252,
@@ -59,8 +62,17 @@ static void usbd_connect(void *p)
 	app->usbd.device.drv->connect();
 }
 
+static void usrapp_init_initial(struct usrapp_t *app)
+{
+	// null
+}
 
-void usrapp_init(struct usrapp_t *app)
+static void usrapp_init_pendsv(struct usrapp_t *app)
+{
+	// null
+}
+
+static void usrapp_init_main(struct usrapp_t *app)
 {
 	// vsfcdc init
 	STREAM_INIT(&app->usbd.cdc.stream_rx);
@@ -74,5 +86,17 @@ void usrapp_init(struct usrapp_t *app)
 	vsfusbd_device_init(&app->usbd.device);		
 	app->usbd.device.drv->disconnect();
 	vsftimer_create_cb(200, 1, usbd_connect, app);
+}
+
+void usrapp_init(struct usrapp_t *app, int32_t level)
+{
+	if (level == VSFMAIN_PHASE_INITIAL)
+		usrapp_init_initial(app);
+	else if (level == VSFMAIN_PHASE_PENDSV)
+		usrapp_init_pendsv(app);
+	else if (level == VSFMAIN_PHASE_MAIN)
+		usrapp_init_main(app);
+	else
+		return;
 }
 

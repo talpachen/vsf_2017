@@ -46,7 +46,8 @@ vsf_err_t vsfhal_tickclk_init(void);
 vsf_err_t vsfhal_tickclk_fini(void);
 vsf_err_t vsfhal_tickclk_start(void);
 vsf_err_t vsfhal_tickclk_stop(void);
-uint32_t vsfhal_tickclk_get_count(void);
+uint32_t vsfhal_tickclk_get_ms(void);
+uint16_t vsfhal_tickclk_get_us(void);
 vsf_err_t vsfhal_tickclk_config_cb(void (*)(void*), void*);
 
 /*******************************************************************************

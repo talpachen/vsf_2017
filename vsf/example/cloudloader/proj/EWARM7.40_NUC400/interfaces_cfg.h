@@ -53,7 +53,6 @@
 #define VSFHAL_USART_EN						1
 #define VSFHAL_FLASH_EN						1
 
-
 // USART config
 #define VSFHAL_USART_NUM					5
 
@@ -67,4 +66,6 @@
 #define USART3_INT_EN						1
 #define USART4_0_ENABLE						1
 #define USART4_INT_EN						1
+
+#include "interfaces_cfg_nuc400.h"
 

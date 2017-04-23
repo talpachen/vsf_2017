@@ -13,30 +13,6 @@
 
 extern void nuc400_unlock_reg(void);
 extern void nuc400_lock_reg(void);
-
-static vsf_err_t nuc400_flash_lock(uint8_t index)
-{
-	switch (index)
-	{
-	case 0:
-		FMC->ISPCTL &=  ~FMC_ISPCTL_ISPEN_Msk;
-		return VSFERR_NONE;
-	default:
-		return VSFERR_NOT_SUPPORT;
-	}
-}
-
-static vsf_err_t nuc400_flash_unlock(uint8_t index)
-{
-	switch (index)
-	{
-	case 0:
-		FMC->ISPCTL |=  FMC_ISPCTL_ISPEN_Msk;
-		return VSFERR_NONE;
-	default:
-		return VSFERR_NOT_SUPPORT;
-	}
-}
 	
 vsf_err_t vsfhal_flash_checkidx(uint8_t index)
 {
@@ -98,6 +74,9 @@ vsf_err_t vsfhal_flash_fini(uint8_t index)
 	switch (index)
 	{
 	case 0:
+		nuc400_unlock_reg();
+		FMC->ISPCTL &= ~FMC_ISPCTL_ISPEN_Msk;
+		nuc400_lock_reg();
 		return VSFERR_NONE;
 	default:
 		return VSFERR_NOT_SUPPORT;

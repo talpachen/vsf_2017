@@ -349,6 +349,8 @@ vsf_err_t vsfshell_input_thread(struct vsfsm_pt_t *pt, vsfsm_evt_t evt)
 	while (1)
 	{
 		vsfsm_pt_wfe(pt, VSFSHELL_EVT_STREAMRX_ONIN);
+		
+		__ASM("nop");
 		while (1)
 		{
 			buffer.buffer = (uint8_t *)&shell->ch;

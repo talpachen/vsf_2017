@@ -18,6 +18,7 @@ struct recovery_t
 vsf_err_t recovery_init(struct recovery_t *info);
 int32_t recovery_load(struct recovery_t *info, uint8_t *payload, int32_t size);
 int32_t recovery_store(struct recovery_t *info, uint8_t *payload, int32_t size);
+vsf_err_t recovery_clean(struct recovery_t *info);
 
 #endif	// __RECOVERY_H_INCLUDED__
 

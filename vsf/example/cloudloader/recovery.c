@@ -1,29 +1,50 @@
 #include "vsf.h"
 #include "recovery.h"
 
-vsf_err_t vsfhal_flash_init(uint8_t index);
-vsf_err_t vsfhal_flash_fini(uint8_t index);
-vsf_err_t vsfhal_flash_capacity(uint8_t index, uint32_t *pagesize, uint32_t *pagenum);
-uint32_t vsfhal_flash_baseaddr(uint8_t index);
-uint32_t vsfhal_flash_blocksize(uint8_t index, uint32_t addr, uint32_t size, int op);
-vsf_err_t vsfhal_flash_config_cb(uint8_t index, uint32_t int_priority, void *param, void (*onfinish)(void*, vsf_err_t));
-vsf_err_t vsfhal_flash_erase(uint8_t index, uint32_t addr);
-vsf_err_t vsfhal_flash_read(uint8_t index, uint32_t addr, uint8_t *buff);
-vsf_err_t vsfhal_flash_write(uint8_t index, uint32_t addr, uint8_t *buff);
+#define READ_BUF_OP_MAX			256
 
 static vsf_err_t recovery_write(struct recovery_t *info, uint8_t *buf, uint32_t addr, uint32_t size)
 {
-
+	uint32_t i, op = vsfhal_flash_blocksize(info->index, addr, size, 2);
+	
+	for (i = 0; i < size; i += op)
+	{
+		vsfhal_flash_write(info->index, addr + i, buf + i);
+	}
+	
+	return VSFERR_NONE;
 }
 
 static vsf_err_t recovery_read(struct recovery_t *info, uint8_t *buf, uint32_t addr, uint32_t size)
 {
+	uint8_t op_buf[READ_BUF_OP_MAX];
+	uint32_t i, op = vsfhal_flash_blocksize(info->index, addr, size, 1);
 	
+	if (op > READ_BUF_OP_MAX)
+		return VSFERR_FAIL;
+	
+	for (i = 0; i < size; i += op)
+	{
+		vsfhal_flash_read(info->index, addr + i, op_buf);
+		if (i + op <= size)
+			memcpy(buf + i, op_buf, op);
+		else
+			memcpy(buf + i, op_buf, size - i);
+	}
+	
+	return VSFERR_NONE;
 }
 
 static vsf_err_t recovery_erase(struct recovery_t *info, uint32_t addr, uint32_t size)
 {
+	uint32_t i, op = vsfhal_flash_blocksize(info->index, addr, size, 0);
+
+	for (i = 0; i < size; i += op)
+	{
+		vsfhal_flash_erase(info->index, addr + i);
+	}
 	
+	return VSFERR_NONE;
 }
 
 static uint32_t recovery_find_last_element(struct recovery_t *info)
@@ -161,5 +182,10 @@ vsf_err_t recovery_init(struct recovery_t *info)
 	}
 
 	return VSFERR_NONE;
+}
+
+vsf_err_t recovery_clean(struct recovery_t *info)
+{
+	return recovery_erase(info, info->addr, info->size);
 }
 

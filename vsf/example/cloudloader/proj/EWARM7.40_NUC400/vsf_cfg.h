@@ -43,3 +43,5 @@
 //#define VSFCFG_FUNC_TCPIP
 //#define VSFCFG_FUNC_BCMWIFI
 
+#define VSFUSBD_CFG_DBUFFER_EN			0
+

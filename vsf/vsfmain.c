@@ -120,25 +120,30 @@ int main(void)
 {
 	vsf_enter_critical();	
 	usrapp_init(app.usrapp, VSFMAIN_PHASE_INITIAL);
-
-	vsfapp_init(&app);
 	
+#if defined(APPCFG_VSFSM_MAINQ_LEN) && (APPCFG_VSFSM_MAINQ_LEN > 0)
+	vsfsm_evtq_init(&app.mainq);
+	vsfsm_evtq_set(&app.mainq);
+#endif
 #if defined(APPCFG_VSFSM_PENDSVQ_LEN) && (APPCFG_VSFSM_PENDSVQ_LEN > 0)
 	vsfsm_evtq_init(&app.pendsvq);
 	vsfsm_evtq_set(&app.pendsvq);
 	vsfhal_core_pendsv_config(app_on_pendsv, &app.pendsvq);
+#endif
+
+	vsfapp_init(&app);
+#if defined(APPCFG_VSFSM_PENDSVQ_LEN) && (APPCFG_VSFSM_PENDSVQ_LEN > 0)
 	usrapp_init(app.usrapp, VSFMAIN_PHASE_PENDSV);
 #endif
 
+	vsf_leave_critical();
+
 #if defined(APPCFG_VSFSM_MAINQ_LEN) && (APPCFG_VSFSM_MAINQ_LEN > 0)
-	vsfsm_evtq_init(&app.mainq);
 	vsfsm_evtq_set(&app.mainq);
 	usrapp_init(app.usrapp, VSFMAIN_PHASE_MAIN);
 #else
 	vsfsm_evtq_set(NULL);
 #endif
-
-	vsf_leave_critical();
 
 	while (1)
 	{

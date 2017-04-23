@@ -340,7 +340,7 @@
         </option>
         <option>
           <name>CCOptLevel</name>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>CCOptStrategy</name>
@@ -349,7 +349,7 @@
         </option>
         <option>
           <name>CCOptLevelSlave</name>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>CompilerMisraRules98</name>
@@ -2175,10 +2175,10 @@
     <name>$PROJ_DIR$\app_cfg.h</name>
   </file>
   <file>
-    <name>$PROJ_DIR$\hw_cfg_NUC400.h</name>
+    <name>$PROJ_DIR$\interfaces_cfg.h</name>
   </file>
   <file>
-    <name>$PROJ_DIR$\interfaces_cfg.h</name>
+    <name>$PROJ_DIR$\interfaces_cfg_nuc400.h</name>
   </file>
   <file>
     <name>$PROJ_DIR$\..\..\recovery.c</name>
