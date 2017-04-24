@@ -646,7 +646,7 @@ fakefat32_dir_write_next:
 }
 
 // fs
-static vsf_err_t fakefat32_fs_mount(struct vsfsm_pt_t *pt, vsfsm_evt_t evt,
+vsf_err_t fakefat32_fs_mount(struct vsfsm_pt_t *pt, vsfsm_evt_t evt,
 								struct vsfile_t *dir)
 {
 	struct fakefat32_param_t *param = (struct fakefat32_param_t *)pt->user_data;
@@ -979,6 +979,7 @@ vsf_err_t fakefat32_modinit(struct vsf_module_t *module,
 	ifs->mal_drv.fini = fakefat32_mal_fini;
 	ifs->mal_drv.read = fakefat32_mal_read;
 	ifs->mal_drv.write = fakefat32_mal_write;
+	ifs->fs_mount = fakefat32_fs_mount;
 	memcpy(ifs->mbr, fakefat32_mbr_const, sizeof(ifs->mbr));
 	module->ifs = ifs;
 	return VSFERR_NONE;

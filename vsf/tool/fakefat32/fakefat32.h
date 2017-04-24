@@ -66,6 +66,8 @@ struct fakefat32_modifs_t
 {
 	struct vsfmal_drv_t mal_drv;
 	struct vsfile_fsop_t fs_op;
+	vsf_err_t (*fs_mount)(struct vsfsm_pt_t *pt, vsfsm_evt_t evt,
+								struct vsfile_t *dir);
 
 	uint8_t mbr[512];
 };
@@ -77,11 +79,15 @@ vsf_err_t fakefat32_modinit(struct vsf_module_t*, struct app_hwcfg_t const*);
 	((struct fakefat32_modifs_t *)vsf_module_load(FAKEFAT32_MODNAME, true))
 #define fakefat32_mal_drv					FAKEFAT32_MOD->mal_drv
 #define fakefat32_fs_op						FAKEFAT32_MOD->fs_op
+#define fakefat32_fs_mount					FAKEFAT32_MOD->fs_mount
 #define fakefat32_mbr						FAKEFAT32_MOD->mbr
 
 #else
 extern const struct vsfmal_drv_t fakefat32_mal_drv;
 extern const struct vsfile_fsop_t fakefat32_fs_op;
+// fakefat32_fs_mount can be used to bypass vsfile to initialize fakefat32
+vsf_err_t fakefat32_fs_mount(struct vsfsm_pt_t *pt, vsfsm_evt_t evt,
+								struct vsfile_t *dir);
 #endif
 
 #endif	// __FAKEFAT32_H_INCLUDED__
