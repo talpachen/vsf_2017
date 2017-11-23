@@ -56,7 +56,7 @@
 #define VSFHAL_GPIO_EN						1
 #define VSFHAL_USBD_EN						1
 #define VSFHAL_HCD_EN						0
-#define VSFHAL_USART_EN						0
+#define VSFHAL_USART_EN						1
 #define VSFHAL_FLASH_EN						0
 #define VSFHAL_I2C_EN						0
 #define VSFHAL_SPI_EN						0
@@ -114,8 +114,11 @@
 #define VSFHAL_USART2_RTS_PB13_EN			0
 #endif
 
-#define USBD_PULLUP_PORT							VSFHAL_DUMMY_PORT
-#define USBD_PULLUP_PIN								0
-	 
+#define USBD_PULLUP_PORT					VSFHAL_DUMMY_PORT
+#define USBD_PULLUP_PIN						0
+
+#define WIFI_UART_INDEX						1
+#define EXT_UART_INDEX						1
+
 #endif // __VSFHAL_CFG_H__
 

@@ -17,33 +17,30 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-// define the address of the api table
-#define VSFCFG_API_ADDR				(SYS_MAIN_ADDR + 0x200)
+#ifndef __VSFUSBD_VLLINK_H_INCLUDED__
+#define __VSFUSBD_VLLINK_H_INCLUDED__
 
-#define VSFCFG_MAX_SRT_PRIO			0xFF
+struct vsfusbd_VLLINK_param_t
+{
+	uint8_t ep_out;
+	uint8_t ep_in;
 
-//#define VSFCFG_DEBUG
-//#define VSFCFG_DEBUG_INFO_LEN		(1024)
-//#define VSFCFG_BUFMGR_LOG
+	// stream_tx is used for data stream send to USB host
+	struct vsf_stream_t *stream_tx;
+	// stream_rx is used for data stream receive from USB host
+	struct vsf_stream_t *stream_rx;
 
-#define VSFCFG_BUFFER
-#define VSFCFG_LIST
-#define VSFCFG_STREAM
-//#define VSFCFG_MAL
-//#define VSFCFG_SCSI
-//#define VSFCFG_FILE
+	struct
+	{
+		void (*on_tx_finish)(void *param);
+		void (*on_rx_finish)(void *param);
+	} callback;
+	
+	struct vsfusbd_device_t *device;
+	struct vsfusbd_transact_t IN_transact;
+	struct vsfusbd_transact_t OUT_transact;
+};
 
-// include VSFCFG_STANDALONE_MODULE to compile the project as a module
-//#define VSFCFG_STANDALONE_MODULE
+extern const struct vsfusbd_class_protocol_t vsfusbd_VLLINK_class;
 
-// include VSFCFG_MODULE to enable module support
-//#define VSFCFG_MODULE
-
-// define VSFCFG_FUNC_XXXX to include corresponding func
-#define VSFCFG_FUNC_USBD
-#define VSFUSBD_CFG_EPMAXNO				8
-//#define VSFCFG_FUNC_USBH
-#define VSFCFG_FUNC_SHELL
-//#define VSFCFG_FUNC_TCPIP
-//#define VSFCFG_FUNC_BCMWIFI
-
+#endif	// __VSFUSBD_VLLINK_H_INCLUDED__

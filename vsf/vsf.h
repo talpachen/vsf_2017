@@ -82,6 +82,7 @@
 #include "component/usb/core/vsfusbd.h"
 #include "component/usb/class/device/CDC/vsfusbd_CDC.h"
 #include "component/usb/class/device/CDC/vsfusbd_CDCACM.h"
+#include "component/usb/class/device/VLLINK/vsfusbd_VLLINK.h"
 #ifdef VSFCFG_FUNC_TCPIP
 #include "component/usb/class/device/CDC/vsfusbd_RNDIS.h"
 #endif
