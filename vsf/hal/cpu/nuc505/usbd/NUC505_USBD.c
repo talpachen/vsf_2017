@@ -1,23 +1,26 @@
-/**************************************************************************
- *  Copyright (C) 2008 - 2010 by Simon Qian                               *
- *  SimonQian@SimonQian.com                                               *
- *                                                                        *
- *  Project:    Versaloon                                                 *
- *  File:       BDM.c                                                     *
- *  Author:     SimonQian                                                 *
- *  Versaion:   See changelog                                             *
- *  Purpose:    BDM interface implementation file                         *
- *  License:    See license                                               *
- *------------------------------------------------------------------------*
- *  Change Log:                                                           *
- *      YYYY-MM-DD:     What(by Who)                                      *
- *      2011-05-09:     created(by SimonQian)                             *
- **************************************************************************/
+/***************************************************************************
+ *   Copyright (C) 2009 - 2010 by Simon Qian <SimonQian@SimonQian.com>     *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
 #include "vsf.h"
 
 #if VSFHAL_USBD_EN
 
-#include "usbd\NUC505_USBD.h"
+#include "NUC505_USBD.h"
 
 // CEPCTL
 #define USB_CEPCTL_NAKCLR					((uint32_t)0x00000000)
@@ -55,7 +58,7 @@ static uint16_t EP_Cfg_Ptr;
 static uint16_t max_ctl_ep_size = 64;
 
 // true if data direction in setup packet is device to host
-static volatile bool vsfhal_setup_status_IN;
+static volatile bool vsfhal_setup_status_IN, vsfhal_status_out = false;
 
 #define NUC505_USBD_EPIN					0x10
 #define NUC505_USBD_EPOUT					0x00
@@ -101,8 +104,12 @@ vsf_err_t vsfhal_usbd_init(int32_t int_priority)
 			USBD_CEPINTEN_TXPKIEN_Msk | USBD_CEPINTEN_STSDONEIEN_Msk;
 	// Enable USB interrupt
 	USBD->GINTEN = USBD_GINTEN_USBIEN_Msk | USBD_GINTEN_CEPIEN_Msk;
-	NVIC_SetPriority(USBD_IRQn,5);
-	NVIC_EnableIRQ(USBD_IRQn);
+
+	if (int_priority >= 0)
+	{
+		NVIC_SetPriority(USBD_IRQn, int_priority);
+		NVIC_EnableIRQ(USBD_IRQn);
+	}
 	return VSFERR_NONE;
 }
 
@@ -170,9 +177,7 @@ uint32_t vsfhal_usbd_get_frame_number(void)
 
 vsf_err_t vsfhal_usbd_get_setup(uint8_t *buffer)
 {
-	uint16_t temp;
-	
-	temp = USBD->SETUP1_0;
+	uint16_t temp = USBD->SETUP1_0;
 	buffer[0] = temp & 0xFF;
 	vsfhal_setup_status_IN = (buffer[0] & 0x80) > 0;
 	buffer[1] = temp >> 8;
@@ -301,9 +306,10 @@ vsf_err_t vsfhal_usbd_ep_set_IN_epsize(uint8_t idx, uint16_t epsize)
 	int8_t index = vsfhal_usbd_get_free_ep(idx | NUC505_USBD_EPIN);
 	if (index < 0)
 		return VSFERR_FAIL;
-	
+
 	if (0 == idx)
 	{
+#if 0
 		if (EP_Cfg_Ptr < epsize)
 			return VSFERR_NOT_ENOUGH_RESOURCES;
 
@@ -311,6 +317,12 @@ vsf_err_t vsfhal_usbd_ep_set_IN_epsize(uint8_t idx, uint16_t epsize)
 		USBD->CEPBUFSTART = EP_Cfg_Ptr;
 		USBD->CEPBUFEND = EP_Cfg_Ptr + epsize - 1;
 		max_ctl_ep_size = epsize;
+#else
+		EP_Cfg_Ptr -= 128;
+		USBD->CEPBUFSTART = EP_Cfg_Ptr;
+		USBD->CEPBUFEND = EP_Cfg_Ptr + 128 - 1;
+		max_ctl_ep_size = epsize;
+#endif
 		return VSFERR_NONE;
 	}
 	else if (index > 1)
@@ -678,12 +690,18 @@ uint16_t vsfhal_usbd_ep_get_OUT_count(uint8_t idx)
 
 	if (0 == idx)
 	{
+		// some ugly fix because NUC505 not have IN0/OUT0 for status stage
+		if (vsfhal_status_out)
+		{
+			vsfhal_status_out = false;
+			return 0;
+		}
 		return USBD->CEPRXCNT;
 	}
 	else if (index > 1)
 	{
 		index -= 2;
-		return NUC505_USBD_EP_REG(index, EPDATCNT) & 0xFF;
+		return NUC505_USBD_EP_REG(index, EPDATCNT) & 0xFFFF;
 	}
 	return 0;
 }
@@ -701,9 +719,12 @@ vsf_err_t vsfhal_usbd_ep_read_OUT_buffer(uint8_t idx, uint8_t *buffer,
 
 	if (0 == idx)
 	{
-		for (i = 0; i < size; i++)
+		if (!vsfhal_setup_status_IN)
 		{
-			buffer[i] = USBD->CEPDAT_BYTE;
+			for (i = 0; i < size; i++)
+			{
+				buffer[i] = USBD->CEPDAT_BYTE;
+			}
 		}
 		return VSFERR_NONE;
 	}
@@ -763,6 +784,8 @@ void USB_Istr(void)
 		IrqSt &= USBD->BUSINTEN;
 
 		if (IrqSt & USBD_BUSINTSTS_RSTIF_Msk) {
+			vsfhal_status_out = false;
+
 			if (vsfhal_usbd_callback.on_reset != NULL)
 			{
 				vsfhal_usbd_callback.on_reset(\
@@ -778,15 +801,14 @@ void USB_Istr(void)
 		IrqSt = USBD->CEPINTSTS;
 		IrqSt &= USBD->CEPINTEN;
 
-		if (IrqSt & USBD_CEPINTSTS_SETUPPKIF_Msk) {
-			USBD->CEPINTSTS = USBD_CEPINTSTS_SETUPPKIF_Msk;
-
-			if (vsfhal_usbd_callback.on_setup != NULL)
-			{
-				vsfhal_usbd_callback.on_setup(vsfhal_usbd_callback.param);
-			}
-		}
-		
+		// IMPORTANT:
+		// 		the OUT ep of NUC505 has no flow control, so the order of
+		// 		checking the interrupt flash MUST be as follow:
+		// 		IN0 -->> STATUS -->> SETUP -->> OUT0
+		// consider this:
+		// 		SETUP -->> IN0 -->> STATUS -->> SETUP -->> OUT0 -->> STATUS
+		// 		           ------------------------------------
+		//		in some condition, the under line interrupt MAYBE in one routine
 		if (IrqSt & USBD_CEPINTSTS_TXPKIF_Msk) {
 			USBD->CEPINTSTS = USBD_CEPINTSTS_TXPKIF_Msk;
 
@@ -796,15 +818,6 @@ void USB_Istr(void)
 			}
 		}
 
-		if (IrqSt & USBD_CEPINTSTS_RXPKIF_Msk) {
-			USBD->CEPINTSTS = USBD_CEPINTSTS_RXPKIF_Msk;
-
-			if (vsfhal_usbd_callback.on_out != NULL)
-			{
-				vsfhal_usbd_callback.on_out(vsfhal_usbd_callback.param, 0);
-			}
-		}
-		
 		if (IrqSt & USBD_CEPINTSTS_STSDONEIF_Msk) {
 			USBD->CEPINTSTS = USBD_CEPINTSTS_STSDONEIF_Msk;
 
@@ -817,10 +830,30 @@ void USB_Istr(void)
 			}
 			else
 			{
+				vsfhal_status_out = true;
 				if (vsfhal_usbd_callback.on_out != NULL)
 				{
 					vsfhal_usbd_callback.on_out(vsfhal_usbd_callback.param, 0);
 				}
+			}
+		}
+
+		if (IrqSt & USBD_CEPINTSTS_SETUPPKIF_Msk) {
+			USBD->CEPINTSTS = USBD_CEPINTSTS_SETUPPKIF_Msk;
+
+			USBD->CEPCTL = USB_CEPCTL_FLUSH;
+			if (vsfhal_usbd_callback.on_setup != NULL)
+			{
+				vsfhal_usbd_callback.on_setup(vsfhal_usbd_callback.param);
+			}
+		}
+
+		if (IrqSt & USBD_CEPINTSTS_RXPKIF_Msk) {
+			USBD->CEPINTSTS = USBD_CEPINTSTS_RXPKIF_Msk;
+
+			if (vsfhal_usbd_callback.on_out != NULL)
+			{
+				vsfhal_usbd_callback.on_out(vsfhal_usbd_callback.param, 0);
 			}
 		}
 	}
@@ -860,6 +893,7 @@ void USB_Istr(void)
 		}
 	}
 }
+
 
 ROOTFUNC void USBD_IRQHandler(void)
 {

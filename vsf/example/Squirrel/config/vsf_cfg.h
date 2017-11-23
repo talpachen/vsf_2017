@@ -41,7 +41,7 @@
 
 // define VSFCFG_FUNC_XXXX to include corresponding func
 #define VSFCFG_FUNC_USBD
-#define VSFUSBD_CFG_EPMAXNO				8
+#define VSFUSBD_CFG_EPMAXNO				12
 //#define VSFCFG_FUNC_USBH
 #define VSFCFG_FUNC_SHELL
 //#define VSFCFG_FUNC_TCPIP
