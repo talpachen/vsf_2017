@@ -118,8 +118,8 @@ static void vsfapp_init(struct vsfapp_t *app)
 	vsfhal_tickclk_config_cb(app_tickclk_callback_int, NULL);
 #endif
 
-#if defined(APPCFG_BUFMGR_SIZE) && (APPCFG_BUFMGR_SIZE > 0)
-	vsf_bufmgr_init(compiler_get_heap(), APPCFG_BUFMGR_SIZE);
+#ifdef APPCFG_BUFMGR_EN
+	vsf_bufmgr_init(compiler_get_heap(), compiler_get_heap_size());
 #endif
 
 #ifdef APPCFG_SRT_QUEUE_LEN

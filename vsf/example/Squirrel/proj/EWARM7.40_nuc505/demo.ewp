@@ -376,7 +376,7 @@
         </option>
         <option>
           <name>IccLang</name>
-          <state>0</state>
+          <state>2</state>
         </option>
         <option>
           <name>IccCDialect</name>
@@ -1948,6 +1948,12 @@
       <name>$PROJ_DIR$\app_cfg.h</name>
     </file>
     <file>
+      <name>$PROJ_DIR$\nuc505.icf</name>
+      <excluded>
+        <configuration>Debug</configuration>
+      </excluded>
+    </file>
+    <file>
       <name>$PROJ_DIR$\..\..\config\vsf_cfg.h</name>
     </file>
     <file>
@@ -2151,6 +2157,7 @@
           <option>
             <name>CCDefines</name>
             <state>FLASH_LOAD_OFFSET=0x0</state>
+            <state>NO_GARBAGE_COLLECTOR</state>
           </option>
           <option>
             <name>CCPreprocFile</name>
@@ -2211,7 +2218,7 @@
           <option>
             <name>CCAllowList</name>
             <version>1</version>
-            <state>11111110</state>
+            <state>00000000</state>
           </option>
           <option>
             <name>CCDebugInfo</name>
@@ -2306,7 +2313,7 @@
           </option>
           <option>
             <name>CCOptLevel</name>
-            <state>3</state>
+            <state>1</state>
           </option>
           <option>
             <name>CCOptStrategy</name>
@@ -2315,7 +2322,7 @@
           </option>
           <option>
             <name>CCOptLevelSlave</name>
-            <state>3</state>
+            <state>1</state>
           </option>
           <option>
             <name>CompilerMisraRules98</name>
@@ -2341,7 +2348,7 @@
           </option>
           <option>
             <name>IccLang</name>
-            <state>1</state>
+            <state>2</state>
           </option>
           <option>
             <name>IccCDialect</name>

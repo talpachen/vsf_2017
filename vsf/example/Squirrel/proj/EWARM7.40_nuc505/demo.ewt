@@ -2320,6 +2320,9 @@
       <name>$PROJ_DIR$\app_cfg.h</name>
     </file>
     <file>
+      <name>$PROJ_DIR$\nuc505.icf</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\..\..\config\vsf_cfg.h</name>
     </file>
     <file>
@@ -2499,9 +2502,6 @@
         <name>$PROJ_DIR$\..\..\squirrel3\squirrel\sqvm.h</name>
       </file>
     </group>
-    <configuration>
-      <name>Debug</name>
-    </configuration>
   </group>
   <group>
     <name>vsf</name>

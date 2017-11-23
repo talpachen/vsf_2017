@@ -1,5 +1,5 @@
 #define APPCFG_VSFTIMER_NUM				32
-#define APPCFG_BUFMGR_SIZE				(60 * 1024)
+#define APPCFG_BUFMGR_EN				1
 
 // The 3 MACROs below define the Hard/Soft/Non-RealTime event queue
 // undefine to indicate that the corresponding event queue is not supported

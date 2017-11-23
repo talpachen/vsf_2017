@@ -20,6 +20,10 @@
 #ifndef __VSF_H_INCLUDED__
 #define __VSF_H_INCLUDED__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "app_cfg.h"
 #include "app_type.h"
 
@@ -119,6 +123,10 @@
 
 #ifdef VSFCFG_MODULE
 #include "appmod.h"
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif		// __VSF_H_INCLUDED__
