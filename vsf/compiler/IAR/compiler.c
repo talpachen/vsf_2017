@@ -1,14 +1,12 @@
 #include "compiler.h"
 
+#pragma segment="HEAP"
 unsigned char * compiler_get_heap(void)
 {
-	#pragma segment="HEAP"
 	return __sfb("HEAP");
 }
 
-unsigned char * compiler_get_stack(void)
+long compiler_get_heap_size(void)
 {
-	#pragma segment="STACK"
-	return __sfe("STACK");
+	return (long)__sfe("HEAP") - (long)__sfb("HEAP");
 }
-

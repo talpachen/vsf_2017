@@ -19,11 +19,6 @@
 
 #include "vsf.h"
 
-#undef vsfscsi_init
-#undef vsfscsi_execute
-#undef vsfscsi_cancel_transact
-#undef vsfscsi_release_transact
-
 void vsfscsi_release_transact(struct vsfscsi_transact_t *transact)
 {
 	transact->lun = NULL;
@@ -442,37 +437,6 @@ static vsf_err_t vsf_scsi2mal_write(struct vsfsm_pt_t *pt, vsfsm_evt_t evt,
 {
 }
 
-#ifdef VSFCFG_STANDALONE_MODULE
-vsf_err_t vsfscsi_modexit(struct vsf_module_t *module)
-{
-	vsf_bufmgr_free(module->ifs);
-	module->ifs = NULL;
-	return VSFERR_NONE;
-}
-
-vsf_err_t vsfscsi_modinit(struct vsf_module_t *module,
-								struct app_hwcfg_t const *cfg)
-{
-	struct vsfscsi_modifs_t *ifs;
-	ifs = vsf_bufmgr_malloc(sizeof(struct vsfscsi_modifs_t));
-	if (!ifs) return VSFERR_FAIL;
-	memset(ifs, 0, sizeof(*ifs));
-
-	ifs->init = vsfscsi_init;
-	ifs->execute = vsfscsi_execute;
-	ifs->cancel_transact = vsfscsi_cancel_transact;
-	ifs->release_transact = vsfscsi_release_transact;
-	ifs->mal2scsi.op.init = vsf_mal2scsi_init;
-	ifs->mal2scsi.op.execute = vsf_mal2scsi_execute;
-	ifs->scsi2mal.op.block_size = vsf_scsi2mal_blocksize;
-	ifs->scsi2mal.op.init = vsf_scsi2mal_init;
-	ifs->scsi2mal.op.fini = vsf_scsi2mal_fini;
-	ifs->scsi2mal.op.read = vsf_scsi2mal_read;
-	ifs->scsi2mal.op.write = vsf_scsi2mal_write;
-	module->ifs = ifs;
-	return VSFERR_NONE;
-}
-#else
 const struct vsfscsi_lun_op_t vsf_mal2scsi_op =
 {
 	.init = vsf_mal2scsi_init,
@@ -486,4 +450,4 @@ const struct vsfmal_drv_t vsf_scsi2mal_op =
 	.read = vsf_scsi2mal_read,
 	.write = vsf_scsi2mal_write,
 };
-#endif
+

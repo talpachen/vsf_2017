@@ -1,29 +1,23 @@
-/***************************************************************************
- *   Copyright (C) 2009 - 2010 by Simon Qian <SimonQian@SimonQian.com>     *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
-
-#include "app_type.h"
-#include "vsfhal.h"
+/**************************************************************************
+ *  Copyright (C) 2008 - 2010 by Simon Qian                               *
+ *  SimonQian@SimonQian.com                                               *
+ *                                                                        *
+ *  Project:    Versaloon                                                 *
+ *  File:       GPIO.h                                                    *
+ *  Author:     SimonQian                                                 *
+ *  Versaion:   See changelog                                             *
+ *  Purpose:    GPIO interface header file                                *
+ *  License:    See license                                               *
+ *------------------------------------------------------------------------*
+ *  Change Log:                                                           *
+ *      YYYY-MM-DD:     What(by Who)                                      *
+ *      2008-11-07:     created(by SimonQian)                             *
+ **************************************************************************/
+#include "vsf.h"
 
 #if VSFHAL_GPIO_EN
 
 #include "NUC505_GPIO.h"
-#include "NUC505Series.h"
 
 #define NUC505_GPIO_NUM					4
 
@@ -35,72 +29,50 @@ typedef struct
     __I  uint32_t PIN;
 } GPIO_COMMON_T;
 
-vsf_err_t nuc505_gpio_init(uint8_t index)
+vsf_err_t vsfhal_gpio_init(uint8_t index)
 {
+	if (index == VSFHAL_DUMMY_PORT)
+		return VSFERR_NOT_SUPPORT;
+	
 	return VSFERR_NONE;
 }
 
-vsf_err_t nuc505_gpio_fini(uint8_t index)
+vsf_err_t vsfhal_gpio_fini(uint8_t index)
 {
+	if (index == VSFHAL_DUMMY_PORT)
+		return VSFERR_NOT_SUPPORT;
 	return VSFERR_NONE;
 }
 
-vsf_err_t nuc505_gpio_config_pin(uint8_t index, uint8_t pin_idx, uint32_t mode)
+vsf_err_t vsfhal_gpio_config(uint8_t index, uint8_t pin_idx, uint32_t mode)
 {
 	GPIO_COMMON_T *gpio;
 
+	if (index == VSFHAL_DUMMY_PORT)
+		return VSFERR_NOT_SUPPORT;
+	
 	gpio = (GPIO_COMMON_T *)(GPIOA_BASE + ((uint32_t)index << 4));
-
-	if (mode == nuc505_GPIO_INFLOAT)
-		gpio->MODE &= ~(0x1ul << pin_idx);
-	else
+	
+	if (mode & (VSFHAL_GPIO_OUTPP | VSFHAL_GPIO_OUTOD))
 		gpio->MODE |= 0x1ul << pin_idx;
+	else
+		gpio->MODE &= ~(0x1ul << pin_idx);
 
+	gpio->PUEN &= ~(0x3ul << (pin_idx * 2));
+	if (mode & VSFHAL_GPIO_PULLUP)
+		gpio->PUEN |= 0x1ul << (pin_idx * 2);
+	if (mode & VSFHAL_GPIO_PULLDOWN)
+		gpio->PUEN |= 0x1ul << (pin_idx * 2 + 1);
+	
 	return VSFERR_NONE;
 }
 
-vsf_err_t nuc505_gpio_config(uint8_t index, uint32_t pin_mask, uint32_t io,
-							uint32_t pull_en_mask, uint32_t input_pull_mask)
+vsf_err_t vsfhal_gpio_set(uint8_t index, uint32_t pin_mask)
 {
 	GPIO_COMMON_T *gpio;
-	uint32_t i, mask;
-	uint32_t mode;
-
-	gpio = (GPIO_COMMON_T *)(GPIOA_BASE + ((uint32_t)index << 4));
-
-	for (i = 0; i < 16; i++)
-	{
-		mask = 1UL << i;
-		if (pin_mask & mask)
-		{
-			//mode = !(io & mask) ? nuc505_GPIO_INFLOAT :
-			//	(pull_en_mask & input_pull_mask & mask) ? nuc505_GPIO_OUTOD :
-			//	nuc505_GPIO_OUTPP;
-			mode = (io & mask) ? nuc505_GPIO_OUTPP : nuc505_GPIO_INFLOAT;
-			nuc505_gpio_config_pin(index, i, mode);
-			if (pull_en_mask & mask)
-			{
-				if (input_pull_mask & mask) // pull down
-				{
-					gpio->PUEN = (gpio->PUEN & ~(0x3 << i)) | (0x2 << i);
-				}
-				else // pull up
-				{
-					gpio->PUEN = (gpio->PUEN & ~(0x3 << i)) | (0x1 << i);
-				}
-			}
-			else
-			{
-				gpio->PUEN &= ~(0x3 << i);
-			}
-		}
-	}
-	return VSFERR_NONE;
-}
-
-vsf_err_t nuc505_gpio_set(uint8_t index, uint32_t pin_mask)
-{
-	GPIO_COMMON_T *gpio;
+	
+	if (index == VSFHAL_DUMMY_PORT)
+		return VSFERR_NOT_SUPPORT;
 
 	gpio = (GPIO_COMMON_T *)(GPIOA_BASE + ((uint32_t)index << 4));
 	gpio->DOUT |= pin_mask;
@@ -108,9 +80,12 @@ vsf_err_t nuc505_gpio_set(uint8_t index, uint32_t pin_mask)
 	return VSFERR_NONE;
 }
 
-vsf_err_t nuc505_gpio_clear(uint8_t index, uint32_t pin_mask)
+vsf_err_t vsfhal_gpio_clear(uint8_t index, uint32_t pin_mask)
 {
 	GPIO_COMMON_T *gpio;
+	
+	if (index == VSFHAL_DUMMY_PORT)
+		return VSFERR_NOT_SUPPORT;
 
 	gpio = (GPIO_COMMON_T *)(GPIOA_BASE + ((uint32_t)index << 4));
 	gpio->DOUT &= ~pin_mask;
@@ -118,9 +93,12 @@ vsf_err_t nuc505_gpio_clear(uint8_t index, uint32_t pin_mask)
 	return VSFERR_NONE;
 }
 
-vsf_err_t nuc505_gpio_out(uint8_t index, uint32_t pin_mask, uint32_t value)
+vsf_err_t vsfhal_gpio_out(uint8_t index, uint32_t pin_mask, uint32_t value)
 {
 	GPIO_COMMON_T *gpio;
+	
+	if (index == VSFHAL_DUMMY_PORT)
+		return VSFERR_NOT_SUPPORT;
 
 	gpio = (GPIO_COMMON_T *)(GPIOA_BASE + ((uint32_t)index << 4));
 	gpio->DOUT |= pin_mask & value;
@@ -129,18 +107,12 @@ vsf_err_t nuc505_gpio_out(uint8_t index, uint32_t pin_mask, uint32_t value)
 	return VSFERR_NONE;
 }
 
-vsf_err_t nuc505_gpio_in(uint8_t index, uint32_t pin_mask, uint32_t *value)
+uint32_t vsfhal_gpio_get(uint8_t index, uint32_t pin_mask)
 {
 	GPIO_COMMON_T *gpio;
-
-	gpio = (GPIO_COMMON_T *)(GPIOA_BASE + ((uint32_t)index << 4));
-	*value = gpio->PIN & pin_mask;
-	return VSFERR_NONE;
-}
-
-uint32_t nuc505_gpio_get(uint8_t index, uint32_t pin_mask)
-{
-	GPIO_COMMON_T *gpio;
+	
+	if (index == VSFHAL_DUMMY_PORT)
+		return VSFERR_NOT_SUPPORT;
 
 	gpio = (GPIO_COMMON_T *)(GPIOA_BASE + ((uint32_t)index << 4));
 	return gpio->PIN & pin_mask;

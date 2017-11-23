@@ -18,8 +18,6 @@
  ***************************************************************************/
 #include "vsf.h"
 
-#undef vsfip_httpc_get
-
 #define VSFIP_HTTPC_AGENT				"VSFIP"
 #define VSFIP_HTTPC_SOCKET_TIMEOUT		4000
 
@@ -390,30 +388,6 @@ static vsf_err_t vsfip_httpc_on_recv_buffer(struct vsfsm_pt_t *pt,
 	return VSFERR_NONE;
 }
 
-#ifdef VSFCFG_STANDALONE_MODULE
-vsf_err_t vsfip_httpc_modexit(struct vsf_module_t *module)
-{
-	vsf_bufmgr_free(module->ifs);
-	module->ifs = NULL;
-	return VSFERR_NONE;
-}
-
-vsf_err_t vsfip_httpc_modinit(struct vsf_module_t *module,
-								struct app_hwcfg_t const *cfg)
-{
-	struct vsfip_httpc_modifs_t *ifs;
-	ifs = vsf_bufmgr_malloc(sizeof(struct vsfip_httpc_modifs_t));
-	if (!ifs) return VSFERR_FAIL;
-	memset(ifs, 0, sizeof(*ifs));
-
-	ifs->op_stream.on_connect = vsfip_httpc_on_connect_stream;
-	ifs->op_stream.on_recv = vsfip_httpc_on_recv_stream;
-	ifs->op_buffer.on_recv = vsfip_httpc_on_recv_buffer;
-	ifs->get = vsfip_httpc_get;
-	module->ifs = ifs;
-	return VSFERR_NONE;
-}
-#else
 const struct vsfip_httpc_op_t vsfip_httpc_op_stream =
 {
 	.on_connect = vsfip_httpc_on_connect_stream,
@@ -424,4 +398,4 @@ const struct vsfip_httpc_op_t vsfip_httpc_op_buffer =
 {
 	.on_recv = vsfip_httpc_on_recv_buffer,
 };
-#endif
+

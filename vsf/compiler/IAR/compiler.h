@@ -4,8 +4,6 @@
 #include <string.h>
 #include <intrinsics.h>
 
-#define __VSF_FUNCNAME__				"cur_function"
-
 #define ROOTFUNC	__root
 #define PACKED_HEAD	__packed
 #define PACKED_MID	
@@ -18,7 +16,7 @@
 #define vsf_leave_critical()			__enable_interrupt()
 
 unsigned char * compiler_get_heap(void);
-unsigned char * compiler_get_stack(void);
+long compiler_get_heap_size(void);
 
 #define compiler_set_pc(reg)			asm("MOV pc, %0" : :"r"(reg))
 #define compiler_get_lr(reg)			asm("MOV %0, lr" : "=r"(reg))

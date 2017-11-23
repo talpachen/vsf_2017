@@ -52,13 +52,9 @@ struct vsfapp_t
 	struct vsfsm_evtq_element_t mainq_ele[APPCFG_NRT_QUEUE_LEN];
 #endif
 #endif
-
-#if defined(APPCFG_BUFMGR_SIZE) && (APPCFG_BUFMGR_SIZE > 0)
-	uint8_t bufmgr_buffer[APPCFG_BUFMGR_SIZE];
-#endif
 } static app =
 {
-	.usrapp = &usrapp,
+	.usrapp = (struct usrapp_t *)&usrapp,
 #if VSFSM_CFG_PREMPT_EN
 #ifdef APPCFG_PENDSVQ_EN
 	.pendsvq.size = dimof(app.pendsvq_ele),
@@ -113,11 +109,7 @@ static void vsfapp_init(struct vsfapp_t *app)
 #endif
 
 	vsfhal_core_init(NULL);
-#if defined(APPCFG_USR_POLL)
-	vsfhal_tickclk_init(-1);
-#else
-	vsfhal_tickclk_init(0xFF);
-#endif
+	vsfhal_tickclk_init(APPCFG_TICKCLK_PRIORITY);
 	vsfhal_tickclk_start();
 
 #ifdef APPCFG_VSFTIMER_EN
@@ -127,7 +119,7 @@ static void vsfapp_init(struct vsfapp_t *app)
 #endif
 
 #if defined(APPCFG_BUFMGR_SIZE) && (APPCFG_BUFMGR_SIZE > 0)
-	vsf_bufmgr_init(app->bufmgr_buffer, sizeof(app->bufmgr_buffer));
+	vsf_bufmgr_init(compiler_get_heap(), APPCFG_BUFMGR_SIZE);
 #endif
 
 #ifdef APPCFG_SRT_QUEUE_LEN
@@ -166,6 +158,8 @@ int main(void)
 {
 	vsf_enter_critical();
 
+	usrapp_initial_init(app.usrapp);
+
 #ifdef APPCFG_MAINQ_EN
 	vsfsm_evtq_init(&app.mainq);
 #endif
@@ -186,11 +180,11 @@ int main(void)
 		vsfsm_poll();
 		vsf_enter_critical();
 		if (!vsfsm_get_event_pending())
-			vsfhal_core_sleep(SLEEP_WFI);	// will enable interrupt
+			vsfhal_core_sleep(VSFHAL_SLEEP_WFI);	// will enable interrupt
 		else
 			vsf_leave_critical();
 #else
-		vsfhal_core_sleep(SLEEP_WFI);
+		vsfhal_core_sleep(VSFHAL_SLEEP_WFI);
 #endif
 	}
 }

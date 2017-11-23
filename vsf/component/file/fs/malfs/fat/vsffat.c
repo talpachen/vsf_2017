@@ -19,9 +19,6 @@
 
 #include "vsf.h"
 
-#undef vsffat_is_LFN
-#undef vsffat_parse_dentry_fat
-
 // Refer to:
 // 1. "Microsoft Extensible Firmware Initiative FAT32 File System Specification"
 
@@ -522,6 +519,7 @@ bool vsffat_parse_dentry_fat(struct vsffat_dentry_parser_t *parser)
 				if (parser->lfn == 1)
 				{
 					// previous lfn parsed, igure sfn and return
+					parser->lfn = 0;
 					parsed = true;
 					break;
 				}
@@ -532,7 +530,7 @@ bool vsffat_parse_dentry_fat(struct vsffat_dentry_parser_t *parser)
 				for (i = 0; (i < 8) && (entry->fat.Name[i] != ' '); i++)
 				{
 					*ptr = entry->fat.Name[i];
-					if (lower) tolower(*ptr);
+					if (lower) *ptr = tolower(*ptr);
 					ptr++;
 				}
 				if (entry->fat.Ext[0] != ' ')
@@ -542,7 +540,7 @@ bool vsffat_parse_dentry_fat(struct vsffat_dentry_parser_t *parser)
 					for (i = 0; (i < 3) && (entry->fat.Ext[i] != ' '); i++)
 					{
 						*ptr = entry->fat.Ext[i];
-						if (lower) tolower(*ptr);
+						if (lower) *ptr = tolower(*ptr);
 						ptr++;
 					}
 				}
@@ -986,36 +984,6 @@ static vsf_err_t vsffat_write(struct vsfsm_pt_t *pt, vsfsm_evt_t evt,
 	return VSFERR_NOT_SUPPORT;
 }
 
-#ifdef VSFCFG_STANDALONE_MODULE
-vsf_err_t vsffat_modexit(struct vsf_module_t *module)
-{
-	vsf_bufmgr_free(module->ifs);
-	module->ifs = NULL;
-	return VSFERR_NONE;
-}
-
-vsf_err_t vsffat_modinit(struct vsf_module_t *module,
-								struct app_hwcfg_t const *cfg)
-{
-	struct vsffat_modifs_t *ifs;
-	ifs = vsf_bufmgr_malloc(sizeof(struct vsffat_modifs_t));
-	if (!ifs) return VSFERR_FAIL;
-	memset(ifs, 0, sizeof(*ifs));
-
-	ifs->op.mount = vsffat_mount;
-	ifs->op.unmount = vsffat_unmount;
-	ifs->op.f_op.close = vsffat_close;
-	ifs->op.f_op.read = vsffat_read;
-	ifs->op.f_op.write = vsffat_write;
-	ifs->op.d_op.addfile = vsffat_addfile;
-	ifs->op.d_op.removefile = vsffat_removefile;
-	ifs->op.d_op.getchild = vsffat_getchild;
-	ifs->is_LFN = vsffat_is_LFN;
-	ifs->parse_dentry_fat = vsffat_parse_dentry_fat;
-	module->ifs = ifs;
-	return VSFERR_NONE;
-}
-#else
 const struct vsfile_fsop_t vsffat_op =
 {
 	// mount / unmount
@@ -1030,4 +998,4 @@ const struct vsfile_fsop_t vsffat_op =
 	.d_op.removefile = vsffat_removefile,
 	.d_op.getchild = vsffat_getchild,
 };
-#endif
+

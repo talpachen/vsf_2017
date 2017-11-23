@@ -107,60 +107,7 @@ struct vsf_bufstream_t
 	struct vsf_bufstream_mem_t mem;
 };
 
-#ifdef VSFCFG_STANDALONE_MODULE
-#define VSFSTREAM_MODNAME					"vsf.component.stream"
-
-struct vsfstream_modifs_t
-{
-	vsf_err_t (*init)(struct vsf_stream_t*);
-	vsf_err_t (*fini)(struct vsf_stream_t*);
-	uint32_t (*write)(struct vsf_stream_t*, struct vsf_buffer_t*);
-	uint32_t (*read)(struct vsf_stream_t*, struct vsf_buffer_t*);
-	uint32_t (*get_data_size)(struct vsf_stream_t*);
-	uint32_t (*get_free_size)(struct vsf_stream_t*);
-	uint32_t (*get_wbuf)(struct vsf_stream_t*, uint8_t**);
-	uint32_t (*get_rbuf)(struct vsf_stream_t*, uint8_t**);
-	void (*connect_rx)(struct vsf_stream_t*);
-	void (*connect_tx)(struct vsf_stream_t*);
-	void (*disconnect_rx)(struct vsf_stream_t*);
-	void (*disconnect_tx)(struct vsf_stream_t*);
-
-	struct
-	{
-		struct vsf_stream_op_t op;
-	} fifostream;
-	struct
-	{
-		struct vsf_stream_op_t op;
-	} mbufstream;
-	struct
-	{
-		struct vsf_stream_op_t op;
-	} bufstream;
-};
-
-vsf_err_t vsfstream_modexit(struct vsf_module_t*);
-vsf_err_t vsfstream_modinit(struct vsf_module_t*, struct app_hwcfg_t const*);
-
-#define VSFSTREAM_MOD						\
-	((struct vsfstream_modifs_t *)vsf_module_load(VSFSTREAM_MODNAME, true))
-#define stream_init							VSFSTREAM_MOD->init
-#define stream_fini							VSFSTREAM_MOD->fini
-#define stream_write						VSFSTREAM_MOD->write
-#define stream_read							VSFSTREAM_MOD->read
-#define stream_get_data_size				VSFSTREAM_MOD->get_data_size
-#define stream_get_free_size				VSFSTREAM_MOD->get_free_size
-#define stream_get_wbuf						VSFSTREAM_MOD->get_wbuf
-#define stream_get_rbuf						VSFSTREAM_MOD->get_rbuf
-#define stream_connect_rx					VSFSTREAM_MOD->connect_rx
-#define stream_connect_tx					VSFSTREAM_MOD->connect_tx
-#define stream_disconnect_rx				VSFSTREAM_MOD->disconnect_rx
-#define stream_disconnect_tx				VSFSTREAM_MOD->disconnect_tx
-#define fifostream_op						VSFSTREAM_MOD->fifostream.op
-#define mbufstream_op						VSFSTREAM_MOD->mbufstream.op
-#define bufstream_op						VSFSTREAM_MOD->bufstream.op
-
-#else
+#ifndef VSFCFG_EXCLUDE_STREAM
 vsf_err_t stream_init(struct vsf_stream_t *stream);
 vsf_err_t stream_fini(struct vsf_stream_t *stream);
 uint32_t stream_write(struct vsf_stream_t *stream, struct vsf_buffer_t *buffer);

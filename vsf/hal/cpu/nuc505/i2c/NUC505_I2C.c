@@ -1,31 +1,7 @@
-/***************************************************************************
- *   Copyright (C) 2009 - 2010 by Simon Qian <SimonQian@SimonQian.com>     *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
-
-#include "app_type.h"
-#include "vsfhal.h"
-
-#if VSFHAL_I2C_EN
-
-#include "NUC505Series.h"
+#include "vsf.h"
 #include "core.h"
 
-#define NUC505_I2C_NUM				2
+#if VSFHAL_I2C_EN
 
 #define I2C_CON_I2C_STS		I2C_CTL_SI_Msk
 #define I2C_CON_START		I2C_CTL_STA_Msk
@@ -33,91 +9,83 @@
 #define I2C_CON_ACK			I2C_CTL_AA_Msk
 #define I2C_SET_CONTROL_REG(i2c, CTL_Msk) ( (i2c)->CTL = ((i2c)->CTL & ~0x3cul) | (CTL_Msk) )
 
-static void *nuc505_i2c_param[NUC505_I2C_NUM];
-static void (*nuc505_i2c_callback[NUC505_I2C_NUM])(void *, vsf_err_t);
-
 struct i2c_ctrl_t
 {
-	uint16_t enable : 1;
-	uint16_t :15;
-	uint16_t chip_addr;
-	uint16_t msg_len;
-	uint16_t msg_prt;
+	uint8_t chip_addr;
+	uint8_t msg_len;
+	uint8_t msg_prt;
 	uint16_t msg_buf_prt;
-	struct vsfi2c_msg_t *msg;
-} static i2c_ctrl[NUC505_I2C_NUM];
+	struct vsfhal_i2c_msg_t *msg;
+	void *param;
+	void (*callback)(void *, vsf_err_t);
+} static i2c_ctrl[VSFHAL_I2C_NUM];
 
-vsf_err_t nuc505_i2c_init(uint8_t index)
+vsf_err_t vsfhal_i2c_init(uint8_t index)
 {
-#if __VSF_DEBUG__
-	if (index >= NUC505_I2C_NUM)
-		return VSFERR_NOT_SUPPORT;
-#endif
-
 	switch (index)
 	{
-	#if I2C0_ENABLE
+	#if VSFHAL_I2C0_ENABLE
 	case 0:
-		#if I2C00_SCL_ENABLE
+		#if VSFHAL_I2C0_SCL_PA14_EN
 		SYS->GPA_MFPH &= ~(SYS_GPA_MFPH_PA14MFP_Msk);
 		SYS->GPA_MFPH |= 2 << SYS_GPA_MFPH_PA14MFP_Pos;
 		#endif
-		#if I2C00_SDA_ENABLE
-		SYS->GPA_MFPH &= ~(SYS_GPA_MFPH_PA14MFP_Msk);
-		SYS->GPA_MFPH |= 2 << SYS_GPA_MFPH_PA14MFP_Pos;
-		#endif
-		#if I2C10_SCL_ENABLE
+		#if VSFHAL_I2C0_SCL_PB0_EN
 		SYS->GPB_MFPL &= ~(SYS_GPB_MFPL_PB0MFP_Msk);
 		SYS->GPB_MFPL |= 2 << SYS_GPB_MFPL_PB0MFP_Pos;
 		#endif
-		#if I2C10_SDA_ENABLE
-		SYS->GPB_MFPL &= ~(SYS_GPB_MFPL_PB1MFP_Msk);
-		SYS->GPB_MFPL |= 2 << SYS_GPB_MFPL_PB1MFP_Pos;
-		#endif
-		#if I2C20_SCL_ENABLE
+		#if VSFHAL_I2C0_SCL_PD0_EN
 		SYS->GPD_MFPL &= ~(SYS_GPD_MFPL_PD0MFP_Msk);
 		SYS->GPD_MFPL |= 2 << SYS_GPD_MFPL_PD0MFP_Pos;
 		#endif
-		#if I2C20_SDA_ENABLE
+		#if VSFHAL_I2C0_SDA_PA15_EN
+		SYS->GPA_MFPH &= ~(SYS_GPA_MFPH_PA15MFP_Msk);
+		SYS->GPA_MFPH |= 2 << SYS_GPA_MFPH_PA15MFP_Pos;
+		#endif
+		#if VSFHAL_I2C0_SDA_PB1_EN
+		SYS->GPB_MFPL &= ~(SYS_GPB_MFPL_PB1MFP_Msk);
+		SYS->GPB_MFPL |= 2 << SYS_GPB_MFPL_PB1MFP_Pos;
+		#endif
+		#if VSFHAL_I2C0_SDA_PD1_EN
 		SYS->GPD_MFPL &= ~(SYS_GPD_MFPL_PD1MFP_Msk);
 		SYS->GPD_MFPL |= 2 << SYS_GPD_MFPL_PD1MFP_Pos;
 		#endif
 		CLK->APBCLK |= CLK_APBCLK_I2C0CKEN_Msk;
 		SYS->IPRST1 |= SYS_IPRST1_I2C0RST_Msk;
 		SYS->IPRST1 &= ~SYS_IPRST1_I2C0RST_Msk;
-		break:
-	#endif // I2C0_ENABLE
-	#if I2C1_ENABLE
+		break;
+	#endif // VSFHAL_I2C0_ENABLE
+	#if VSFHAL_I2C1_ENABLE
 	case 1:
-		#if I2C01_SCL_ENABLE
+		#if VSFHAL_I2C1_SCL_PA10_EN
 		SYS->GPA_MFPH &= ~(SYS_GPA_MFPH_PA10MFP_Msk);
 		SYS->GPA_MFPH |= 2 << SYS_GPA_MFPH_PA10MFP_Pos;
 		#endif
-		#if I2C01_SDA_ENABLE
-		SYS->GPA_MFPH &= ~(SYS_GPA_MFPH_PA11MFP_Msk);
-		SYS->GPA_MFPH |= 2 << SYS_GPA_MFPH_PA11MFP_Pos;
-		#endif
-		#if I2C11_SCL_ENABLE
+		#if VSFHAL_I2C1_SCL_PB10_EN
 		SYS->GPB_MFPH &= ~(SYS_GPB_MFPH_PB10MFP_Msk);
 		SYS->GPB_MFPH |= 2 << SYS_GPB_MFPH_PB10MFP_Pos;
 		#endif
-		#if I2C11_SDA_ENABLE
+		#if VSFHAL_I2C1_SCL_PB14_EN
+		SYS->GPB_MFPH &= ~(SYS_GPB_MFPH_PB14MFP_Msk);
+		SYS->GPB_MFPH |= 2 << SYS_GPB_MFPH_PB14MFP_Pos;
+		#endif		
+		#if VSFHAL_I2C1_SDA_PA11_EN
+		SYS->GPA_MFPH &= ~(SYS_GPA_MFPH_PA11MFP_Msk);
+		SYS->GPA_MFPH |= 2 << SYS_GPA_MFPH_PA11MFP_Pos;
+		#endif
+		#if VSFHAL_I2C1_SDA_PB11_EN
 		SYS->GPB_MFPH &= ~(SYS_GPB_MFPH_PB11MFP_Msk);
 		SYS->GPB_MFPH |= 2 << SYS_GPB_MFPH_PB11MFP_Pos;
 		#endif
-		#if I2C21_SCL_ENABLE
-		SYS->GPB_MFPH &= ~(SYS_GPB_MFPH_PB14MFP_Msk);
-		SYS->GPB_MFPH |= 2 << SYS_GPB_MFPH_PB14MFP_Pos;
-		#endif
-		#if I2C21_SDA_ENABLE
+		#if VSFHAL_I2C1_SDA_PB15_EN
 		SYS->GPB_MFPH &= ~(SYS_GPB_MFPH_PB15MFP_Msk);
 		SYS->GPB_MFPH |= 2 << SYS_GPB_MFPH_PB15MFP_Pos;
 		#endif
 		CLK->APBCLK |= CLK_APBCLK_I2C1CKEN_Msk;
 		SYS->IPRST1 |= SYS_IPRST1_I2C1RST_Msk;
 		SYS->IPRST1 &= ~SYS_IPRST1_I2C1RST_Msk;
-		break:
-	#endif // I2C1_ENABLE
+		break;
+	#endif // VSFHAL_I2C1_ENABLE
 	default:
 		return VSFERR_FAIL;
 	}
@@ -125,56 +93,52 @@ vsf_err_t nuc505_i2c_init(uint8_t index)
 	return VSFERR_NONE;
 }
 
-vsf_err_t nuc505_i2c_fini(uint8_t index)
+vsf_err_t vsfhal_i2c_fini(uint8_t index)
 {
-#if __VSF_DEBUG__
-	if (index >= NUC505_I2C_NUM)
-		return VSFERR_NOT_SUPPORT;
-#endif
-
-	if (index == 0)
+	switch (index)
 	{
-		I2C0->CTL = 0;
+	#if VSFHAL_I2C0_ENABLE
+	case 0:
+		SYS->IPRST1 |= SYS_IPRST1_I2C0RST_Msk;
 		CLK->APBCLK &= ~CLK_APBCLK_I2C0CKEN_Msk;
-	}
-	else if (index == 1)
-	{
-		I2C1->CTL = 0;
+		break;
+	#endif // VSFHAL_I2C0_ENABLE
+	#if VSFHAL_I2C1_ENABLE
+	case 1:
+		SYS->IPRST1 |= SYS_IPRST1_I2C1RST_Msk;
 		CLK->APBCLK &= ~CLK_APBCLK_I2C1CKEN_Msk;
-	}
-	return VSFERR_NONE;
-}
-
-vsf_err_t nuc505_i2c_config(uint8_t index, uint16_t kHz, void *param,
-							void (*callback)(void *, int32_t, int32_t))
-{
-	vsf_err_t err;
-	I2C_T *i2c;
-	struct nuc505_info_t *info;
-	uint32_t div;
-
-#if __VSF_DEBUG__
-	if (index >= NUC505_I2C_NUM)
-		return VSFERR_NOT_SUPPORT;
-#endif
-
-	if (index == 0)
-	{
-		i2c = I2C0;
-	}
-	else if (index == 1)
-	{
-		i2c = I2C1;
-	}
-
-	err = nuc505_get_info(&info);
-	if (err != VSFERR_NONE)
-	{
+		break;
+	#endif // VSFHAL_I2C1_ENABLE
+	default:
 		return VSFERR_FAIL;
 	}
 
-	nuc505_i2c_param[index] = param;
-	nuc505_i2c_callback[index] = callback;
+	return VSFERR_NONE;
+}
+
+vsf_err_t vsfhal_i2c_config(uint8_t index, uint16_t kHz)
+{
+	uint32_t div;
+	I2C_T *i2c;
+	struct vsfhal_info_t *info;
+
+	if (index >= VSFHAL_I2C_NUM)
+		return VSFERR_FAIL;
+
+	if (vsfhal_core_get_info(&info))
+		return VSFERR_FAIL;
+	
+	switch (index)
+	{
+	case 0:
+		i2c = I2C0;
+		NVIC_EnableIRQ(I2C0_IRQn);
+		break;
+	case 1:
+		i2c = I2C1;
+		NVIC_EnableIRQ(I2C1_IRQn);
+		break;
+	}
 
 	div = info->pclk_freq_hz / (kHz * 1000 * 4) - 1;
 	if (div < 4)
@@ -184,87 +148,79 @@ vsf_err_t nuc505_i2c_config(uint8_t index, uint16_t kHz, void *param,
 	i2c->CLKDIV = div;
 	i2c->CTL = I2C_CTL_INTEN_Msk | I2C_CTL_I2CEN_Msk;
 
-	if (index == 0)
-	{
-		NVIC_EnableIRQ(I2C0_IRQn);
-	}
-	else if (index == 1)
-	{
-		NVIC_EnableIRQ(I2C1_IRQn);
-	}
-
 	return VSFERR_NONE;
 }
 
-vsf_err_t nuc505_i2c_xfer(uint8_t index, uint16_t chip_addr,
-							struct vsfi2c_msg_t *msg, uint16_t msg_len)
+vsf_err_t vsfhal_i2c_config_cb(uint8_t index, void *param,
+		void (*cb)(void*, vsf_err_t))
 {
-#if __VSF_DEBUG__
-	if (index >= NUC505_I2C_NUM)
+	if (index >= VSFHAL_I2C_NUM)
+		return VSFERR_FAIL;
+	
+	i2c_ctrl[index].param = param;
+	i2c_ctrl[index].callback = cb;
+	
+	return VSFERR_NONE;
+}
+
+vsf_err_t vsfhal_i2c_xfer(uint8_t index, uint16_t addr,
+		struct vsfhal_i2c_msg_t *msg, uint8_t msg_len)
+{
+	I2C_T *i2c;
+
+	if ((index >= VSFHAL_I2C_NUM) || !msg || !msg_len)
+		return VSFERR_FAIL;
+
+	switch (index)
 	{
-		return VSFERR_NOT_SUPPORT;
+	case 0:
+		i2c = I2C0;
+		break;
+	case 1:
+		i2c = I2C1;
+		break;
 	}
-#endif
 
-	if ((msg == NULL) || (msg_len == 0))
-		return VSFERR_INVALID_PARAMETER;
-
-	i2c_ctrl[index].chip_addr = chip_addr;
+	i2c_ctrl[index].chip_addr = addr;
 	i2c_ctrl[index].msg = msg;
 	i2c_ctrl[index].msg_len = msg_len;
 	i2c_ctrl[index].msg_prt = 0;
 	i2c_ctrl[index].msg_buf_prt = 0;
-	i2c_ctrl[index].enable = 1;
 
-	if (index == 0)
-	{
-		I2C0->TOCTL = I2C_TOCTL_TOIF_Msk;
-		I2C0->TOCTL = I2C_TOCTL_TOCEN_Msk;
-		I2C_SET_CONTROL_REG(I2C0, I2C_CON_START);
-	}
-	else if (index == 1)
-	{
-		I2C1->TOCTL = I2C_TOCTL_TOIF_Msk;
-		I2C1->TOCTL = I2C_TOCTL_TOCEN_Msk;
-		I2C_SET_CONTROL_REG(I2C1, I2C_CON_START);
-	}
+	i2c->TOCTL = I2C_TOCTL_TOIF_Msk;
+	i2c->TOCTL = I2C_TOCTL_TOCEN_Msk;
+	I2C_SET_CONTROL_REG(i2c, I2C_CON_START);
 
 	return VSFERR_NONE;
 }
 
-#if I2C0_ENABLE
-void I2C0_IRQHandler(void)
+static void i2c_handler(I2C_T *i2c, struct i2c_ctrl_t *i2c_ctrl)
 {
-	if (i2c_ctrl[0].enable == 0)
-		goto end;
-
-	if (I2C0->TOCTL & I2C_TOCTL_TOIF_Msk)
-	{
+	if (i2c->TOCTL & I2C_TOCTL_TOIF_Msk)
 		goto error;
-	}
-	else if (I2C0->CTL & I2C_CON_I2C_STS)
+	else if (i2c->CTL & I2C_CON_I2C_STS)
 	{
-		uint32_t status = I2C0->STATUS;
-		struct vsfi2c_msg_t *msg = &i2c_ctrl[0].msg[i2c_ctrl[0].msg_prt];
+		uint32_t status = i2c->STATUS;
+		struct vsfhal_i2c_msg_t *msg = &i2c_ctrl->msg[i2c_ctrl->msg_prt];
 
-		if (msg->flag & VSFI2C_READ)
+		if (msg->flag & VSFHAL_I2C_READ)
 		{
 			if ((status == 0x08) || (status == 0x10))
 			{
-				I2C0->DAT = (i2c_ctrl[0].chip_addr << 1) + 1;
-				I2C_SET_CONTROL_REG(I2C0, I2C_CON_I2C_STS);
+				i2c->DAT = (i2c_ctrl->chip_addr << 1) + 1;
+				I2C_SET_CONTROL_REG(i2c, I2C_CON_I2C_STS);
 			}
 			else if (status == 0x40)
 			{
 				if (msg->len > 1)
 				{
 					// host reply ack
-					I2C_SET_CONTROL_REG(I2C0, I2C_CON_I2C_STS | I2C_CON_ACK);
+					I2C_SET_CONTROL_REG(i2c, I2C_CON_I2C_STS | I2C_CON_ACK);
 				}
 				else if (msg->len == 1)
 				{
 					// host reply nack
-					I2C_SET_CONTROL_REG(I2C0, I2C_CON_I2C_STS);
+					I2C_SET_CONTROL_REG(i2c, I2C_CON_I2C_STS);
 				}
 				else
 				{
@@ -273,38 +229,35 @@ void I2C0_IRQHandler(void)
 			}
 			else if (status == 0x50)
 			{
-				if (i2c_ctrl[0].msg_buf_prt < msg->len)
-					msg->buf[i2c_ctrl[0].msg_buf_prt++] = I2C0->DAT;
-				if (i2c_ctrl[0].msg_buf_prt < msg->len - 1)
+				if (i2c_ctrl->msg_buf_prt < msg->len)
+					msg->buf[i2c_ctrl->msg_buf_prt++] = i2c->DAT;
+				if (i2c_ctrl->msg_buf_prt < msg->len - 1)
 				{
 					// host reply ack
-					I2C_SET_CONTROL_REG(I2C0, I2C_CON_I2C_STS | I2C_CON_ACK);
+					I2C_SET_CONTROL_REG(i2c, I2C_CON_I2C_STS | I2C_CON_ACK);
 				}
 				else
 				{
 					// host reply nack
-					I2C_SET_CONTROL_REG(I2C0, I2C_CON_I2C_STS);
+					I2C_SET_CONTROL_REG(i2c, I2C_CON_I2C_STS);
 				}
 			}
 			else if (status == 0x58)
 			{
-				if (i2c_ctrl[0].msg_buf_prt < msg->len)
-					msg->buf[i2c_ctrl[0].msg_buf_prt++] = I2C0->DAT;
+				if (i2c_ctrl->msg_buf_prt < msg->len)
+					msg->buf[i2c_ctrl->msg_buf_prt++] = i2c->DAT;
 
-				if (++i2c_ctrl[0].msg_prt < i2c_ctrl[0].msg_len)
+				if (++i2c_ctrl->msg_prt < i2c_ctrl->msg_len)
 				{
-					i2c_ctrl[0].msg_buf_prt = 0;
-					I2C_SET_CONTROL_REG(I2C0, I2C_CON_I2C_STS | I2C_CON_START);
+					i2c_ctrl->msg_buf_prt = 0;
+					I2C_SET_CONTROL_REG(i2c, I2C_CON_I2C_STS | I2C_CON_START);
 				}
 				else
 				{
-					I2C_SET_CONTROL_REG(I2C0, I2C_CON_I2C_STS | I2C_CON_STOP);
-					I2C0->TOCTL = I2C_TOCTL_TOIF_Msk;
-					if (nuc505_i2c_callback[0] != NULL)
-					{
-						i2c_ctrl[0].enable = 0;
-						nuc505_i2c_callback[0](nuc505_i2c_param[0], VSFERR_NONE);
-					}
+					I2C_SET_CONTROL_REG(i2c, I2C_CON_I2C_STS | I2C_CON_STOP);
+					i2c->TOCTL = I2C_TOCTL_TOIF_Msk;
+					if (i2c_ctrl->callback)
+						i2c_ctrl->callback(i2c_ctrl->param, VSFERR_NONE);
 				}
 			}
 			else
@@ -316,32 +269,29 @@ void I2C0_IRQHandler(void)
 		{
 			if ((status == 0x08) || (status == 0x10))	// start send finish
 			{
-				I2C0->DAT = i2c_ctrl[0].chip_addr << 1;
-				I2C_SET_CONTROL_REG(I2C0, I2C_CON_I2C_STS);
+				i2c->DAT = i2c_ctrl->chip_addr << 1;
+				I2C_SET_CONTROL_REG(i2c, I2C_CON_I2C_STS);
 			}
 			else if ((status == 0x18) || (status == 0x28))	// addr/data send finish and ACK received
 			{
-				if (i2c_ctrl[0].msg_buf_prt < msg->len)
+				if (i2c_ctrl->msg_buf_prt < msg->len)
 				{
-					I2C0->DAT = msg->buf[i2c_ctrl[0].msg_buf_prt++];
-					I2C_SET_CONTROL_REG(I2C0, I2C_CON_I2C_STS);
+					i2c->DAT = msg->buf[i2c_ctrl->msg_buf_prt++];
+					I2C_SET_CONTROL_REG(i2c, I2C_CON_I2C_STS);
 				}
 				else
 				{
-					if (++i2c_ctrl[0].msg_prt < i2c_ctrl[0].msg_len)
+					if (++i2c_ctrl->msg_prt < i2c_ctrl->msg_len)
 					{
-						i2c_ctrl[0].msg_buf_prt = 0;
-						I2C_SET_CONTROL_REG(I2C0, I2C_CON_I2C_STS | I2C_CON_START);
+						i2c_ctrl->msg_buf_prt = 0;
+						I2C_SET_CONTROL_REG(i2c, I2C_CON_I2C_STS | I2C_CON_START);
 					}
 					else
 					{
-						I2C_SET_CONTROL_REG(I2C0, I2C_CON_I2C_STS | I2C_CON_STOP);
-						I2C0->TOCTL = I2C_TOCTL_TOIF_Msk;
-						if (nuc505_i2c_callback[0] != NULL)
-						{
-							i2c_ctrl[0].enable = 0;
-							nuc505_i2c_callback[0](nuc505_i2c_param[0], VSFERR_NONE);
-						}
+						I2C_SET_CONTROL_REG(i2c, I2C_CON_I2C_STS | I2C_CON_STOP);
+						i2c->TOCTL = I2C_TOCTL_TOIF_Msk;
+						if (i2c_ctrl->callback)
+							i2c_ctrl->callback(i2c_ctrl->param, VSFERR_NONE);				
 					}
 				}
 			}
@@ -351,22 +301,24 @@ void I2C0_IRQHandler(void)
 			}
 		}
 	}
+	return;
 
 error:
-	I2C_SET_CONTROL_REG(I2C0, I2C_CON_I2C_STS | I2C_CON_STOP);
-	i2c_ctrl[0].enable = 0;
-	if (nuc505_i2c_callback[0] != NULL)
-	{
-		nuc505_i2c_callback[0](nuc505_i2c_param[0], VSFERR_FAIL);
-	}
-
-end:
-	I2C0->TOCTL = I2C_TOCTL_TOIF_Msk;
+	I2C_SET_CONTROL_REG(i2c, I2C_CON_I2C_STS | I2C_CON_STOP);
+	if (i2c_ctrl->callback)
+		i2c_ctrl->callback(i2c_ctrl->param, VSFERR_FAIL);
+	i2c->TOCTL = I2C_TOCTL_TOIF_Msk;
 }
-#endif
 
-#if I2C1_ENABLE
-if used, copy from I2C0_IRQHandler
-#endif
+ROOTFUNC void I2C0_IRQHandler(void)
+{
+	i2c_handler(I2C0, &i2c_ctrl[0]);
+}
+
+ROOTFUNC void I2C1_IRQHandler(void)
+{
+	i2c_handler(I2C1, &i2c_ctrl[1]);
+}
+
 #endif
 

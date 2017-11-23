@@ -19,8 +19,6 @@
 
 #include "vsf.h"
 
-#undef vsfusbd_HID_IN_report_changed
-
 enum vsfusbd_HID_EVT_t
 {
 	VSFUSBD_HID_EVT_TIMER4MS = VSFSM_EVT_USER_LOCAL_INSTANT + 0,
@@ -187,7 +185,6 @@ vsfusbd_HID_evt_handler(struct vsfsm_t *sm, vsfsm_evt_t evt)
 
 			report->pos = 0;
 			report->idle_cnt = 0;
-			report->changed = true;
 		}
 
 		// enable timer
@@ -221,11 +218,19 @@ vsfusbd_HID_evt_handler(struct vsfsm_t *sm, vsfsm_evt_t evt)
 		{
 			struct vsfusbd_transact_t *transact = &param->IN_transact;
 			struct vsfusbd_HID_report_t *report;
-			uint8_t i;
 
-			for (i = 0; i < param->num_of_report; i++)
+			if (param->busy)
 			{
-				report = &param->reports[i];
+				break;
+			}
+
+			if (param->cur_report >= param->num_of_report)
+			{
+				param->cur_report = 0;
+			}
+			for (; param->cur_report < param->num_of_report; param->cur_report++)
+			{
+				report = &param->reports[param->cur_report];
 				if ((report->type == USB_HID_REPORT_INPUT) &&
 					(report->changed || ((report->idle != 0) &&
 							(report->idle_cnt >= report->idle))))
@@ -245,6 +250,7 @@ vsfusbd_HID_evt_handler(struct vsfsm_t *sm, vsfsm_evt_t evt)
 
 					report->changed = false;
 					report->idle_cnt = 0;
+					param->cur_report++;
 					param->busy = true;
 					break;
 				}
@@ -385,7 +391,8 @@ static vsf_err_t vsfusbd_HID_request_process(struct vsfusbd_device_t *device)
 	struct vsfusbd_HID_param_t *param =
 			(struct vsfusbd_HID_param_t *)config->iface[iface].protocol_param;
 
-	if (USB_HIDREQ_SET_REPORT == request->bRequest)
+	if ((USB_HIDREQ_SET_REPORT == request->bRequest) ||
+		(USB_HIDREQ_GET_REPORT == request->bRequest))
 	{
 		uint8_t type = request->wValue >> 8, id = request->wValue;
 		struct vsfusbd_HID_report_t *report =
@@ -396,39 +403,24 @@ static vsf_err_t vsfusbd_HID_request_process(struct vsfusbd_device_t *device)
 			return VSFERR_FAIL;
 		}
 
-		if (param->on_report_in != NULL)
+		if (USB_HIDREQ_SET_REPORT == request->bRequest)
 		{
-			return param->on_report_in(param, report);
+			if (param->on_report_in != NULL)
+			{
+				return param->on_report_in(param, report);
+			}
+		}
+		else
+		{
+			if (param->on_report_out != NULL)
+			{
+				return param->on_report_out(param, report);
+			}
 		}
 	}
 	return VSFERR_NONE;
 }
 
-#ifdef VSFCFG_STANDALONE_MODULE
-vsf_err_t vsfusbd_HID_modexit(struct vsf_module_t *module)
-{
-	vsf_bufmgr_free(module->ifs);
-	module->ifs = NULL;
-	return VSFERR_NONE;
-}
-
-vsf_err_t vsfusbd_HID_modinit(struct vsf_module_t *module,
-								struct app_hwcfg_t const *cfg)
-{
-	struct vsfusbd_HID_modifs_t *ifs;
-	ifs = vsf_bufmgr_malloc(sizeof(struct vsfusbd_HID_modifs_t));
-	if (!ifs) return VSFERR_FAIL;
-	memset(ifs, 0, sizeof(*ifs));
-
-	ifs->protocol.get_desc = vsfusbd_HID_get_desc;
-	ifs->protocol.request_prepare = vsfusbd_HID_request_prepare;
-	ifs->protocol.request_process = vsfusbd_HID_request_process;
-	ifs->protocol.init = vsfusbd_HID_class_init;
-	ifs->IN_report_changed = vsfusbd_HID_IN_report_changed;
-	module->ifs = ifs;
-	return VSFERR_NONE;
-}
-#else
 const struct vsfusbd_class_protocol_t vsfusbd_HID_class =
 {
 	.get_desc =			vsfusbd_HID_get_desc,
@@ -436,4 +428,4 @@ const struct vsfusbd_class_protocol_t vsfusbd_HID_class =
 	.request_process =	vsfusbd_HID_request_process,
 	.init =				vsfusbd_HID_class_init,
 };
-#endif
+

@@ -87,6 +87,7 @@ struct vsfusbd_HID_param_t
 
 	// private
 	uint8_t protocol;
+	uint8_t cur_report;
 	uint8_t cur_OUT_id;
 	uint8_t cur_IN_id;
 
@@ -102,25 +103,7 @@ struct vsfusbd_HID_param_t
 	bool busy;
 };
 
-#ifdef VSFCFG_STANDALONE_MODULE
-#define VSFUSBD_HID_MODNAME					"vsf.stack.usb.device.classes.hid"
-
-struct vsfusbd_HID_modifs_t
-{
-	struct vsfusbd_class_protocol_t protocol;
-	vsf_err_t (*IN_report_changed)(struct vsfusbd_HID_param_t*,
-									struct vsfusbd_HID_report_t*);
-};
-
-vsf_err_t vsfusbd_HID_modexit(struct vsf_module_t*);
-vsf_err_t vsfusbd_HID_modinit(struct vsf_module_t*, struct app_hwcfg_t const*);
-
-#define VSFUSBD_HIDMOD						\
-	((struct vsfusbd_HID_modifs_t *)vsf_module_load(VSFUSBD_HID_MODNAME, true))
-#define vsfusbd_HID_class					VSFUSBD_HIDMOD->protocol
-#define vsfusbd_HID_IN_report_changed		VSFUSBD_HIDMOD->IN_report_changed
-
-#else
+#ifndef VSFCFG_EXCLUDE_USBD_HID
 extern const struct vsfusbd_class_protocol_t vsfusbd_HID_class;
 
 vsf_err_t vsfusbd_HID_IN_report_changed(struct vsfusbd_HID_param_t *param,

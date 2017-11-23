@@ -171,39 +171,7 @@ struct vsf_scsi2mal_t
 	uint32_t size;
 };
 
-#ifdef VSFCFG_STANDALONE_MODULE
-#define VSFSCSI_MODNAME					"vsf.component.mal.scsi"
-
-struct vsfscsi_modifs_t
-{
-	vsf_err_t (*init)(struct vsfscsi_device_t*);
-	vsf_err_t (*execute)(struct vsfscsi_lun_t*, uint8_t*, uint8_t, uint32_t);
-	void (*cancel_transact)(struct vsfscsi_transact_t*);
-	void (*release_transact)(struct vsfscsi_transact_t*);
-
-	struct
-	{
-		struct vsfscsi_lun_op_t op;
-	} mal2scsi;
-	struct
-	{
-		struct vsfmal_drv_t op;
-	} scsi2mal;
-};
-
-vsf_err_t vsfscsi_modexit(struct vsf_module_t*);
-vsf_err_t vsfscsi_modinit(struct vsf_module_t*, struct app_hwcfg_t const*);
-
-#define VSFSCSI_MOD						\
-	((struct vsfscsi_modifs_t *)vsf_module_load(VSFSCSI_MODNAME, true))
-#define vsfscsi_init						VSFSCSI_MOD->init
-#define vsfscsi_execute						VSFSCSI_MOD->execute
-#define vsfscsi_cancel_transact				VSFSCSI_MOD->cancel_transact
-#define vsfscsi_release_transact			VSFSCSI_MOD->release_transact
-#define vsf_mal2scsi_op						VSFSCSI_MOD->mal2scsi.op
-#define vsf_scsi2mal_op						VSFSCSI_MOD->scsi2mal.op
-
-#else
+#ifndef VSFCFG_EXCLUDE_SCSI
 vsf_err_t vsfscsi_init(struct vsfscsi_device_t *dev);
 vsf_err_t vsfscsi_execute(struct vsfscsi_lun_t *lun, uint8_t *CDB,
 							uint8_t CDB_size, uint32_t size);

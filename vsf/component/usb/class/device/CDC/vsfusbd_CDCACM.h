@@ -41,24 +41,7 @@ struct vsfusbd_CDCACM_param_t
 	uint8_t line_coding_buffer[7];
 };
 
-#ifdef VSFCFG_STANDALONE_MODULE
-#define VSFUSBD_CDCACM_MODNAME				"vsf.stack.usb.device.classes.cdcacm"
-
-struct vsfusbd_CDCACM_modifs_t
-{
-	struct vsfusbd_class_protocol_t control_protocol;
-	struct vsfusbd_class_protocol_t data_protocol;
-};
-
-vsf_err_t vsfusbd_CDCACM_modexit(struct vsf_module_t*);
-vsf_err_t vsfusbd_CDCACM_modinit(struct vsf_module_t*, struct app_hwcfg_t const*);
-
-#define VSFUSBD_CDCACMMOD					\
-	((struct vsfusbd_CDCACM_modifs_t *)vsf_module_load(VSFUSBD_CDCACM_MODNAME, true))
-#define vsfusbd_CDCACMControl_class			VSFUSBD_CDCACMMOD->control_protocol
-#define vsfusbd_CDCACMData_class			VSFUSBD_CDCACMMOD->data_protocol
-
-#else
+#ifndef VSFCFG_EXCLUDE_USBD_CDCACM
 extern const struct vsfusbd_class_protocol_t vsfusbd_CDCACMControl_class;
 extern const struct vsfusbd_class_protocol_t vsfusbd_CDCACMData_class;
 #endif

@@ -22,67 +22,47 @@
 
 #include "NUC505Series.h"
 
-#define nuc505_SLEEP_WFI			0
-#define nuc505_SLEEP_PWRDOWN		1
+// common
+#define VSFHAL_DUMMY_PORT					0xFF
 
-#define nuc505_GPIO_INFLOAT			0x00
-#define nuc505_GPIO_INPU			0x00
-#define nuc505_GPIO_INPD			0x00
-#define nuc505_GPIO_OUTPP			0x01
-#define nuc505_GPIO_OUTOD			0x02
+// core
+#define VSFHAL_SLEEP_WFI					(0x1ul << 0)
+#define VSFHAL_SLEEP_PWRDOWN				(0x1ul << 1)
 
-#define nuc505_EINT_ONFALL			0x01
-#define nuc505_EINT_ONRISE			0x02
-#define nuc505_EINT_ONLOW			0		// not support
-#define nuc505_EINT_ONHIGH			0		// not support
+// usart
+#define VSFHAL_USART_STOPBITS_1				(0x0ul << 4)
+#define VSFHAL_USART_STOPBITS_1P5			(0x1ul << 4)
+#define VSFHAL_USART_STOPBITS_2				(0x1ul << 4)
+#define VSFHAL_USART_PARITY_NONE			(0x0ul << 0)
+#define VSFHAL_USART_PARITY_ODD				(0x2ul << 0)
+#define VSFHAL_USART_PARITY_EVEN			(0x3ul << 0)
 
-#define nuc505_HCD_PORT1			(0x1 << 0)
-#define nuc505_HCD_PORT2			(0x1 << 1)
+// GPIO
+#define VSFHAL_GPIO_INPUT					(0x1ul << 0)
+#define VSFHAL_GPIO_OUTPP					(0x1ul << 1)
+#define VSFHAL_GPIO_OUTOD					(0x1ul << 2)
+#define VSFHAL_GPIO_PULLUP					(0x1ul << 3)
+#define VSFHAL_GPIO_PULLDOWN				(0x1ul << 4)
 
-#define nuc505_USART_CLKEN
-#define nuc505_USART_STOPBITS_0P5
-#define nuc505_USART_STOPBITS_1
-#define nuc505_USART_STOPBITS_1P5
-#define nuc505_USART_STOPBITS_2
-#define nuc505_USART_PARITY_NONE
-#define nuc505_USART_PARITY_ODD
-#define nuc505_USART_PARITY_EVEN
+// I2C
+#define VSFHAL_I2C_READ						(0x1ul << 0)
+#define VSFHAL_I2C_WRITE					(0x0ul << 0)
+#define VSFHAL_I2C_NOSTART					(0x1ul << 4)
+#define VSFHAL_I2C_ACKLAST					(0x1ul << 5)
 
-#define nuc505_SPI_MASTER			0x00
-#define nuc505_SPI_SLAVE			(SPI_CTL_SLAVE_Msk)
-#define nuc505_SPI_MODE0			(SPI_CTL_TXNEG_Msk)                             /*!< CLKPOL=0; RXNEG=0; TXNEG=1 */
-#define nuc505_SPI_MODE1			(SPI_CTL_RXNEG_Msk)                             /*!< CLKPOL=0; RXNEG=1; TXNEG=0 */
-#define nuc505_SPI_MODE2			(SPI_CTL_CLKPOL_Msk | SPI_CTL_RXNEG_Msk)        /*!< CLKPOL=1; RXNEG=1; TXNEG=0 */
-#define nuc505_SPI_MODE3			(SPI_CTL_CLKPOL_Msk | SPI_CTL_TXNEG_Msk)        /*!< CLKPOL=1; RXNEG=0; TXNEG=1 */
-#define nuc505_SPI_MSB_FIRST		0x00
-#define nuc505_SPI_LSB_FIRST		(SPI_CTL_LSB_Msk)
+// SPI
+#define VSFHAL_SPI_MASTER					0x00
+#define VSFHAL_SPI_SLAVE					(SPI_CTL_SLAVE_Msk)
+#define VSFHAL_SPI_MODE0					(SPI_CTL_TXNEG_Msk)
+#define VSFHAL_SPI_MODE1					(SPI_CTL_RXNEG_Msk)
+#define VSFHAL_SPI_MODE2					(SPI_CTL_CLKPOL_Msk | SPI_CTL_RXNEG_Msk)
+#define VSFHAL_SPI_MODE3					(SPI_CTL_CLKPOL_Msk | SPI_CTL_TXNEG_Msk)
+#define VSFHAL_SPI_MSB_FIRST				0x00
+#define VSFHAL_SPI_LSB_FIRST				(SPI_CTL_LSB_Msk)
 
-/*
-#define m45x_SLEEP_WFI			0
-#define m45x_SLEEP_PWRDOWN		1
-
-
-#define m45x_SPI_MASTER
-#define m45x_SPI_SLAVE
-#define m45x_SPI_MODE0
-#define m45x_SPI_MODE1
-#define m45x_SPI_MODE2
-#define m45x_SPI_MODE3
-#define m45x_SPI_MSB_FIRST
-#define m45x_SPI_LSB_FIRST
-
-#define m45x_ADC_ALIGNLEFT
-#define m45x_ADC_ALIGNRIGHT
-
-#define m45x_EINT_ONFALL			0x01
-#define m45x_EINT_ONRISE			0x02
-#define m45x_EINT_INT				0x04
-#define m45x_EINT_EVT				0x08
-
-#define m45x_SDIO_RESP_NONE
-#define m45x_SDIO_RESP_SHORT
-#define m45x_SDIO_RESP_LONG
-*/
+// OHCI
+#define VSFHAL_HCD_PORT1					(0x1 << 0)
+#define VSFHAL_HCD_PORT2					(0x1 << 1)
 
 // NUC505 GPIO BITBAND
 #define MEM_ADDR(address)  *((volatile unsigned long *) (address))

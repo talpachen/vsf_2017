@@ -24,17 +24,17 @@ static void vsfusbd_MSCBOT_on_data_finish(void *p);
 static vsf_err_t vsfusbd_MSCBOT_SendCSW(struct vsfusbd_device_t *device,
 							struct vsfusbd_MSCBOT_param_t *param)
 {
-	struct vsfscsi_transact_t *transact = &param->scsi_dev->transact;
+	struct vsfscsi_transact_t *scsi_transact = &param->scsi_dev->transact;
 	struct USBMSC_CSW_t *CSW = &param->CSW;
 	uint32_t remain_size;
 
 	CSW->dCSWSignature = SYS_TO_LE_U32(USBMSC_CSW_SIGNATURE);
 	CSW->dCSWTag = param->CBW.dCBWTag;
 	remain_size = param->CBW.dCBWDataTransferLength;
-	if (transact->lun != NULL)
+	if (scsi_transact->lun != NULL)
 	{
-		remain_size -= transact->data_size;
-		vsfscsi_release_transact(transact);
+		remain_size -= scsi_transact->data_size;
+		vsfscsi_release_transact(scsi_transact);
 	}
 	CSW->dCSWDataResidue = SYS_TO_LE_U32(remain_size);
 
@@ -61,7 +61,7 @@ static void vsfusbd_MSCBOT_to_SendCSW(void *p)
 static vsf_err_t vsfusbd_MSCBOT_ErrHandler(struct vsfusbd_device_t *device,
 			struct vsfusbd_MSCBOT_param_t *param,  uint8_t error)
 {
-	struct vsfscsi_transact_t *transact = &param->scsi_dev->transact;
+	struct vsfscsi_transact_t *scsi_transact = &param->scsi_dev->transact;
 	param->CSW.dCSWStatus = error;
 
 	// OUT:	NACK(don't enable_OUT, if OUT is enabled, it will be disabled after data is sent)
@@ -72,9 +72,9 @@ static vsf_err_t vsfusbd_MSCBOT_ErrHandler(struct vsfusbd_device_t *device,
 				USBMSC_CBWFLAGS_DIR_IN) &&
 		(param->CBW.dCBWDataTransferLength > 0))
 	{
-		if (transact->lun != NULL)
+		if (scsi_transact->lun != NULL)
 		{
-			transact->data_size = 0;
+			scsi_transact->data_size = 0;
 		}
 
 		param->transact.ep = param->ep_in;
@@ -103,7 +103,6 @@ static void vsfusbd_MSCBOT_dummy_inout(void *p)
 		.size = stream_get_data_size(transact->stream),
 	};
 
-	scsi_transact->data_size += buffer.size;
 	stream_read(transact->stream, &buffer);
 }
 
@@ -113,7 +112,6 @@ static void vsfusbd_MSCBOT_on_data_finish(void *p)
 	struct USBMSC_CBW_t *CBW = &param->CBW;
 	struct vsfscsi_transact_t *scsi_transact = &param->scsi_dev->transact;
 	struct vsfusbd_transact_t *transact = &param->transact;
-	uint32_t remain = stream_get_data_size(transact->stream);
 
 	if (scsi_transact->err)
 	{
@@ -121,6 +119,7 @@ static void vsfusbd_MSCBOT_on_data_finish(void *p)
 	}
 	if ((CBW->bmCBWFlags & USBMSC_CBWFLAGS_DIR_MASK) == USBMSC_CBWFLAGS_DIR_IN)
 	{
+		uint32_t remain = stream_get_data_size(transact->stream);
 		if (remain)
 		{
 			transact->data_size = remain;
@@ -145,11 +144,10 @@ static void vsfusbd_MSCBOT_on_data_finish(void *p)
 	}
 	else
 	{
-		scsi_transact->data_size += remain;
-		if (scsi_transact->data_size < CBW->dCBWDataTransferLength)
+		uint32_t remain = transact->data_size;
+		if (remain)
 		{
-			transact->data_size =
-				CBW->dCBWDataTransferLength - scsi_transact->data_size;
+			transact->data_size = remain;
 			transact->stream->callback_rx.param = param;
 			transact->stream->callback_rx.on_connect = NULL;
 			transact->stream->callback_rx.on_disconnect = NULL;
@@ -296,31 +294,9 @@ static vsf_err_t vsfusbd_MSCBOT_request_prepare(struct vsfusbd_device_t *device)
 	return VSFERR_NONE;
 }
 
-#ifdef VSFCFG_STANDALONE_MODULE
-vsf_err_t vsfusbd_MSC_modexit(struct vsf_module_t *module)
-{
-	vsf_bufmgr_free(module->ifs);
-	module->ifs = NULL;
-	return VSFERR_NONE;
-}
-
-vsf_err_t vsfusbd_MSC_modinit(struct vsf_module_t *module,
-								struct app_hwcfg_t const *cfg)
-{
-	struct vsfusbd_MSC_modifs_t *ifs;
-	ifs = vsf_bufmgr_malloc(sizeof(struct vsfusbd_MSC_modifs_t));
-	if (!ifs) return VSFERR_FAIL;
-	memset(ifs, 0, sizeof(*ifs));
-
-	ifs->protocol.request_prepare = vsfusbd_MSCBOT_request_prepare;
-	ifs->protocol.init = vsfusbd_MSCBOT_class_init;
-	module->ifs = ifs;
-	return VSFERR_NONE;
-}
-#else
 const struct vsfusbd_class_protocol_t vsfusbd_MSCBOT_class =
 {
 	.request_prepare = vsfusbd_MSCBOT_request_prepare,
 	.init = vsfusbd_MSCBOT_class_init,
 };
-#endif
+

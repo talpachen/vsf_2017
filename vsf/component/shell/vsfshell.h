@@ -118,27 +118,7 @@ typedef vsf_err_t (*vsfshell_printf_thread_t)(struct vsfsm_pt_t *pt,
 		vsfshell_free_handler_thread(param->shell, &param->sm);\
 	} while (0)
 
-#ifdef VSFCFG_STANDALONE_MODULE
-#define VSFSHELL_MODNAME					"vsf.framework.shell"
-
-struct vsfshell_modifs_t
-{
-	vsf_err_t (*init)(struct vsfshell_t*);
-	void (*register_handlers)(struct vsfshell_t*, struct vsfshell_handler_t*,
-								int);
-	void (*free_handler_thread)(struct vsfshell_t*, struct vsfsm_t*);
-};
-
-vsf_err_t vsfshell_modexit(struct vsf_module_t*);
-vsf_err_t vsfshell_modinit(struct vsf_module_t*, struct app_hwcfg_t const*);
-
-#define VSFSHELL_MOD						\
-	((struct vsfshell_modifs_t *)vsf_module_load(VSFSHELL_MODNAME, true))
-#define vsfshell_init						VSFSHELL_MOD->init
-#define vsfshell_register_handlers			VSFSHELL_MOD->register_handlers
-#define vsfshell_free_handler_thread		VSFSHELL_MOD->free_handler_thread
-
-#else
+#ifndef VSFCFG_EXCLUDE_SHELL
 vsf_err_t vsfshell_init(struct vsfshell_t*);
 void vsfshell_register_handlers(struct vsfshell_t*, struct vsfshell_handler_t*,
 								int);

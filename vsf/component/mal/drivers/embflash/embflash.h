@@ -34,25 +34,7 @@ struct embflash_mal_t
 	struct vsfsm_pt_t pt;
 };
 
-#ifdef VSFCFG_STANDALONE_MODULE
-#define EMBFLASH_MODNAME					"vsf.tool.embflash"
-
-struct embflash_modifs_t
-{
-	struct
-	{
-		struct vsfmal_drv_t drv;
-	} mal;
-};
-
-vsf_err_t embflash_modexit(struct vsf_module_t*);
-vsf_err_t embflash_modinit(struct vsf_module_t*, struct app_hwcfg_t const*);
-
-#define EMBFLASH_MOD						\
-	((struct embflash_modifs_t *)vsf_module_load(EMBFLASH_MODNAME, true))
-#define embflash_mal_drv					EMBFLASH_MOD->mal.drv
-
-#else
+#ifndef VSFCFG_EXCLUDE_EMBFLASH
 extern struct vsfmal_drv_t embflash_mal_drv;
 #endif
 

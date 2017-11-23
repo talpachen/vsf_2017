@@ -18,16 +18,12 @@
  ***************************************************************************/
 #include "vsf.h"
 
-#undef vsfip_dhcpc_start
-
 #include "vsfip_dhcp_common.h"
 
-#ifndef VSFCFG_STANDALONE_MODULE
 static struct vsfip_dhcpc_local_t vsfip_dhcpc =
 {
 	.xid = VSFIP_DHCPC_XID,
 };
-#endif
 
 #define VSFIP_DHCPC_RETRY_CNT	10
 
@@ -270,25 +266,3 @@ vsf_err_t vsfip_dhcpc_start(struct vsfip_netif_t *netif,
 	return vsfsm_init(&dhcpc->sm);
 }
 
-#ifdef VSFCFG_STANDALONE_MODULE
-vsf_err_t vsfip_dhcpc_modexit(struct vsf_module_t *module)
-{
-	vsf_bufmgr_free(module->ifs);
-	module->ifs = NULL;
-	return VSFERR_NONE;
-}
-
-vsf_err_t vsfip_dhcpc_modinit(struct vsf_module_t *module,
-								struct app_hwcfg_t const *cfg)
-{
-	struct vsfip_dhcpc_modifs_t *ifs;
-	ifs = vsf_bufmgr_malloc(sizeof(struct vsfip_dhcpc_modifs_t));
-	if (!ifs) return VSFERR_FAIL;
-	memset(ifs, 0, sizeof(*ifs));
-
-	ifs->dhcpc.xid = VSFIP_DHCPC_XID;
-	ifs->start = vsfip_dhcpc_start;
-	module->ifs = ifs;
-	return VSFERR_NONE;
-}
-#endif

@@ -91,6 +91,7 @@ uint8_t* vsf_multibuf_get_payload(struct vsf_multibuf_t *mbuffer);
 vsf_err_t vsf_multibuf_pop(struct vsf_multibuf_t *mbuffer);
 
 // buffer_manager
+#ifndef VSFCFG_BUFMGR_USE_STDLIB
 void vsf_bufmgr_init(uint8_t *buf, uint32_t size);
 
 #ifdef VSFCFG_BUFMGR_LOG
@@ -107,6 +108,11 @@ void vsf_bufmgr_free_do(void *ptr);
 #define vsf_bufmgr_malloc_aligned(s, a)	vsf_bufmgr_malloc_aligned_do(s, a)
 #define vsf_bufmgr_free(p)				vsf_bufmgr_free_do(p)
 #endif // VSFCFG_BUFMGR_LOG
+#else
+#include <stdlib.h>
+#define vsf_bufmgr_malloc(s) 			malloc(s)
+#define vsf_bufmgr_free(p)				free(p)
+#endif
 
 // pool
 struct vsfpool_t

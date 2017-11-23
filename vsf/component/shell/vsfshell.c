@@ -18,10 +18,8 @@
  ***************************************************************************/
 
 #include "vsf.h"
-
-#undef vsfshell_init
-#undef vsfshell_register_handlers
-#undef vsfshell_free_handler_thread
+#include <stdio.h>
+#include <stdarg.h>
 
 static void vsfshell_streamrx_on_in(void *p)
 {
@@ -339,7 +337,11 @@ vsf_err_t vsfshell_input_thread(struct vsfsm_pt_t *pt, vsfsm_evt_t evt)
 	vsfsm_pt_begin(pt);
 	vsfsm_pt_wfe(pt, VSFSHELL_EVT_STREAMTX_ONCONN);
 	vsfshell_printf(output_pt,
-					"vsfshell 0.1 beta by SimonQian" VSFSHELL_LINEEND);
+		"vsfshell 0.1 beta by SimonQian" VSFSHELL_LINEEND);
+	vsfshell_printf(output_pt,
+		"    https://github.com/versaloon/vsf" VSFSHELL_LINEEND);
+	vsfshell_printf(output_pt,
+		"    Using \"help\" for more information" VSFSHELL_LINEEND);
 	vsfshell_printf(output_pt, VSFSHELL_PROMPT);
 	shell->prompted = true;
 	while (1)
@@ -504,26 +506,3 @@ void vsfshell_register_handlers(struct vsfshell_t *shell,
 	}
 }
 
-#ifdef VSFCFG_STANDALONE_MODULE
-vsf_err_t vsfshell_modexit(struct vsf_module_t *module)
-{
-	vsf_bufmgr_free(module->ifs);
-	module->ifs = NULL;
-	return VSFERR_NONE;
-}
-
-vsf_err_t vsfshell_modinit(struct vsf_module_t *module,
-								struct app_hwcfg_t const *cfg)
-{
-	struct vsfshell_modifs_t *ifs;
-	ifs = vsf_bufmgr_malloc(sizeof(struct vsfshell_modifs_t));
-	if (!ifs) return VSFERR_FAIL;
-	memset(ifs, 0, sizeof(*ifs));
-
-	ifs->init = vsfshell_init;
-	ifs->register_handlers = vsfshell_register_handlers;
-	ifs->free_handler_thread = vsfshell_free_handler_thread;
-	module->ifs = ifs;
-	return VSFERR_NONE;
-}
-#endif

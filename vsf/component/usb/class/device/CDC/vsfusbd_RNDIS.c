@@ -160,12 +160,10 @@ static vsf_err_t vsfusbd_RNDIS_netdrv_fini(struct vsfsm_pt_t *pt, vsfsm_evt_t ev
 	return VSFERR_NONE;
 }
 
-#ifndef VSFCFG_STANDALONE_MODULE
 static struct vsfip_netdrv_op_t vsfusbd_RNDIS_netdrv_op =
 {
 	vsfusbd_RNDIS_netdrv_init, vsfusbd_RNDIS_netdrv_fini, vsfip_eth_header
 };
-#endif
 
 // rndis
 const enum oid_t vsfusbd_RNDIS_OID_Supportlist[VSFUSBD_RNDIS_CFG_OIDNUM] =
@@ -431,32 +429,8 @@ vsfusbd_RNDISData_class_init(uint8_t iface, struct vsfusbd_device_t *device)
 	return vsfusbd_CDCACMData_class.init(iface, device);
 }
 
-#ifdef VSFCFG_STANDALONE_MODULE
-vsf_err_t vsfusbd_RNDIS_modexit(struct vsf_module_t *module)
-{
-	vsf_bufmgr_free(module->ifs);
-	module->ifs = NULL;
-	return VSFERR_NONE;
-}
-
-vsf_err_t vsfusbd_RNDIS_modinit(struct vsf_module_t *module,
-								struct app_hwcfg_t const *cfg)
-{
-	struct vsfusbd_RNDIS_modifs_t *ifs;
-	ifs = vsf_bufmgr_malloc(sizeof(struct vsfusbd_RNDIS_modifs_t));
-	if (!ifs) return VSFERR_FAIL;
-	memset(ifs, 0, sizeof(*ifs));
-
-	ifs->data_protocol.init = vsfusbd_RNDISData_class_init;
-	ifs->netdrv_op.init = vsfusbd_RNDIS_netdrv_init;
-	ifs->netdrv_op.fini = vsfusbd_RNDIS_netdrv_fini;
-	ifs->netdrv_op.header = vsfip_eth_header;
-	module->ifs = ifs;
-	return VSFERR_NONE;
-}
-#else
 const struct vsfusbd_class_protocol_t vsfusbd_RNDISData_class =
 {
 	.init = vsfusbd_RNDISData_class_init,
 };
-#endif
+

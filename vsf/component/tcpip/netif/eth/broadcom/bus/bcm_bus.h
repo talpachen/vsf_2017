@@ -201,10 +201,8 @@ struct bcm_bus_t
 	uint32_t tmpreg;
 };
 
-#ifndef VSFCFG_STANDALONE_MODULE
 extern const struct bcm_bus_op_t bcm_bus_spi_op;
 extern const struct bcm_bus_op_t bcm_bus_sdio_op;
-#endif
 
 vsf_err_t bcm_bus_construct(struct bcm_bus_t *bus);
 vsf_err_t bcm_bus_init(struct vsfsm_pt_t *pt, vsfsm_evt_t evt);

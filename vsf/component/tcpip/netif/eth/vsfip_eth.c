@@ -18,9 +18,6 @@
  ***************************************************************************/
 #include "vsf.h"
 
-#undef vsfip_eth_header
-#undef vsfip_eth_input
-
 PACKED_HEAD struct PACKED_MID vsfip_ethhead_t
 {
 	uint8_t dst_addr[6];

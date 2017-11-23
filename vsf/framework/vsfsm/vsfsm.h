@@ -41,11 +41,14 @@
 #ifndef VSFSM_CFG_HSM_EN
 #define VSFSM_CFG_HSM_EN				0
 #endif
+#ifndef VSFSM_CFG_MSM_EN
+#define VSFSM_CFG_MSM_EN				0
+#endif
 #ifndef VSFSM_CFG_PT_EN
 #define VSFSM_CFG_PT_EN					1
 #endif
 #ifndef VSFSM_CFG_LJMP_EN
-#define VSFSM_CFG_LJMP_EN				1
+#define VSFSM_CFG_LJMP_EN				0
 #endif
 
 enum
@@ -149,6 +152,28 @@ struct vsfsm_evtq_t
 };
 void vsfsm_evtq_init(struct vsfsm_evtq_t *queue);
 struct vsfsm_evtq_t* vsfsm_evtq_set(struct vsfsm_evtq_t *queue);
+#endif
+
+#if VSFSM_CFG_MSM_EN
+struct vsfsm_msm_t;
+struct vsfsm_msm_entry_t
+{
+	int state;
+	vsfsm_evt_t evt;
+	bool (*guard)(struct vsfsm_msm_t *msm);
+	int (*transact)(struct vsfsm_msm_t *msm);
+};
+struct vsfsm_msm_t
+{
+	uint32_t entry_num;
+	struct vsfsm_msm_entry_t *trans_tbl;
+	void *user_data;
+
+	// protected
+	int state;
+	struct vsfsm_t *sm;
+};
+vsf_err_t vsfsm_msm_init(struct vsfsm_t *sm, struct vsfsm_msm_t *msm);
 #endif
 
 #if VSFSM_CFG_LJMP_EN

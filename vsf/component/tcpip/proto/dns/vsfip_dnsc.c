@@ -18,10 +18,6 @@
  ***************************************************************************/
 #include "vsf.h"
 
-#undef vsfip_dnsc_init
-#undef vsfip_dnsc_setserver
-#undef vsfip_gethostbyname
-
 #define VSFIP_DNS_CLIENT_PORT	53
 #define VSFIP_DNS_TRY_CNT		3
 
@@ -59,9 +55,7 @@ PACKED_HEAD struct PACKED_MID vsfip_dns_response_t
 	uint16_t len;
 }; PACKED_TAIL
 
-#ifndef VSFCFG_STANDALONE_MODULE
 static struct vsfip_dnsc_local_t vsfip_dnsc;
-#endif
 
 #define VSFIP_DNS_PKG_SIZE		512
 #define VSFIP_DNS_AFNET			1
@@ -326,26 +320,3 @@ close:
 	return err;
 }
 
-#ifdef VSFCFG_STANDALONE_MODULE
-vsf_err_t vsfip_dnsc_modexit(struct vsf_module_t *module)
-{
-	vsf_bufmgr_free(module->ifs);
-	module->ifs = NULL;
-	return VSFERR_NONE;
-}
-
-vsf_err_t vsfip_dnsc_modinit(struct vsf_module_t *module,
-								struct app_hwcfg_t const *cfg)
-{
-	struct vsfip_dnsc_modifs_t *ifs;
-	ifs = vsf_bufmgr_malloc(sizeof(struct vsfip_dnsc_modifs_t));
-	if (!ifs) return VSFERR_FAIL;
-	memset(ifs, 0, sizeof(*ifs));
-
-	ifs->init = vsfip_dnsc_init;
-	ifs->setserver = vsfip_dnsc_setserver;
-	ifs->gethostbyname = vsfip_gethostbyname;
-	module->ifs = ifs;
-	return VSFERR_NONE;
-}
-#endif

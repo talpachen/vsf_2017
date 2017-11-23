@@ -145,32 +145,6 @@ static vsf_err_t embflash_maldrv_write(struct vsfsm_pt_t *pt, vsfsm_evt_t evt,
 	return VSFERR_NONE;
 }
 
-#ifdef VSFCFG_STANDALONE_MODULE
-vsf_err_t embflash_modexit(struct vsf_module_t *module)
-{
-	vsf_bufmgr_free(module->ifs);
-	module->ifs = NULL;
-	return VSFERR_NONE;
-}
-
-vsf_err_t embflash_modinit(struct vsf_module_t *module,
-								struct app_hwcfg_t const *cfg)
-{
-	struct embflash_modifs_t *ifs;
-	ifs = vsf_bufmgr_malloc(sizeof(struct embflash_modifs_t));
-	if (!ifs) return VSFERR_FAIL;
-	memset(ifs, 0, sizeof(*ifs));
-
-	ifs->mal.drv.block_size = embflash_maldrv_blocksize;
-	ifs->mal.drv.init = embflash_maldrv_init;
-	ifs->mal.drv.fini = embflash_maldrv_fini;
-	ifs->mal.drv.erase = embflash_maldrv_erase;
-	ifs->mal.drv.read = embflash_maldrv_read;
-	ifs->mal.drv.write = embflash_maldrv_write;
-	module->ifs = ifs;
-	return VSFERR_NONE;
-}
-#else
 const struct vsfmal_drv_t embflash_mal_drv =
 {
 	.block_size = embflash_maldrv_blocksize,
@@ -180,4 +154,4 @@ const struct vsfmal_drv_t embflash_mal_drv =
 	.read = embflash_maldrv_read,
 	.write = embflash_maldrv_write,
 };
-#endif
+

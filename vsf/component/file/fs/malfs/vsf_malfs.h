@@ -39,28 +39,7 @@ struct vsf_malfs_t
 	uint8_t *mbufstream_buffer[1];
 };
 
-#ifdef VSFCFG_STANDALONE_MODULE
-#define VSF_MALFS_MODNAME					"vsf.component.file.fs.malfs"
-
-struct vsf_malfs_modifs_t
-{
-	vsf_err_t (*init)(struct vsf_malfs_t*);
-	void (*fini)(struct vsf_malfs_t*);
-	vsf_err_t (*read)(struct vsf_malfs_t*, uint32_t, uint8_t*, uint32_t);
-	vsf_err_t (*write)(struct vsf_malfs_t*, uint32_t, uint8_t*, uint32_t);
-};
-
-vsf_err_t vsf_malfs_modexit(struct vsf_module_t*);
-vsf_err_t vsf_malfs_modinit(struct vsf_module_t*, struct app_hwcfg_t const*);
-
-#define VSF_MALFS_MOD						\
-	((struct vsf_malfs_modifs_t *)vsf_module_load(VSF_MALFS_MODNAME, true))
-#define vsf_malfs_init						VSF_MALFS_MOD->init
-#define vsf_malfs_fini						VSF_MALFS_MOD->fini
-#define vsf_malfs_read						VSF_MALFS_MOD->read
-#define vsf_malfs_write						VSF_MALFS_MOD->write
-
-#else
+#ifndef VSFCFG_EXCLUDE_MALFS
 vsf_err_t vsf_malfs_init(struct vsf_malfs_t *malfs);
 void vsf_malfs_fini(struct vsf_malfs_t *malfs);
 

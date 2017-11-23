@@ -70,25 +70,7 @@ struct vsfusbd_RNDIS_param_t
 
 #define vsfusbd_RNDISControl_class			vsfusbd_CDCACMControl_class
 
-#ifdef VSFCFG_STANDALONE_MODULE
-#define VSFUSBD_RNDIS_MODNAME				"vsf.stack.usb.device.classes.rndis"
-
-struct vsfusbd_RNDIS_modifs_t
-{
-	struct vsfusbd_class_protocol_t data_protocol;
-	struct vsfip_netdrv_op_t netdrv_op;
-};
-
-vsf_err_t vsfusbd_RNDIS_modexit(struct vsf_module_t*);
-vsf_err_t vsfusbd_RNDIS_modinit(struct vsf_module_t*,
-										struct app_hwcfg_t const*);
-
-#define VSFUSBD_RNDISMOD					\
-	((struct vsfusbd_RNDIS_modifs_t *)vsf_module_load(VSFUSBD_RNDIS_MODNAME, true))
-#define vsfusbd_RNDISData_class				VSFUSBD_RNDISMOD->data_protocol
-#define vsfusbd_RNDIS_netdrv_op				VSFUSBD_RNDISMOD->netdrv_op
-
-#else
+#ifndef VSFCFG_EXCLUDE_USBD_RNDIS
 extern const struct vsfusbd_class_protocol_t vsfusbd_RNDISData_class;
 #endif
 

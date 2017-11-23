@@ -97,48 +97,7 @@ struct vsf_malstream_t
 	struct vsfsm_pt_t pt;
 };
 
-#ifdef VSFCFG_STANDALONE_MODULE
-#define VSFMAL_MODNAME						"vsf.component.mal"
-
-struct vsfmal_modifs_t
-{
-	vsf_err_t (*init)(struct vsfsm_pt_t*, vsfsm_evt_t);
-	vsf_err_t (*fini)(struct vsfsm_pt_t*, vsfsm_evt_t);
-	vsf_err_t (*erase_all)(struct vsfsm_pt_t*, vsfsm_evt_t);
-	vsf_err_t (*erase)(struct vsfsm_pt_t*, vsfsm_evt_t, uint64_t, uint32_t);
-	vsf_err_t (*read)(struct vsfsm_pt_t*, vsfsm_evt_t, uint64_t, uint8_t*, uint32_t);
-	vsf_err_t (*write)(struct vsfsm_pt_t*, vsfsm_evt_t, uint64_t, uint8_t*, uint32_t);
-
-	struct
-	{
-		struct vsfmal_drv_t drv;
-	} mim;
-
-	struct
-	{
-		vsf_err_t (*init)(struct vsf_malstream_t*);
-		vsf_err_t (*read)(struct vsf_malstream_t*, uint64_t, uint32_t);
-		vsf_err_t (*write)(struct vsf_malstream_t*, uint64_t, uint32_t);
-	} malstream;
-};
-
-vsf_err_t vsfmal_modexit(struct vsf_module_t*);
-vsf_err_t vsfmal_modinit(struct vsf_module_t*, struct app_hwcfg_t const*);
-
-#define VSFMAL_MOD							\
-	((struct vsfmal_modifs_t *)vsf_module_load(VSFMAL_MODNAME, true))
-#define vsfmal_init							VSFMAL_MOD->init
-#define vsfmal_fini							VSFMAL_MOD->fini
-#define vsfmal_erase_all					VSFMAL_MOD->erase_all
-#define vsfmal_erase						VSFMAL_MOD->erase
-#define vsfmal_read							VSFMAL_MOD->read
-#define vsfmal_write						VSFMAL_MOD->write
-#define vsfmin_drv							VSFMAL_MOD->mim.drv
-#define vsf_malstream_init					VSFMAL_MOD->malstream.init
-#define vsf_malstream_read					VSFMAL_MOD->malstream.read
-#define vsf_malstream_write					VSFMAL_MOD->malstream.write
-
-#else
+#ifndef VSFCFG_EXCLUDE_MAL
 vsf_err_t vsfmal_init(struct vsfsm_pt_t *pt, vsfsm_evt_t evt);
 vsf_err_t vsfmal_fini(struct vsfsm_pt_t *pt, vsfsm_evt_t evt);
 vsf_err_t vsfmal_erase_all(struct vsfsm_pt_t *pt, vsfsm_evt_t evt);

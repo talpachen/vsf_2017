@@ -122,9 +122,7 @@ void vsfip_netif_ip4_input(struct vsfip_buffer_t *buf);
 void vsfip_netif_ip6_input(struct vsfip_buffer_t *buf);
 void vsfip_netif_arp_input(struct vsfip_buffer_t *buf);
 
-#ifdef VSFCFG_STANDALONE_MODULE
-#define vsfip_netif_arp_add_assoc			VSFIP_MOD->netif.arp_add_assoc
-#else
+#ifndef VSFCFG_EXCLUDE_NETIF
 void vsfip_netif_arp_add_assoc(struct vsfip_netif_t *netif,
 		uint8_t hwlen, uint8_t *hwaddr, uint8_t protolen, uint8_t *protoaddr);
 #endif

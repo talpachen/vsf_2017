@@ -129,29 +129,6 @@ static vsf_err_t vsfusbd_CDCACMControl_request_process(struct vsfusbd_device_t *
 	return VSFERR_NONE;
 }
 
-#ifdef VSFCFG_STANDALONE_MODULE
-vsf_err_t vsfusbd_CDCACM_modexit(struct vsf_module_t *module)
-{
-	vsf_bufmgr_free(module->ifs);
-	module->ifs = NULL;
-	return VSFERR_NONE;
-}
-
-vsf_err_t vsfusbd_CDCACM_modinit(struct vsf_module_t *module,
-								struct app_hwcfg_t const *cfg)
-{
-	struct vsfusbd_CDCACM_modifs_t *ifs;
-	ifs = vsf_bufmgr_malloc(sizeof(struct vsfusbd_CDCACM_modifs_t));
-	if (!ifs) return VSFERR_FAIL;
-	memset(ifs, 0, sizeof(*ifs));
-
-	ifs->control_protocol.request_prepare = vsfusbd_CDCACMControl_request_prepare;
-	ifs->control_protocol.request_process = vsfusbd_CDCACMControl_request_process;
-	ifs->data_protocol.init = vsfusbd_CDCACMData_class_init;
-	module->ifs = ifs;
-	return VSFERR_NONE;
-}
-#else
 const struct vsfusbd_class_protocol_t vsfusbd_CDCACMControl_class =
 {
 	.request_prepare = vsfusbd_CDCACMControl_request_prepare,
@@ -162,4 +139,4 @@ const struct vsfusbd_class_protocol_t vsfusbd_CDCACMData_class =
 {
 	.init = vsfusbd_CDCACMData_class_init,
 };
-#endif
+

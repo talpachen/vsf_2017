@@ -19,16 +19,6 @@
 
 #include "vsf.h"
 
-#undef vsfusbd_device_get_descriptor
-#undef vsfusbd_device_init
-#undef vsfusbd_device_fini
-#undef vsfusbd_ep_recv
-#undef vsfusbd_ep_cancel_recv
-#undef vsfusbd_ep_send
-#undef vsfusbd_ep_cancel_send
-#undef vsfusbd_set_IN_handler
-#undef vsfusbd_set_OUT_handler
-
 // events for vsfusbd
 #define VSFUSBD_INTEVT_BASE				VSFSM_EVT_USER_LOCAL
 enum vsfusbd_evt_t
@@ -693,7 +683,7 @@ static vsf_err_t vsfusbd_ctrl_prepare(struct vsfusbd_device_t *device)
 	{
 		err = vsfusbd_stdctrl_prepare(device);
 	}
-	else if (USB_TYPE_CLASS == type)
+	else if ((USB_TYPE_CLASS == type) || (USB_TYPE_VENDOR == type))
 	{
 		int8_t iface = -1;
 
@@ -1045,8 +1035,8 @@ vsfusbd_evt_handler(struct vsfsm_t *sm, vsfsm_evt_t evt)
 			if (drv->callback != NULL)
 			{
 				drv->callback->param = (void *)device;
-				drv->callback->on_attach = NULL;
-				drv->callback->on_detach = NULL;
+				drv->callback->on_attach = vsfusbd_on_ATTACH;
+				drv->callback->on_detach = vsfusbd_on_DETACH;
 				drv->callback->on_reset = vsfusbd_on_RESET;
 				drv->callback->on_setup = vsfusbd_on_SETUP;
 				drv->callback->on_error = vsfusbd_on_ERROR;
@@ -1081,7 +1071,6 @@ vsfusbd_evt_handler(struct vsfsm_t *sm, vsfsm_evt_t evt)
 			struct vsf_buffer_t desc = {NULL, 0};
 			uint16_t ep_size;
 		#endif
-
 			memset(device->IN_transact, 0, sizeof(device->IN_transact));
 			memset(device->OUT_transact, 0,sizeof(device->OUT_transact));
 			memset(device->IN_handler, 0, sizeof(device->IN_handler));
@@ -1158,6 +1147,9 @@ vsfusbd_evt_handler(struct vsfsm_t *sm, vsfsm_evt_t evt)
 			struct usb_ctrlrequest_t *request = &ctrl_handler->request;
 			struct vsfusbd_transact_t *transact;
 
+			if (device->callback.on_SETUP != NULL)
+				device->callback.on_SETUP(device);
+			
 			if (drv->get_setup((uint8_t *)request) ||
 				vsfusbd_ctrl_prepare(device))
 			{
@@ -1322,32 +1314,3 @@ vsf_err_t vsfusbd_device_fini(struct vsfusbd_device_t *device)
 	return vsfsm_post_evt_pending(&device->sm, VSFSM_EVT_FINI);
 }
 
-#ifdef VSFCFG_STANDALONE_MODULE
-vsf_err_t vsfusbd_modexit(struct vsf_module_t *module)
-{
-	vsf_bufmgr_free(module->ifs);
-	module->ifs = NULL;
-	return VSFERR_NONE;
-}
-
-vsf_err_t vsfusbd_modinit(struct vsf_module_t *module,
-								struct app_hwcfg_t const *cfg)
-{
-	struct vsfusbd_modifs_t *ifs;
-	ifs = vsf_bufmgr_malloc(sizeof(struct vsfusbd_modifs_t));
-	if (!ifs) return VSFERR_FAIL;
-	memset(ifs, 0, sizeof(*ifs));
-
-	ifs->init = vsfusbd_device_init;
-	ifs->fini = vsfusbd_device_fini;
-	ifs->ep_send = vsfusbd_ep_send;
-	ifs->ep_cancel_send = vsfusbd_ep_cancel_send;
-	ifs->ep_recv = vsfusbd_ep_recv;
-	ifs->ep_cancel_recv = vsfusbd_ep_cancel_recv;
-	ifs->set_IN_handler = vsfusbd_set_IN_handler;
-	ifs->set_OUT_handler = vsfusbd_set_OUT_handler;
-	ifs->get_descriptor = vsfusbd_device_get_descriptor;
-	module->ifs = ifs;
-	return VSFERR_NONE;
-}
-#endif

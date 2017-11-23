@@ -40,9 +40,7 @@ struct bcm_wifi_t
 	struct vsfip_netif_t *netif;
 };
 
-#ifndef VSFCFG_STANDALONE_MODULE
 extern struct vsfip_netdrv_op_t bcm_wifi_netdrv_op;
-#endif
 
 vsf_err_t bcm_wifi_scan(struct vsfsm_pt_t *pt, vsfsm_evt_t evt,
 						struct vsfip_buffer_t **result, uint8_t interface);

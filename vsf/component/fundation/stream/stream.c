@@ -19,19 +19,6 @@
 
 #include "vsf.h"
 
-#undef stream_init
-#undef stream_fini
-#undef stream_write
-#undef stream_read
-#undef stream_get_data_size
-#undef stream_get_free_size
-#undef stream_get_wbuf
-#undef stream_get_rbuf
-#undef stream_connect_rx
-#undef stream_connect_tx
-#undef stream_disconnect_rx
-#undef stream_disconnect_tx
-
 uint32_t stream_read(struct vsf_stream_t *stream, struct vsf_buffer_t *buffer)
 {
 	uint32_t count = stream->op->read(stream, buffer);
@@ -413,60 +400,6 @@ buffer_stream_read(struct vsf_stream_t *stream, struct vsf_buffer_t *buffer)
 	return rsize;
 }
 
-#ifdef VSFCFG_STANDALONE_MODULE
-vsf_err_t vsfstream_modexit(struct vsf_module_t *module)
-{
-	vsf_bufmgr_free(module->ifs);
-	module->ifs = NULL;
-	return VSFERR_NONE;
-}
-
-vsf_err_t vsfstream_modinit(struct vsf_module_t *module,
-								struct app_hwcfg_t const *cfg)
-{
-	struct vsfstream_modifs_t *ifs;
-	ifs = vsf_bufmgr_malloc(sizeof(struct vsfstream_modifs_t));
-	if (!ifs) return VSFERR_FAIL;
-	memset(ifs, 0, sizeof(*ifs));
-
-	ifs->init = stream_init;
-	ifs->fini = stream_fini;
-	ifs->write = stream_write;
-	ifs->read = stream_read;
-	ifs->get_data_size = stream_get_data_size;
-	ifs->get_free_size = stream_get_free_size;
-	ifs->connect_rx = stream_connect_rx;
-	ifs->connect_tx = stream_connect_tx;
-	ifs->disconnect_rx = stream_disconnect_rx;
-	ifs->disconnect_tx = stream_disconnect_tx;
-	ifs->fifostream.op.init = fifo_stream_init;
-	ifs->fifostream.op.fini = fifo_stream_init;
-	ifs->fifostream.op.write = fifo_stream_write;
-	ifs->fifostream.op.read = fifo_stream_read;
-	ifs->fifostream.op.get_data_length = fifo_stream_get_data_length;
-	ifs->fifostream.op.get_avail_length = fifo_stream_get_avail_length;
-	ifs->fifostream.op.get_wbuf = fifo_stream_get_wbuf;
-	ifs->fifostream.op.get_rbuf = fifo_stream_get_rbuf;
-	ifs->mbufstream.op.init = multibuf_stream_init;
-	ifs->mbufstream.op.fini = multibuf_stream_init;
-	ifs->mbufstream.op.write = multibuf_stream_write;
-	ifs->mbufstream.op.read = multibuf_stream_read;
-	ifs->mbufstream.op.get_data_length = multibuf_stream_get_data_length;
-	ifs->mbufstream.op.get_avail_length = multibuf_stream_get_avail_length;
-	ifs->mbufstream.op.get_wbuf = multibuf_stream_get_wbuf;
-	ifs->mbufstream.op.get_rbuf = multibuf_stream_get_rbuf;
-	ifs->bufstream.op.init = buffer_stream_init;
-	ifs->bufstream.op.fini = buffer_stream_init;
-	ifs->bufstream.op.write = buffer_stream_write;
-	ifs->bufstream.op.read = buffer_stream_read;
-	ifs->bufstream.op.get_data_length = buffer_stream_get_data_length;
-	ifs->bufstream.op.get_avail_length = buffer_stream_get_avail_length;
-	ifs->bufstream.op.get_wbuf = buffer_stream_get_wbuf;
-	ifs->bufstream.op.get_rbuf = buffer_stream_get_rbuf;
-	module->ifs = ifs;
-	return VSFERR_NONE;
-}
-#else
 const struct vsf_stream_op_t fifostream_op =
 {
 	.init = fifo_stream_init,
@@ -502,4 +435,4 @@ const struct vsf_stream_op_t bufstream_op =
 	.get_wbuf = buffer_stream_get_wbuf,
 	.get_rbuf = buffer_stream_get_rbuf,
 };
-#endif
+

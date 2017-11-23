@@ -61,26 +61,7 @@ struct vsfusbd_CDC_param_t
 #endif
 };
 
-#ifdef VSFCFG_STANDALONE_MODULE
-#define VSFUSBD_CDC_MODNAME					"vsf.stack.usb.device.classes.cdc"
-
-struct vsfusbd_CDC_modifs_t
-{
-	struct vsfusbd_class_protocol_t control_protocol;
-	struct vsfusbd_class_protocol_t data_protocol;
-	void (*connect)(struct vsfusbd_CDC_param_t*);
-};
-
-vsf_err_t vsfusbd_CDC_modexit(struct vsf_module_t*);
-vsf_err_t vsfusbd_CDC_modinit(struct vsf_module_t*, struct app_hwcfg_t const*);
-
-#define VSFUSBD_CDCMOD						\
-	((struct vsfusbd_CDC_modifs_t *)vsf_module_load(VSFUSBD_CDC_MODNAME, true))
-#define vsfusbd_CDCControl_class			VSFUSBD_CDCMOD->control_protocol
-#define vsfusbd_CDCData_class				VSFUSBD_CDCMOD->data_protocol
-#define vsfusbd_CDCData_connect				VSFUSBD_CDCMOD->connect
-
-#else
+#ifndef VSFCFG_EXCLUDE_USBD_CDC
 extern const struct vsfusbd_class_protocol_t vsfusbd_CDCControl_class;
 extern const struct vsfusbd_class_protocol_t vsfusbd_CDCData_class;
 

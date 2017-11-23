@@ -17,11 +17,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "app_type.h"
-#include "compiler.h"
-
-#include "buffer.h"
-#include "component/debug/debug.h"
+#include "vsf.h"
 
 // queue
 void vsfq_init(struct vsfq_t *q)
@@ -420,6 +416,7 @@ vsf_err_t vsf_multibuf_pop(struct vsf_multibuf_t *mbuffer)
 }
 
 // bufmgr
+#ifndef VSFCFG_BUFMGR_USE_STDLIB
 #define VSF_BUFMGR_DEFAULT_ALIGN				4
 #define VSF_BUFMGR_BUF_CHECK_EN					0
 #define VSF_BUFMGR_POINT_CHECK_EN				0
@@ -621,6 +618,9 @@ void* vsf_bufmgr_malloc_aligned_do(uint32_t size, uint32_t align,
 void* vsf_bufmgr_malloc_aligned(uint32_t size, uint32_t align)
 #endif
 {
+#ifdef VSFCFG_THREAD_SAFTY
+	uint8_t origlevel = vsfhal_core_set_intlevel(VSFCFG_MAX_SRT_PRIO);
+#endif
 	struct vsf_bufmgr_mcb_t *mcb= sllist_get_container(
 				bufmgr.freed_list.list.next, struct vsf_bufmgr_mcb_t, list);
 #ifdef VSFCFG_BUFMGR_LOG
@@ -633,6 +633,9 @@ void* vsf_bufmgr_malloc_aligned(uint32_t size, uint32_t align)
 
 	if (size == 0)
 	{
+#ifdef VSFCFG_THREAD_SAFTY
+		vsfhal_core_set_intlevel(origlevel);
+#endif
 		return NULL;
 	}
 	if (size & 0x3)
@@ -697,13 +700,14 @@ void* vsf_bufmgr_malloc_aligned(uint32_t size, uint32_t align)
 			}
 #endif
 			
+			void *ptr = mcb_align->buffer.buffer + offset;
 #if VSF_BUFMGR_POINT_CHECK_EN
-			mcb_align->p = mcb_align->buffer.buffer + offset;
-			return mcb_align->p;
-#else
-			return mcb_align->buffer.buffer + offset;
+			mcb_align->p = ptr;
 #endif
-
+#ifdef VSFCFG_THREAD_SAFTY
+			vsfhal_core_set_intlevel(origlevel);
+#endif
+			return ptr;
 		}
 		mcb = sllist_get_container(mcb->list.next, struct vsf_bufmgr_mcb_t,
 									list);
@@ -724,6 +728,9 @@ void* vsf_bufmgr_malloc_aligned(uint32_t size, uint32_t align)
 #if VSF_BUFMGR_BUF_CHECK_EN
 	vsf_bufmgr_error();
 #endif
+#ifdef VSFCFG_THREAD_SAFTY
+	vsfhal_core_set_intlevel(origlevel);
+#endif
 	return NULL;
 }
 
@@ -733,6 +740,9 @@ void vsf_bufmgr_free_do(void *ptr, const char *format, ...)
 void vsf_bufmgr_free(void *ptr)
 #endif
 {
+#ifdef VSFCFG_THREAD_SAFTY
+	uint8_t origlevel = vsfhal_core_set_intlevel(VSFCFG_MAX_SRT_PRIO);
+#endif
 	struct vsf_bufmgr_mcb_t *mcb = sllist_get_container(
 			bufmgr.allocated_list.list.next,struct vsf_bufmgr_mcb_t, list);											 
 #ifdef VSFCFG_BUFMGR_LOG
@@ -742,7 +752,6 @@ void vsf_bufmgr_free(void *ptr)
 	size_out = vsnprintf((char *)bufmgr_log_buf, VSF_BUFMGR_LOG_BUF_LENGTH, format, ap);
 	va_end(ap);
 #endif
-	
 	
 	while (mcb != NULL)
 	{
@@ -772,7 +781,9 @@ void vsf_bufmgr_free(void *ptr)
 				vsf_debug("FreeOK 0x%x", (uint32_t)ptr);
 			}
 #endif
-
+#ifdef VSFCFG_THREAD_SAFTY
+			vsfhal_core_set_intlevel(origlevel);
+#endif
 			return;
 		}
 		mcb = sllist_get_container(mcb->list.next, struct vsf_bufmgr_mcb_t,
@@ -794,7 +805,11 @@ void vsf_bufmgr_free(void *ptr)
 #if VSF_BUFMGR_BUF_CHECK_EN
 	vsf_bufmgr_error();
 #endif
+#ifdef VSFCFG_THREAD_SAFTY
+	vsfhal_core_set_intlevel(origlevel);
+#endif
 }
+#endif
 
 // pool
 void vsfpool_init(struct vsfpool_t *pool)

@@ -46,29 +46,7 @@ struct vsfip_hostent_t
 	uint8_t**	h_addr_list;	/* list of addresses */
 };
 
-#ifdef VSFCFG_STANDALONE_MODULE
-#define VSFIP_DNSC_MODNAME					"vsf.stack.net.tcpip.proto.dnsc"
-
-struct vsfip_dnsc_modifs_t
-{
-	struct vsfip_dnsc_local_t dnsc;
-	vsf_err_t (*init)(void);
-	vsf_err_t (*setserver)(uint8_t, struct vsfip_ipaddr_t*);
-	vsf_err_t (*gethostbyname)(struct vsfsm_pt_t*, vsfsm_evt_t, char*,
-										struct vsfip_ipaddr_t*);
-};
-
-vsf_err_t vsfip_dnsc_modexit(struct vsf_module_t*);
-vsf_err_t vsfip_dnsc_modinit(struct vsf_module_t*, struct app_hwcfg_t const*);
-
-#define VSFIP_DNSCMOD						\
-	((struct vsfip_dnsc_modifs_t *)vsf_module_load(VSFIP_DNSC_MODNAME, true))
-#define vsfip_dnsc							VSFIP_DNSCMOD->dnsc
-#define vsfip_dnsc_init						VSFIP_DNSCMOD->init
-#define vsfip_dnsc_setserver				VSFIP_DNSCMOD->setserver
-#define vsfip_gethostbyname					VSFIP_DNSCMOD->gethostbyname
-
-#else
+#ifndef VSFCFG_EXCLUDE_DNSC
 vsf_err_t vsfip_dnsc_init(void);
 vsf_err_t vsfip_dnsc_setserver(uint8_t numdns,
 							struct vsfip_ipaddr_t *dnsserver);

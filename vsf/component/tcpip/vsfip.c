@@ -18,33 +18,6 @@
  ***************************************************************************/
 #include "vsf.h"
 
-#undef vsfip_init
-#undef vsfip_fini
-#undef vsfip_netif_add
-#undef vsfip_netif_remove
-#undef vsfip_buffer_get
-#undef vsfip_appbuffer_get
-#undef vsfip_buffer_reference
-#undef vsfip_buffer_release
-#undef vsfip_socket
-#undef vsfip_close
-#undef vsfip_socket_cb
-#undef vsfip_listen
-#undef vsfip_bind
-#undef vsfip_tcp_config_window
-#undef vsfip_tcp_connect
-#undef vsfip_tcp_accept
-#undef vsfip_tcp_async_send
-#undef vsfip_tcp_send
-#undef vsfip_tcp_async_recv
-#undef vsfip_tcp_recv
-#undef vsfip_tcp_close
-#undef vsfip_udp_async_send
-#undef vsfip_udp_send
-#undef vsfip_udp_async_recv
-#undef vsfip_udp_recv
-#undef vsfip_ip4_pton
-
 #define VSFIP_TCP_RETRY			3
 #define VSFIP_TCP_ATO			10
 
@@ -72,9 +45,7 @@ enum vsfip_EVT_t
 	VSFIP_EVT_SOCKET_RECV		= VSFSM_EVT_USER_LOCAL_INSTANT + 1,
 };
 
-#ifndef VSFCFG_STANDALONE_MODULE
 struct vsfip_t vsfip;
-#endif
 
 // socket buffer
 static struct vsfip_socket_t* vsfip_socket_get(void)
@@ -2142,61 +2113,3 @@ vsf_err_t vsfip_ip4_pton(struct vsfip_ipaddr_t *domainip, char *domain)
 	return VSFERR_NONE;
 }
 
-#ifdef VSFCFG_STANDALONE_MODULE
-vsf_err_t vsfip_modexit(struct vsf_module_t *module)
-{
-	vsf_bufmgr_free(module->ifs);
-	module->ifs = NULL;
-	return VSFERR_NONE;
-}
-
-#undef vsfip_eth_header
-#undef vsfip_eth_input
-vsf_err_t vsfip_eth_header(struct vsfip_buffer_t *buf,
-	enum vsfip_netif_proto_t proto, const struct vsfip_macaddr_t *dest_addr);
-void vsfip_eth_input(struct vsfip_buffer_t *buf);
-#undef vsfip_netif_arp_add_assoc
-void vsfip_netif_arp_add_assoc(struct vsfip_netif_t *netif,
-		uint8_t hwlen, uint8_t *hwaddr, uint8_t protolen, uint8_t *protoaddr);
-
-vsf_err_t vsfip_modinit(struct vsf_module_t *module,
-								struct app_hwcfg_t const *cfg)
-{
-	struct vsfip_modifs_t *ifs;
-	ifs = vsf_bufmgr_malloc(sizeof(struct vsfip_modifs_t));
-	if (!ifs) return VSFERR_FAIL;
-	memset(ifs, 0, sizeof(*ifs));
-
-	ifs->init = vsfip_init;
-	ifs->fini = vsfip_fini;
-	ifs->netif_add = vsfip_netif_add;
-	ifs->netif_remove = vsfip_netif_remove;
-	ifs->buffer_get = vsfip_buffer_get;
-	ifs->appbuffer_get = vsfip_appbuffer_get;
-	ifs->buffer_reference = vsfip_buffer_reference;
-	ifs->buffer_release = vsfip_buffer_release;
-	ifs->socket = vsfip_socket;
-	ifs->close = vsfip_close;
-	ifs->socket_cb = vsfip_socket_cb;
-	ifs->listen = vsfip_listen;
-	ifs->bind = vsfip_bind;
-	ifs->tcp_config_window = vsfip_tcp_config_window;
-	ifs->tcp_connect = vsfip_tcp_connect;
-	ifs->tcp_accept = vsfip_tcp_accept;
-	ifs->tcp_async_send = vsfip_tcp_async_send;
-	ifs->tcp_send = vsfip_tcp_send;
-	ifs->tcp_async_recv = vsfip_tcp_async_recv;
-	ifs->tcp_recv = vsfip_tcp_recv;
-	ifs->tcp_close = vsfip_tcp_close;
-	ifs->udp_async_send = vsfip_udp_async_send;
-	ifs->udp_send = vsfip_udp_send;
-	ifs->udp_async_recv = vsfip_udp_async_recv;
-	ifs->udp_recv = vsfip_udp_recv;
-	ifs->ip4_pton = vsfip_ip4_pton;
-	ifs->netif.eth.header = vsfip_eth_header;
-	ifs->netif.eth.input = vsfip_eth_input;
-	ifs->netif.arp_add_assoc = vsfip_netif_arp_add_assoc;
-	module->ifs = ifs;
-	return VSFERR_NONE;
-}
-#endif

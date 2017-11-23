@@ -40,7 +40,6 @@ uint32_t vsfsm_get_event_pending(void)
 	return vsfsm_cur_evtq->evt_count;
 }
 
-static vsf_err_t vsfsm_dispatch_evt(struct vsfsm_t *sm, vsfsm_evt_t evt);
 static vsf_err_t vsfsm_evtq_post(struct vsfsm_t *sm, vsfsm_evt_t evt)
 {
 	struct vsfsm_evtq_t *evtq = sm->evtq;
@@ -48,14 +47,7 @@ static vsf_err_t vsfsm_evtq_post(struct vsfsm_t *sm, vsfsm_evt_t evt)
 
 	vsf_enter_critical();
 
-	if (!evtq)
-	{
-		// no valid queue, just process the event directly
-		vsfsm_dispatch_evt(sm, evt);
-		vsf_set_gint(gint);
-		return VSFERR_NONE;
-	}
-	else if (evtq->evt_count >= evtq->size)
+	if (evtq->evt_count >= evtq->size)
 	{
 		vsf_set_gint(gint);
 		return VSFERR_NOT_ENOUGH_RESOURCES;
@@ -228,6 +220,16 @@ update_cur_state:
 #endif
 }
 
+#if VSFSM_CFG_PREMPT_EN
+static vsf_err_t vsfsm_dispatch_evt_protected(struct vsfsm_t *sm, vsfsm_evt_t evt)
+{
+	uint8_t origlevel = vsfhal_core_set_intlevel(VSFCFG_MAX_SRT_PRIO);
+	vsf_err_t err = vsfsm_dispatch_evt(sm, evt);
+	vsfhal_core_set_intlevel(origlevel);
+	return err;
+}
+#endif
+
 #if VSFSM_CFG_HSM_EN
 static struct vsfsm_state_t *
 vsfsm_top_handler(struct vsfsm_t *sm, vsfsm_evt_t evt)
@@ -396,8 +398,10 @@ vsf_err_t vsfsm_post_evt(struct vsfsm_t *sm, vsfsm_evt_t evt)
 			// instant event can not be sent to a valid queue
 			(sm->evtq && (sm->evtq != vsfsm_cur_evtq) &&
 				(evt & VSFSM_EVT_INSTANT_MSK)) ? VSFERR_FAIL :
-			// call vsfsm_evtq_post for invalid evtq will dispatch evt 
-			!sm->evtq || (sm->evtq != vsfsm_cur_evtq) ||
+			// empty event queue, dispatch directly with protection
+			!sm->evtq ?
+				vsfsm_dispatch_evt_protected(sm, evt) :
+			(sm->evtq != vsfsm_cur_evtq) ||
 				(((evt & VSFSM_EVT_INSTANT_MSK) == 0) && sm->evt_count) ?
 				vsfsm_evtq_post(sm, evt) : vsfsm_dispatch_evt(sm, evt);
 #else
@@ -417,12 +421,49 @@ vsf_err_t vsfsm_post_evt_pending(struct vsfsm_t *sm, vsfsm_evt_t evt)
 			!sm->active ||
 #endif
 			// can not post pending event to a invalid queue
-			!sm->evtq || (evt & VSFSM_EVT_INSTANT_MSK) ?
-				VSFERR_FAIL : vsfsm_evtq_post(sm, evt);
+			(evt & VSFSM_EVT_INSTANT_MSK) ?
+				VSFERR_FAIL :
+			!sm->evtq ?
+				vsfsm_dispatch_evt_protected(sm, evt) :
+				vsfsm_evtq_post(sm, evt);
 #else
 			vsfsm_post_evt(sm, evt);
 #endif
 }
+
+#if VSFSM_CFG_MSM_EN
+static struct vsfsm_state_t *
+vsfsm_msm_evt_handler(struct vsfsm_t *sm, vsfsm_evt_t evt)
+{
+	struct vsfsm_msm_t *msm = (struct vsfsm_msm_t *)sm->user_data;
+	struct vsfsm_msm_entry_t *entry;
+	int target_state;
+
+	entry = msm->trans_tbl;
+	for (int i = 0; i < msm->entry_num; i++, entry++)
+	{
+		if ((entry->state == msm->state) && (entry->evt == evt) &&
+			((entry->guard == NULL) || (entry->guard(msm))))
+		{
+			target_state = entry->transact(msm);
+			if (target_state >= 0)
+			{
+				msm->state = target_state;
+				break;
+			}
+		}
+	}
+	return NULL;
+}
+
+vsf_err_t vsfsm_msm_init(struct vsfsm_t *sm, struct vsfsm_msm_t *msm)
+{
+	sm->user_data = msm;
+	sm->init_state.evt_handler = vsfsm_msm_evt_handler;
+	msm->sm = sm;
+	return vsfsm_init(sm);
+}
+#endif
 
 #if VSFSM_CFG_LJMP_EN
 static struct vsfsm_state_t *
@@ -536,6 +577,9 @@ vsf_err_t vsfsm_sync_cancel(struct vsfsm_sync_t *sync, struct vsfsm_t *sm)
 {
 	struct vsfsm_t *sm_pending;
 
+#ifdef VSFCFG_THREAD_SAFTY
+	uint8_t origlevel = vsfhal_core_set_intlevel(VSFCFG_MAX_SRT_PRIO);
+#endif
 	if (sync->sm_pending == sm)
 	{
 		sync->sm_pending = sm->pending_next;
@@ -553,6 +597,9 @@ vsf_err_t vsfsm_sync_cancel(struct vsfsm_sync_t *sync, struct vsfsm_t *sm)
 			sm_pending = sm_pending->pending_next;
 		}
 	}
+#ifdef VSFCFG_THREAD_SAFTY
+	vsfhal_core_set_intlevel(origlevel);
+#endif
 	return VSFERR_NONE;
 }
 
@@ -560,10 +607,16 @@ vsf_err_t vsfsm_sync_increase(struct vsfsm_sync_t *sync)
 {
 	struct vsfsm_t *sm;
 
+#ifdef VSFCFG_THREAD_SAFTY
+	uint8_t origlevel = vsfhal_core_set_intlevel(VSFCFG_MAX_SRT_PRIO);
+#endif
 	if (sync->sm_pending)
 	{
 		sm = sync->sm_pending;
 		sync->sm_pending = sync->sm_pending->pending_next;
+#ifdef VSFCFG_THREAD_SAFTY
+		vsfhal_core_set_intlevel(origlevel);
+#endif
 		if (vsfsm_post_evt(sm, sync->evt))
 		{
 			// should increase the evtq buffer size
@@ -573,9 +626,15 @@ vsf_err_t vsfsm_sync_increase(struct vsfsm_sync_t *sync)
 	else if (sync->cur_value < sync->max_value)
 	{
 		sync->cur_value++;
+#ifdef VSFCFG_THREAD_SAFTY
+		vsfhal_core_set_intlevel(origlevel);
+#endif
 	}
 	else
 	{
+#ifdef VSFCFG_THREAD_SAFTY
+		vsfhal_core_set_intlevel(origlevel);
+#endif
 		return VSFERR_BUG;
 	}
 	return VSFERR_NONE;
@@ -583,12 +642,21 @@ vsf_err_t vsfsm_sync_increase(struct vsfsm_sync_t *sync)
 
 vsf_err_t vsfsm_sync_decrease(struct vsfsm_sync_t *sync, struct vsfsm_t *sm)
 {
+#ifdef VSFCFG_THREAD_SAFTY
+	uint8_t origlevel = vsfhal_core_set_intlevel(VSFCFG_MAX_SRT_PRIO);
+#endif
 	if (sync->cur_value > 0)
 	{
 		sync->cur_value--;
+#ifdef VSFCFG_THREAD_SAFTY
+		vsfhal_core_set_intlevel(origlevel);
+#endif
 		return VSFERR_NONE;
 	}
 	vsfsm_sync_append_sm(sync, sm);
+#ifdef VSFCFG_THREAD_SAFTY
+	vsfhal_core_set_intlevel(origlevel);
+#endif
 	return VSFERR_NOT_READY;
 }
 #endif	// VSFSM_CFG_SYNC_EN

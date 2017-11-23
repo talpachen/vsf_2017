@@ -22,6 +22,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <ctype.h>
 
 #include "vsf_err.h"
 

@@ -37,22 +37,7 @@ struct vsfusbd_MSCBOT_param_t
 	uint32_t transact_size;
 };
 
-#ifdef VSFCFG_STANDALONE_MODULE
-#define VSFUSBD_MSC_MODNAME					"vsf.stack.usb.device.classes.msc"
-
-struct vsfusbd_MSC_modifs_t
-{
-	struct vsfusbd_class_protocol_t protocol;
-};
-
-vsf_err_t vsfusbd_MSC_modexit(struct vsf_module_t*);
-vsf_err_t vsfusbd_MSC_modinit(struct vsf_module_t*, struct app_hwcfg_t const*);
-
-#define VSFUSBD_MSCMOD						\
-	((struct vsfusbd_MSC_modifs_t *)vsf_module_load(VSFUSBD_MSC_MODNAME, true))
-#define vsfusbd_MSCBOT_class				VSFUSBD_MSCMOD->protocol
-
-#else
+#ifndef VSFCFG_EXCLUDE_USBD_MSC
 extern const struct vsfusbd_class_protocol_t vsfusbd_MSCBOT_class;
 #endif
 

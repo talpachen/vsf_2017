@@ -19,16 +19,10 @@
 
 #include "vsf.h"
 
-#undef debug
-#undef debug_init
-#undef debug_fini
-
 #ifdef VSFCFG_DEBUG
 
-#ifndef VSFCFG_STANDALONE_MODULE
 static uint8_t debug_info[VSFCFG_DEBUG_INFO_PARSE_LEN];
 static struct vsf_stream_t *debug_stream = NULL;
-#endif
 
 uint32_t debug(const char *format, ...)
 {
@@ -84,29 +78,5 @@ void debug_fini(void)
 {
 	debug_stream = NULL;
 }
-
-#ifdef VSFCFG_STANDALONE_MODULE
-vsf_err_t vsfdbg_modexit(struct vsf_module_t *module)
-{
-	vsf_bufmgr_free(module->ifs);
-	module->ifs = NULL;
-	return VSFERR_NONE;
-}
-
-vsf_err_t vsfdbg_modinit(struct vsf_module_t *module,
-								struct app_hwcfg_t const *cfg)
-{
-	struct vsfdbg_modifs_t *ifs;
-	ifs = vsf_bufmgr_malloc(sizeof(struct vsfdbg_modifs_t));
-	if (!ifs) return VSFERR_FAIL;
-	memset(ifs, 0, sizeof(*ifs));
-
-	ifs->init = debug_init;
-	ifs->fini = debug_fini;
-	ifs->debug = debug;
-	module->ifs = ifs;
-	return VSFERR_NONE;
-}
-#endif
 
 #endif

@@ -18,19 +18,11 @@
  ***************************************************************************/
 #include "vsf.h"
 
-#undef vsfip_httpd_start
-#undef vsfip_httpd_header_resp
-#undef vsfip_httpd_header_str
-#undef vsfip_httpd_header_u32
-#undef vsfip_httpd_header_end
-#undef vsfip_httpd_getarg
-
 #define VSFIP_HTTP_SERVER_SOCKETTIMEOUT					4000
 
 static const char VSFIP_HTTP_HEAD_GET[] =				"GET ";
 static const char VSFIP_HTTP_HEAD_POST[] =				"POST ";
 
-#ifndef VSFCFG_STANDALONE_MODULE
 static const struct vsfip_http_mimetype_t\
 					vsfip_httpd_mimetype[VSFIP_HTTPD_MIMETYPECNT] =
 {
@@ -65,7 +57,6 @@ static const struct vsfile_memfile_t vsfip_http404 =
 	.file.op = (struct vsfile_fsop_t *)&vsfile_memfs_op,
 	.f.buff = "HTTP/1.0 404 Not Found\r\n\r\nNot Found",
 };
-#endif
 
 static char* vsfip_httpd_getnextline(char *buf)
 {
@@ -561,47 +552,3 @@ vsf_err_t vsfip_httpd_start(struct vsfip_httpd_t *httpd, uint16_t port)
 	return VSFERR_NONE;
 }
 
-#ifdef VSFCFG_STANDALONE_MODULE
-vsf_err_t vsfip_httpd_modexit(struct vsf_module_t *module)
-{
-	vsf_bufmgr_free(module->ifs);
-	module->ifs = NULL;
-	return VSFERR_NONE;
-}
-
-vsf_err_t vsfip_httpd_modinit(struct vsf_module_t *module,
-								struct app_hwcfg_t const *cfg)
-{
-	struct vsfip_httpd_modifs_t *ifs;
-	ifs = vsf_bufmgr_malloc(sizeof(struct vsfip_httpd_modifs_t));
-	if (!ifs) return VSFERR_FAIL;
-	memset(ifs, 0, sizeof(*ifs));
-
-	ifs->start = vsfip_httpd_start;
-	ifs->getarg = vsfip_httpd_getarg;
-	ifs->http400.file.name = "400";
-	ifs->http400.file.size = sizeof("HTTP/1.0 400 Bad Request\r\n\r\nBad Request");
-	ifs->http400.file.attr = VSFILE_ATTR_READONLY;
-	ifs->http400.file.op = (struct vsfile_fsop_t *)&vsfile_memfs_op;
-	ifs->http400.f.buff = "HTTP/1.0 400 Bad Request\r\n\r\nBad Request";
-	ifs->http404.file.name = "404";
-	ifs->http404.file.size = sizeof("HTTP/1.0 404 Not Found\r\n\r\nNot Found");
-	ifs->http404.file.attr = VSFILE_ATTR_READONLY;
-	ifs->http404.file.op = (struct vsfile_fsop_t *)&vsfile_memfs_op;
-	ifs->http404.f.buff = "HTTP/1.0 404 Not Found\r\n\r\nNot Found";
-	// can not change order of the first 2 types, they are used for post
-	ifs->mimetype[0] = (struct vsfip_http_mimetype_t){"application/x-www-form-urlencoded", " "};
-	ifs->mimetype[1] = (struct vsfip_http_mimetype_t){"multipart/form-data", " "};
-	// random order below
-	ifs->mimetype[2] = (struct vsfip_http_mimetype_t){"text/html", "htm"};
-	ifs->mimetype[3] = (struct vsfip_http_mimetype_t){"text/html", "html"};
-	ifs->mimetype[4] = (struct vsfip_http_mimetype_t){"image/jpeg", "jpg"};
-	ifs->mimetype[5] = (struct vsfip_http_mimetype_t){"image/jpeg", "jpeg"};
-	ifs->mimetype[6] = (struct vsfip_http_mimetype_t){"text/plain", "txt"};
-	ifs->mimetype[7] = (struct vsfip_http_mimetype_t){"text/xml", "xml"};
-	ifs->mimetype[8] = (struct vsfip_http_mimetype_t){"application/x-javascript", "js"};
-	ifs->mimetype[9] = (struct vsfip_http_mimetype_t){"application/octet-stream", " "};
-	module->ifs = ifs;
-	return VSFERR_NONE;
-}
-#endif
