@@ -136,6 +136,13 @@ void usrapp_initial_init(struct usrapp_t *app)
 
 void usrapp_srt_init(struct usrapp_t *app)
 {
+	// usbd init
+	app->usbd.device.drv->disconnect();
+	vsftimer_create_cb(200, 1, usrapp_usbd_conn, app);
+}
+
+void usrapp_nrt_init(struct usrapp_t *app)
+{
 	STREAM_INIT(&app->usbd.shell_cdc.stream_rx);
 	STREAM_INIT(&app->usbd.shell_cdc.stream_tx);
 	STREAM_INIT(&app->usbd.wifi_uart_cdc.stream_rx);
@@ -146,15 +153,6 @@ void usrapp_srt_init(struct usrapp_t *app)
 	vsfshell_init(&app->shell);
 	help_init(&app->shell);
 	sq_init(&app->shell, &usrapp.sq_param);
-	
-	// usbd init
-	app->usbd.device.drv->disconnect();
-	vsftimer_create_cb(200, 1, usrapp_usbd_conn, app);
-}
-
-void usrapp_nrt_init(struct usrapp_t *app)
-{
-
 }
 
 void HardFault_Handler(void)

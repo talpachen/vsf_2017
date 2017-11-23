@@ -1,5 +1,5 @@
-#define APPCFG_VSFTIMER_NUM				16
-#define APPCFG_BUFMGR_SIZE				(12 * 1024)
+#define APPCFG_VSFTIMER_NUM				32
+#define APPCFG_BUFMGR_SIZE				(60 * 1024)
 
 // The 3 MACROs below define the Hard/Soft/Non-RealTime event queue
 // undefine to indicate that the corresponding event queue is not supported
@@ -9,8 +9,8 @@
 //		not receive events from tasks in higher priority
 // define to n indicating the length of corresponding real time event queue
 //#define APPCFG_HRT_QUEUE_LEN			0
-#define APPCFG_SRT_QUEUE_LEN			16
-#define APPCFG_NRT_QUEUE_LEN			16
+#define APPCFG_SRT_QUEUE_LEN			32
+#define APPCFG_NRT_QUEUE_LEN			32
 
 #if (defined(APPCFG_HRT_QUEUE_LEN) && (APPCFG_HRT_QUEUE_LEN > 0)) ||\
 	(defined(APPCFG_SRT_QUEUE_LEN) && (APPCFG_SRT_QUEUE_LEN > 0)) ||\

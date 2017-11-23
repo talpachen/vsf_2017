@@ -1979,9 +1979,6 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\shell_cmd\sqmem.cpp</name>
-      <excluded>
-        <configuration>Debug</configuration>
-      </excluded>
     </file>
   </group>
   <group>
@@ -2095,6 +2092,9 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\squirrel3\squirrel\sqmem.cpp</name>
+        <excluded>
+          <configuration>Debug</configuration>
+        </excluded>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\squirrel3\squirrel\sqobject.cpp</name>
