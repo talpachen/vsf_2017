@@ -5,15 +5,15 @@
 define symbol __ICFEDIT_intvec_start__ = 0x00000000;
 /*-Memory Regions-*/
 define symbol __ICFEDIT_region_IROM1_start__ = 0x00000000;
-define symbol __ICFEDIT_region_IROM1_end__   = 0x00007FFF;
+define symbol __ICFEDIT_region_IROM1_end__   = 0x0000FFFF;
 define symbol __ICFEDIT_region_IROM2_start__ = 0x0;
 define symbol __ICFEDIT_region_IROM2_end__   = 0x0;
+define symbol __ICFEDIT_region_SQROM_start__ = 0x00020000;
+define symbol __ICFEDIT_region_SQROM_end__   = 0x0007FFFF;
 define symbol __ICFEDIT_region_EROM1_start__ = 0x0;
 define symbol __ICFEDIT_region_EROM1_end__   = 0x0;
 define symbol __ICFEDIT_region_EROM2_start__ = 0x0;
 define symbol __ICFEDIT_region_EROM2_end__   = 0x0;
-define symbol __ICFEDIT_region_EROM3_start__ = 0x0;
-define symbol __ICFEDIT_region_EROM3_end__   = 0x0;
 define symbol __ICFEDIT_region_IRAM1_start__ = 0x20008000;
 define symbol __ICFEDIT_region_IRAM1_end__   = 0x2001FFFF;
 define symbol __ICFEDIT_region_IRAM2_start__ = 0x0;
@@ -22,8 +22,6 @@ define symbol __ICFEDIT_region_ERAM1_start__ = 0x0;
 define symbol __ICFEDIT_region_ERAM1_end__   = 0x0;
 define symbol __ICFEDIT_region_ERAM2_start__ = 0x0;
 define symbol __ICFEDIT_region_ERAM2_end__   = 0x0;
-define symbol __ICFEDIT_region_ERAM3_start__ = 0x0;
-define symbol __ICFEDIT_region_ERAM3_end__   = 0x0;
 /*-Sizes-*/
 define symbol __ICFEDIT_size_cstack__ = 0x800;
 define symbol __ICFEDIT_size_heap__   = 0x3000;
@@ -32,14 +30,13 @@ define symbol __ICFEDIT_size_heap__   = 0x3000;
 define memory mem with size = 4G;
 define region IROM_region   =   mem:[from __ICFEDIT_region_IROM1_start__ to __ICFEDIT_region_IROM1_end__]
                               | mem:[from __ICFEDIT_region_IROM2_start__ to __ICFEDIT_region_IROM2_end__];
+define region SQROM_region  =   mem:[from __ICFEDIT_region_SQROM_start__ to __ICFEDIT_region_SQROM_end__];
 define region EROM_region   =   mem:[from __ICFEDIT_region_EROM1_start__ to __ICFEDIT_region_EROM1_end__]
-                              | mem:[from __ICFEDIT_region_EROM2_start__ to __ICFEDIT_region_EROM2_end__]
-                              | mem:[from __ICFEDIT_region_EROM3_start__ to __ICFEDIT_region_EROM3_end__];
+                              | mem:[from __ICFEDIT_region_EROM2_start__ to __ICFEDIT_region_EROM2_end__];
 define region IRAM_region   =   mem:[from __ICFEDIT_region_IRAM1_start__ to __ICFEDIT_region_IRAM1_end__]
                               | mem:[from __ICFEDIT_region_IRAM2_start__ to __ICFEDIT_region_IRAM2_end__];
 define region ERAM_region   =   mem:[from __ICFEDIT_region_ERAM1_start__ to __ICFEDIT_region_ERAM1_end__]
-                              | mem:[from __ICFEDIT_region_ERAM2_start__ to __ICFEDIT_region_ERAM2_end__]
-                              | mem:[from __ICFEDIT_region_ERAM3_start__ to __ICFEDIT_region_ERAM3_end__];
+                              | mem:[from __ICFEDIT_region_ERAM2_start__ to __ICFEDIT_region_ERAM2_end__];
 
 define block CSTACK    with alignment = 8, size = __ICFEDIT_size_cstack__   { };
 define block HEAP      with alignment = 8, size = __ICFEDIT_size_heap__     { };
@@ -54,6 +51,29 @@ if (isdefinedsymbol(__USE_DLIB_PERTHREAD))
 
 place at address mem:__ICFEDIT_intvec_start__ { readonly section .intvec };
 
+place in SQROM_region
+{
+	readonly object sqapi.o,
+	readonly object sqbaselib.o,
+	readonly object sqclass.o,
+	readonly object sqcompiler.o,
+	readonly object sqdebug.o,
+	readonly object sqfuncstate.o,
+	readonly object sqlexer.o,
+	readonly object sqmem.o,
+	readonly object sqobject.o,
+	readonly object sqstate.o,
+	readonly object sqtable.o,
+	readonly object sqvm.o,
+	readonly object sqstdaux.o,
+	readonly object sqstdblob.o,
+	readonly object sqstdio.o,
+	readonly object sqstdmath.o,
+	readonly object sqstdrex.o,
+	readonly object sqstdstream.o,
+	readonly object sqstdstring.o,
+	readonly object sqstdsystem.o,
+};
 place in IROM_region  { readonly };
 place in EROM_region  { readonly section application_specific_ro };
 place in IRAM_region  { readwrite, block CSTACK, block HEAP };

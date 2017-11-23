@@ -145,7 +145,7 @@ void usrapp_srt_init(struct usrapp_t *app)
 
 	vsfshell_init(&app->shell);
 	help_init(&app->shell);
-	//sq_init(&app->shell, &usrapp.sq_param);
+	sq_init(&app->shell, &usrapp.sq_param);
 	
 	// usbd init
 	app->usbd.device.drv->disconnect();
