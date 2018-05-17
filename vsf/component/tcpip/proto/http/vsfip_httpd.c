@@ -17,6 +17,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "vsf.h"
+#include <stdio.h>
 
 #define VSFIP_HTTP_SERVER_SOCKETTIMEOUT					4000
 

@@ -18,7 +18,7 @@
  ***************************************************************************/
 
 #include "compiler.h"
-#include "app_type.h"
+#include "vsf_type.h"
 
 uint8_t BIT_REVERSE_U8(uint8_t v8)
 {
@@ -202,7 +202,7 @@ int msb(uint32_t a)
 int ffz(uint32_t a)
 {
 	a = ~a;
-	return msb(a & -a);
+	return msb(a & -(int32_t)a);
 }
 
 // mask array

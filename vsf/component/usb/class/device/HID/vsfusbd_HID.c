@@ -37,7 +37,9 @@ static struct vsfusbd_HID_report_t* vsfusbd_HID_find_report(
 
 	for(i = 0; i < param->num_of_report; i++)
 	{
-		if ((param->reports[i].type == type) && (param->reports[i].id == id))
+		if (((param->reports[i].type == USB_HID_REPORT_OUTPUT_NO_ID) &&
+				(type == USB_HID_REPORT_OUTPUT)) || 
+				((param->reports[i].type == type) && (param->reports[i].id == id)))
 		{
 			return &param->reports[i];
 		}
@@ -54,7 +56,12 @@ static vsf_err_t vsfusbd_HID_OUT_hanlder(struct vsfusbd_device_t *device,
 	int8_t iface = config->ep_OUT_iface_map[ep];
 	struct vsfusbd_HID_param_t *param;
 	uint16_t pkg_size, ep_size;
-	uint8_t buffer[64], *pbuffer = buffer;
+#if defined(VSFUSBD_CFG_HIGHSPEED)
+	uint8_t buffer[512];
+#else
+	uint8_t buffer[64];
+#endif
+	uint8_t *pbuffer = buffer;
 	uint8_t report_id;
 	struct vsfusbd_HID_report_t *report;
 
@@ -390,9 +397,12 @@ static vsf_err_t vsfusbd_HID_request_process(struct vsfusbd_device_t *device)
 	struct vsfusbd_config_t *config = &device->config[device->configuration];
 	struct vsfusbd_HID_param_t *param =
 			(struct vsfusbd_HID_param_t *)config->iface[iface].protocol_param;
+	vsf_err_t (*on_report)(struct vsfusbd_HID_param_t *param,
+			struct vsfusbd_HID_report_t *report) =
+		(USB_HIDREQ_SET_REPORT == request->bRequest) ? param->on_report_in :
+		(USB_HIDREQ_GET_REPORT == request->bRequest) ? param->on_report_out : NULL;
 
-	if ((USB_HIDREQ_SET_REPORT == request->bRequest) ||
-		(USB_HIDREQ_GET_REPORT == request->bRequest))
+	if (on_report != NULL)
 	{
 		uint8_t type = request->wValue >> 8, id = request->wValue;
 		struct vsfusbd_HID_report_t *report =
@@ -403,20 +413,7 @@ static vsf_err_t vsfusbd_HID_request_process(struct vsfusbd_device_t *device)
 			return VSFERR_FAIL;
 		}
 
-		if (USB_HIDREQ_SET_REPORT == request->bRequest)
-		{
-			if (param->on_report_in != NULL)
-			{
-				return param->on_report_in(param, report);
-			}
-		}
-		else
-		{
-			if (param->on_report_out != NULL)
-			{
-				return param->on_report_out(param, report);
-			}
-		}
+		return on_report(param, report);
 	}
 	return VSFERR_NONE;
 }

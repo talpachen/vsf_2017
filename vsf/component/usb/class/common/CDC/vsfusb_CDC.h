@@ -29,4 +29,27 @@ enum usb_CDC_req_t
 	USB_CDCREQ_CLEAR_COMM_FEATURE			= 0x04,
 };
 
+PACKED_HEAD struct PACKED_MID usb_cdc_union_descriptor_t
+{
+	uint8_t bLength;
+	uint8_t bDescriptorType;
+	uint8_t bDescriptorSubType;
+
+	uint8_t bControlInterface;
+	uint8_t bSubordinateInterface[1];
+}; PACKED_TAIL
+
+PACKED_HEAD struct PACKED_MID usb_cdc_ecm_descriptor_t
+{
+	uint8_t bLength;
+	uint8_t bDescriptorType;
+	uint8_t bDescriptorSubType;
+
+	uint8_t iMACAddress;
+	uint8_t bmEthernetStatistics[4];
+	uint8_t wMaxSegmentSize[2];
+	uint8_t wNumberMCFilters[2];
+	uint8_t bNumberPowerFilters;
+}; PACKED_TAIL
+
 #endif	// __VSFUSB_CDC_H_INCLUDED__

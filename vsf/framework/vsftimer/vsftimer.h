@@ -62,7 +62,7 @@ struct vsftimer_t *vsftimer_create(struct vsfsm_t *sm, uint32_t interval,
 struct vsftimer_t *vsftimer_create_cb(uint32_t interval, int16_t trigger_cnt,
 									void (*cb)(void *), void *param);
 void vsftimer_free(struct vsftimer_t *timer);
-void vsftimer_clean_sm_cb(struct vsfsm_t *sm, void (*cb)(void *));
+void vsftimer_clean_sm(struct vsfsm_t *sm);
 
 void vsftimer_enqueue(struct vsftimer_t *timer);
 void vsftimer_dequeue(struct vsftimer_t *timer);

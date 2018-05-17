@@ -854,6 +854,7 @@ static vsf_err_t vsffat_read(struct vsfsm_pt_t *pt, vsfsm_evt_t evt,
 
 	vsfsm_pt_begin(pt);
 
+	*rsize = 0;
 	if (vsfsm_crit_enter(&malfs->crit, pt->sm))
 	{
 		vsfsm_pt_wfe(pt, VSF_MALFS_EVT_CRIT);
@@ -891,6 +892,7 @@ static vsf_err_t vsffat_read(struct vsfsm_pt_t *pt, vsfsm_evt_t evt,
 	fat->cur_size = 0;
 	fat->remain_size = size;
 	fat->cur_sector = vsffat_clus2sec(fat, fat->cur_cluster);
+	fat->last_sector = fat->cur_sector + (1 << fat->clustersize_bits);
 	fat->cur_sector += (offset & (clustersize - 1)) >> fat->sectorsize_bits;
 	fat->cur_offset = offset & ~((1 << fat->sectorsize_bits) - 1);
 	while (fat->remain_size)
@@ -915,8 +917,7 @@ static vsf_err_t vsffat_read(struct vsfsm_pt_t *pt, vsfsm_evt_t evt,
 		{
 			// read page-aligned data in cluster
 			// get remain sector in clusrer
-			fat->cur_run_sector =
-						fat->cur_sector & ((1 << fat->clustersize_bits) - 1);
+			fat->cur_run_sector = fat->last_sector - fat->cur_sector;
 			fat->cur_run_sector = min(fat->cur_run_sector,
 						fat->remain_size >> fat->sectorsize_bits);
 			fat->cur_run_size = fat->cur_run_sector << fat->sectorsize_bits;
@@ -936,18 +937,23 @@ static vsf_err_t vsffat_read(struct vsfsm_pt_t *pt, vsfsm_evt_t evt,
 			src += (1 << fat->sectorsize_bits) - fat->cur_run_size;
 			memcpy(buff, src, fat->cur_run_size);
 			fat->cur_offset += fat->cur_run_size;
+			fat->cur_sector += fat->cur_run_sector;
 		}
 		else if (fat->remain_size < (1 << fat->sectorsize_bits))
 		{
 			uint8_t *dst = buff + fat->cur_size;
 			memcpy(dst, malfs->sector_buffer, fat->cur_run_size);
 		}
+		else
+		{
+			fat->cur_sector += fat->cur_run_sector;
+		}
 		fat->cur_size += fat->cur_run_size;
 		fat->remain_size -= fat->cur_run_size;
+		*rsize += fat->cur_run_size;
 
 		// get next cluster if necessary
-		if (fat->remain_size &&
-			!(fat->cur_sector & ((1 << fat->clustersize_bits) - 1)))
+		if (fat->remain_size && (fat->cur_sector == fat->last_sector))
 		{
 			fat->caller_pt.sm = pt->sm;
 			fat->caller_pt.user_data = fat;
@@ -968,6 +974,7 @@ static vsf_err_t vsffat_read(struct vsfsm_pt_t *pt, vsfsm_evt_t evt,
 
 			// remove MSB 4-bit for 32-bit FAT entry
 			fat->cur_cluster &= 0x0FFFFFFF;
+			fat->cur_sector = vsffat_clus2sec(fat, fat->cur_cluster);
 		}
 	}
 

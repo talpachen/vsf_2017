@@ -95,7 +95,6 @@ static vsf_err_t vsfusbd_MSCBOT_ErrHandler(struct vsfusbd_device_t *device,
 static void vsfusbd_MSCBOT_dummy_inout(void *p)
 {
 	struct vsfusbd_MSCBOT_param_t *param = (struct vsfusbd_MSCBOT_param_t *)p;
-	struct vsfscsi_transact_t *scsi_transact = &param->scsi_dev->transact;
 	struct vsfusbd_transact_t *transact = &param->transact;
 	struct vsf_buffer_t buffer =
 	{

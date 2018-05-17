@@ -24,8 +24,12 @@
 #error "vsfusbd_RNDIS need vsfusbd_CDC run in TRANSACT mode"
 #endif
 
-#if VSFIP_CFG_NETIF_HEADLEN < 64
-#error "RNDIS require minimum 64 bytes netif header size"
+#ifndef VSFIP_CFG_NETIF_HEADLEN
+#define VSFIP_CFG_NETIF_HEADLEN					64
+#elif VSFIP_CFG_NETIF_HEADLEN < 64
+#warning "RNDIS require minimum 64 bytes netif header size"
+#undef VSFIP_CFG_NETIF_HEADLEN
+#define VSFIP_CFG_NETIF_HEADLEN					64
 #endif
 
 #include "../../common/CDC/vsfusb_RNDIS.h"
@@ -41,7 +45,7 @@ struct vsfusbd_RNDIS_param_t
 	struct
 	{
 		void *param;
-		void (*on_connect)(void *param);
+		void (*on_connect)(void *param, struct vsfip_netif_t *netif);
 	} cb;
 
 	// private

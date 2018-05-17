@@ -8,6 +8,7 @@
 #define PACKED_HEAD	__packed
 #define PACKED_MID	
 #define PACKED_TAIL	
+#define WEAKFUNC	__weak
 
 #define vsf_gint_t						__istate_t
 #define vsf_set_gint(gint)				__set_interrupt_state(gint)

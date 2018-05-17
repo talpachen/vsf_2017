@@ -332,17 +332,21 @@ vsf_err_t vsfsm_fini(struct vsfsm_t *sm)
 	vsfsm_set_active(sm, false);
 #endif
 
+	vsftimer_clean_sm(sm);
 #if VSFSM_CFG_PREMPT_EN
-	tmp = (struct vsfsm_evtq_element_t *)sm->evtq->head;
-	while (tmp != sm->evtq->tail)
+	if (sm->evtq != NULL)
 	{
-		if (tmp->sm == sm)
+		tmp = (struct vsfsm_evtq_element_t *)sm->evtq->head;
+		while (tmp != sm->evtq->tail)
 		{
-			tmp->sm = NULL;
-		}
-		if (++tmp >= (sm->evtq->queue + sm->evtq->size))
-		{
-			tmp = sm->evtq->queue;
+			if (tmp->sm == sm)
+			{
+				tmp->sm = NULL;
+			}
+			if (++tmp >= (sm->evtq->queue + sm->evtq->size))
+			{
+				tmp = sm->evtq->queue;
+			}
 		}
 	}
 #endif

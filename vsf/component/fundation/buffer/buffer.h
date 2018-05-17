@@ -20,7 +20,7 @@
 #ifndef __BUFFER_H_INCLUDED__
 #define __BUFFER_H_INCLUDED__
 
-#include "app_type.h"
+#include "vsf_type.h"
 #include "vsf_cfg.h"
 #include "component/fundation/list/list.h"
 
@@ -53,6 +53,9 @@ struct vsf_transaction_buffer_t
 	struct vsf_buffer_t buffer;
 	uint32_t position;
 };
+
+uint32_t buf_get_value(uint8_t *buf, uint8_t offset, uint8_t len);
+void buf_set_value(uint8_t *buf, uint8_t offset, uint8_t len, uint32_t value);
 
 // fifo
 struct vsf_fifo_t
@@ -119,8 +122,8 @@ struct vsfpool_t
 {
 	uint32_t *flags;
 	void *buffer;
-	uint32_t size;
-	uint32_t num;
+	uint32_t item_size;
+	uint32_t item_num;
 };
 
 #define VSFPOOL_DEFINE(name, type, num)			\
@@ -135,8 +138,8 @@ struct vsfpool_t
 	do {\
 		(p)->pool.flags = (p)->mskarr;\
 		(p)->pool.buffer = (p)->buffer;\
-		(p)->pool.size = sizeof(type);\
-		(p)->pool.num = (n);\
+		(p)->pool.item_size = sizeof(type);\
+		(p)->pool.item_num = (n);\
 		vsfpool_init((struct vsfpool_t *)(p));\
 	} while (0)
 
@@ -147,8 +150,8 @@ struct vsfpool_t
 	vsfpool_free((struct vsfpool_t *)(p), (buf))
 
 void vsfpool_init(struct vsfpool_t *pool);
-void* vsfpool_alloc(struct vsfpool_t *pool);
-void vsfpool_free(struct vsfpool_t *pool, void *buffer);
+void *vsfpool_alloc(struct vsfpool_t *pool);
+bool vsfpool_free(struct vsfpool_t *pool, void *buffer);
 
 #endif	// __BUFFER_H_INCLUDED__
 

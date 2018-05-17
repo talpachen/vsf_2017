@@ -17,11 +17,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "app_type.h"
-#include "component/buffer/buffer.h"
-
-#include "component/mal/mal.h"
-#include "vsfui_fb.h"
+#include "vsf.h"
 
 // frame_buffer driver for vsfui
 

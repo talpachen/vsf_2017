@@ -20,7 +20,7 @@
 #ifndef __VSFHAL_H_INCLUDED__
 #define __VSFHAL_H_INCLUDED__
 
-#include "app_type.h"
+#include "vsf_type.h"
 #include "vsfhal_cfg.h"
 #include "vsfhal_const.h"
 
@@ -50,9 +50,16 @@ vsf_err_t vsfhal_tickclk_fini(void);
 vsf_err_t vsfhal_tickclk_start(void);
 vsf_err_t vsfhal_tickclk_stop(void);
 uint32_t vsfhal_tickclk_get_ms(void);
-uint16_t vsfhal_tickclk_get_us(void);
+uint32_t vsfhal_tickclk_get_us(void);
 void vsfhal_tickclk_poll(void);
 vsf_err_t vsfhal_tickclk_config_cb(void (*)(void*), void*);
+
+/*******************************************************************************
+WDT
+*******************************************************************************/
+vsf_err_t vsfhal_wdt_init(int32_t feed_ms, int32_t rst_delay_ms, void (*cb)(void *), void *param);
+vsf_err_t vsfhal_wdt_fini(void);
+void vsfhal_wdt_feed(void);
 
 /*******************************************************************************
 TIMER
@@ -285,17 +292,14 @@ vsf_err_t vsfhal_usbd_ep_toggle_OUT_toggle(uint8_t idx);
 uint16_t vsfhal_usbd_ep_get_OUT_count(uint8_t idx);
 vsf_err_t vsfhal_usbd_ep_read_OUT_buffer(uint8_t idx, uint8_t *buffer, uint16_t size);
 vsf_err_t vsfhal_usbd_ep_enable_OUT(uint8_t idx);
-#if VSFHAL_USBD_EN
 extern const uint8_t vsfhal_usbd_ep_num;
 extern struct vsfhal_usbd_callback_t vsfhal_usbd_callback;
 extern const struct vsfhal_usbd_t vsfhal_usbd;
-#endif
-
 
 /*******************************************************************************
 HCD(OHCI...)
 *******************************************************************************/
-vsf_err_t vsfhal_hcd_init(uint32_t index, int32_t int_priority, vsf_err_t (*ohci_irq)(void *), void *param);
+vsf_err_t vsfhal_hcd_init(uint32_t index, int32_t int_priority, void (*ohci_irq)(void *), void *param);
 vsf_err_t vsfhal_hcd_fini(uint32_t index);
 void* vsfhal_hcd_regbase(uint32_t index);
 

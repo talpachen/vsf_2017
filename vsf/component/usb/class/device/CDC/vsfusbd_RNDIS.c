@@ -322,7 +322,8 @@ static vsf_err_t vsfusbd_RNDIS_on_encapsulated_command(
 						rndis_param->netif_inited = true;
 						if (rndis_param->cb.on_connect != NULL)
 						{
-							rndis_param->cb.on_connect(rndis_param->cb.param);
+							rndis_param->cb.on_connect(rndis_param->cb.param,
+									&rndis_param->netif);
 						}
 					}
 				}

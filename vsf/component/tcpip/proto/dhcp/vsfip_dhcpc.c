@@ -217,6 +217,9 @@ vsfip_dhcpc_evt_handler(struct vsfsm_t *sm, vsfsm_evt_t evt)
 		netif->netmask = dhcpc->netmask;
 		netif->dns[0] = dhcpc->dns[0];
 		netif->dns[1] = dhcpc->dns[1];
+		vsfdbg_printf("dhcpc: %d.%d.%d.%d" VSFCFG_DEBUG_LINEEND,
+			netif->ipaddr.addr.s_addr_buf[0], netif->ipaddr.addr.s_addr_buf[1],
+			netif->ipaddr.addr.s_addr_buf[2], netif->ipaddr.addr.s_addr_buf[3]);
 
 		// timer out for resume
 //		vsftimer_create(sm, 2000, 1, VSFIP_DHCP_EVT_TIMEROUT);

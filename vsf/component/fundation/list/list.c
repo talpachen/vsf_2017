@@ -17,20 +17,38 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "app_type.h"
+#include "vsf_type.h"
 #include "list.h"
 
-int sllist_is_in(struct sllist *head, struct sllist *node)
+int sllist_get_length(struct sllist *head)
 {
+	int length = 0;
+	while (head != (struct sllist *)0)
+	{
+		length++;
+		head = head->next;
+	}
+	return length;
+}
+
+int sllist_get_idx(struct sllist *head, struct sllist *node)
+{
+	int index = 0;
 	while (head != (struct sllist *)0)
 	{
 		if (head == node)
 		{
-			return 1;
+			return index;
 		}
 		head = head->next;
+		index++;
 	}
-	return 0;
+	return -1;
+}
+
+int sllist_is_in(struct sllist *head, struct sllist *node)
+{
+	return sllist_get_idx(head, node) >= 0;
 }
 
 int sllist_remove(struct sllist **head, struct sllist *node)

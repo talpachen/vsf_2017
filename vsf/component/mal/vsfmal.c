@@ -233,15 +233,17 @@ vsf_malstream_read_thread(struct vsfsm_pt_t *pt, vsfsm_evt_t evt)
 		return VSFERR_BUG;
 	}
 
-	mal->pt.user_data = mal;
 	malstream->offset = 0;
 	while (malstream->offset < malstream->size)
 	{
 		while (stream_get_free_size(stream) < mal->op_block_size)
 		{
+			stream->callback_tx.on_inout = vsf_malstream_on_inout;
 			vsfsm_pt_wfe(pt, VSF_MALSTREAM_ON_INOUT);
+			stream->callback_tx.on_inout = NULL;
 		}
 
+		mal->pt.user_data = mal;
 		mal->pt.state = 0;
 		vsfsm_pt_entry(pt);
 		cur_addr = malstream->addr + malstream->offset;
@@ -282,7 +284,7 @@ vsf_err_t vsf_malstream_read(struct vsf_malstream_t *malstream, uint64_t addr,
 	malstream->size = size;
 
 	stream->callback_tx.param = malstream;
-	stream->callback_tx.on_inout = vsf_malstream_on_inout;
+	stream->callback_tx.on_inout = NULL;
 	stream->callback_tx.on_connect = NULL;
 	stream->callback_tx.on_disconnect = NULL;
 	stream_connect_tx(stream);
@@ -310,15 +312,17 @@ vsf_malstream_write_thread(struct vsfsm_pt_t *pt, vsfsm_evt_t evt)
 		return VSFERR_BUG;
 	}
 
-	mal->pt.user_data = mal;
 	malstream->offset = 0;
 	while (malstream->offset < malstream->size)
 	{
 		while (stream_get_data_size(stream) < mal->op_block_size)
 		{
+			stream->callback_rx.on_inout = vsf_malstream_on_inout;
 			vsfsm_pt_wfe(pt, VSF_MALSTREAM_ON_INOUT);
+			stream->callback_rx.on_inout = NULL;
 		}
 
+		mal->pt.user_data = mal;
 		mal->pt.state = 0;
 		vsfsm_pt_entry(pt);
 		cur_addr = malstream->addr + malstream->offset;
@@ -359,7 +363,7 @@ vsf_err_t vsf_malstream_write(struct vsf_malstream_t *malstream, uint64_t addr,
 	malstream->size = size;
 
 	stream->callback_rx.param = malstream;
-	stream->callback_rx.on_inout = vsf_malstream_on_inout;
+	stream->callback_rx.on_inout = NULL;
 	stream->callback_rx.on_connect = NULL;
 	stream->callback_rx.on_disconnect = NULL;
 	stream_connect_rx(stream);

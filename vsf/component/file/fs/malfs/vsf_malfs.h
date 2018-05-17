@@ -24,6 +24,9 @@
 #define VSF_MALFS_EVT_IODONE			(VSFSM_EVT_USER + 1)
 #define VSF_MALFS_EVT_IOFAIL			(VSFSM_EVT_USER + 2)
 
+#ifndef VSF_MALFS_CFG_BUFCNT
+#	define VSF_MALFS_CFG_BUFCNT			8
+#endif
 struct vsf_malfs_t
 {
 	struct vsf_malstream_t malstream;
@@ -36,7 +39,7 @@ struct vsf_malfs_t
 
 	// private
 	struct vsf_mbufstream_t mbufstream;
-	uint8_t *mbufstream_buffer[1];
+	uint8_t *mbufstream_buffer[VSF_MALFS_CFG_BUFCNT];
 };
 
 #ifndef VSFCFG_EXCLUDE_MALFS

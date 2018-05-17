@@ -28,6 +28,9 @@ static void uart_rx_int(void *p, uint16_t data)
 	struct vsf_buffer_t buffer;
 	struct usart_stream_info_t *param = p;
 
+	if (!param->stream_rx)
+		return;
+	
 	buffer.buffer = buf;
 	buf[0] = data & 0xff;
 	buffer.size = vsfhal_usart_rx_get_data_size(param->index);
@@ -45,7 +48,10 @@ static void uart_on_tx(void *p)
 	uint8_t buf[USART_BUF_SIZE];
 	struct vsf_buffer_t buffer;
 	struct usart_stream_info_t *param = p;
-	
+
+	if (!param->stream_tx)
+		return;
+
 	buffer.size = min(vsfhal_usart_tx_get_free_size(param->index),
 			USART_BUF_SIZE);
 	if (buffer.size)
@@ -65,6 +71,9 @@ static void uart_on_rx(void *p)
 	struct vsf_buffer_t buffer;
 	struct usart_stream_info_t *param = p;
 
+	if (!param->stream_rx)
+		return;
+
 	buffer.size = vsfhal_usart_rx_get_data_size(param->index);
 	if (buffer.size)
 	{
@@ -80,26 +89,34 @@ vsf_err_t usart_stream_init(struct usart_stream_info_t *usart_stream)
 	if (usart_stream->index == VSFHAL_DUMMY_PORT)
 		return VSFERR_FAIL;
 	
-	stream_init(usart_stream->stream_tx);
-	stream_init(usart_stream->stream_rx);
+	if (!usart_stream->stream_tx && !usart_stream->stream_rx)
+		return VSFERR_FAIL;
 	
-	usart_stream->stream_rx->callback_tx.param = usart_stream;
-	usart_stream->stream_rx->callback_tx.on_inout = uart_on_rx;
-	usart_stream->stream_rx->callback_tx.on_connect = NULL;
-	usart_stream->stream_rx->callback_tx.on_disconnect = NULL;
-	usart_stream->stream_tx->callback_rx.param = usart_stream;
-	usart_stream->stream_tx->callback_rx.on_inout = uart_on_tx;
-	usart_stream->stream_tx->callback_rx.on_connect = NULL;
-	usart_stream->stream_tx->callback_rx.on_disconnect = NULL;
-	
+	if (usart_stream->stream_tx)
+	{
+		stream_init(usart_stream->stream_tx);
+		usart_stream->stream_tx->callback_rx.param = usart_stream;
+		usart_stream->stream_tx->callback_rx.on_inout = uart_on_tx;
+		usart_stream->stream_tx->callback_rx.on_connect = NULL;
+		usart_stream->stream_tx->callback_rx.on_disconnect = NULL;
+
+		usart_stream->stream_tx->rx_ready = true;
+	}
+	if (usart_stream->stream_rx)
+	{
+		stream_init(usart_stream->stream_rx);
+		usart_stream->stream_rx->callback_tx.param = usart_stream;
+		usart_stream->stream_rx->callback_tx.on_inout = uart_on_rx;
+		usart_stream->stream_rx->callback_tx.on_connect = NULL;
+		usart_stream->stream_rx->callback_tx.on_disconnect = NULL;	
+	}
+
 	vsfhal_usart_init(usart_stream->index);
 	vsfhal_usart_config_cb(usart_stream->index, usart_stream->int_priority,
 			usart_stream, uart_on_tx, uart_rx_int);
 	vsfhal_usart_config(usart_stream->index, usart_stream->baudrate,
 			usart_stream->mode);
 
-	usart_stream->stream_tx->rx_ready = true;
-	
 	return VSFERR_NONE;
 }
 

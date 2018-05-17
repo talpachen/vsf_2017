@@ -20,7 +20,7 @@
 #ifndef __VSFSM_H_INCLUDED__
 #define __VSFSM_H_INCLUDED__
 
-#include "app_type.h"
+#include "vsf_type.h"
 #include "vsf_cfg.h"
 
 #ifndef VSFSM_CFG_PREMPT_EN

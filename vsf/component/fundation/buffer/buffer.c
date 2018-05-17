@@ -19,6 +19,46 @@
 
 #include "vsf.h"
 
+// buf_get_value and buf_set_value
+uint32_t buf_get_value(uint8_t *buf, uint8_t offset, uint8_t len)
+{
+	uint8_t bitlen, bitpos, bytepos, mask, result_len = 0;
+	uint32_t result = 0;
+
+	while (result_len < len)
+	{
+		bytepos = offset >> 3;
+		bitpos = offset & 7;
+		bitlen = min(len - result_len, 8 - bitpos);
+		mask = (1 << bitlen) - 1;
+
+		result |= ((buf[bytepos] >> bitpos) & mask) << result_len;
+
+		offset += bitlen;
+		result_len += bitlen;
+	}
+	return result;
+}
+
+void buf_set_value(uint8_t *buf, uint8_t offset, uint8_t len, uint32_t value)
+{
+	uint8_t bitlen, bitpos, bytepos, mask, result_len = 0;
+
+	while (result_len < len)
+	{
+		bytepos = offset >> 3;
+		bitpos = offset & 7;
+		bitlen = min(len - result_len, 8 - bitpos);
+		mask = (1 << bitlen) - 1;
+		
+		buf[bytepos] &= ~(((~0UL >> result_len) & mask) << bitpos);
+		buf[bytepos] |= ((value >> result_len) & mask) << bitpos;
+
+		offset += bitlen;
+		result_len += bitlen;
+	}
+}
+
 // queue
 void vsfq_init(struct vsfq_t *q)
 {
@@ -692,11 +732,13 @@ void* vsf_bufmgr_malloc_aligned(uint32_t size, uint32_t align)
 			if (size_out > 1)
 			{
 				bufmgr_log_buf[size_out] = '\0';
-				vsf_debug("MalcOK 0x%x:%d %s", (uint32_t)(mcb_align->buffer.buffer + offset), mcb_align->buffer.size, bufmgr_log_buf);
+				vsfdbg_printf("MalcOK 0x%x:%d %s" VSFCFG_DEBUG_LINEEND,
+					(uint32_t)(mcb_align->buffer.buffer + offset), mcb_align->buffer.size, bufmgr_log_buf);
 			}
 			else
 			{
-				vsf_debug("MalcOK 0x%x:%d", (uint32_t)(mcb_align->buffer.buffer + offset), mcb_align->buffer.size);
+				vsfdbg_printf("MalcOK 0x%x:%d" VSFCFG_DEBUG_LINEEND,
+					(uint32_t)(mcb_align->buffer.buffer + offset), mcb_align->buffer.size);
 			}
 #endif
 			
@@ -717,11 +759,11 @@ void* vsf_bufmgr_malloc_aligned(uint32_t size, uint32_t align)
 	if (size_out > 1)
 	{
 		bufmgr_log_buf[size_out] = '\0';
-		vsf_debug("MalcFL %s", bufmgr_log_buf);
+		vsfdbg_printf("MalcFL %s" VSFCFG_DEBUG_LINEEND, bufmgr_log_buf);
 	}
 	else
 	{
-		vsf_debug("MalcFL UNKNOWN");
+		vsfdbg_printf("MalcFL UNKNOWN" VSFCFG_DEBUG_LINEEND);
 	}
 #endif
 	
@@ -753,6 +795,7 @@ void vsf_bufmgr_free(void *ptr)
 	va_end(ap);
 #endif
 	
+	
 	while (mcb != NULL)
 	{
 		if (((uint32_t)mcb->buffer.buffer <= (uint32_t)ptr) &&
@@ -774,11 +817,12 @@ void vsf_bufmgr_free(void *ptr)
 			if (size_out > 1)
 			{
 				bufmgr_log_buf[size_out] = '\0';
-				vsf_debug("FreeOK 0x%x %s", (uint32_t)ptr, bufmgr_log_buf);
+				vsfdbg_printf("FreeOK 0x%x %s" VSFCFG_DEBUG_LINEEND,
+					(uint32_t)ptr, bufmgr_log_buf);
 			}
 			else
 			{
-				vsf_debug("FreeOK 0x%x", (uint32_t)ptr);
+				vsfdbg_printf("FreeOK 0x%x" VSFCFG_DEBUG_LINEEND, (uint32_t)ptr);
 			}
 #endif
 #ifdef VSFCFG_THREAD_SAFTY
@@ -794,11 +838,12 @@ void vsf_bufmgr_free(void *ptr)
 	if (size_out > 1)
 	{
 		bufmgr_log_buf[size_out] = '\0';
-		vsf_debug("FreeFL 0x%x %s", (uint32_t)ptr, bufmgr_log_buf);
+		vsfdbg_printf("FreeFL 0x%x %s" VSFCFG_DEBUG_LINEEND,
+			(uint32_t)ptr, bufmgr_log_buf);
 	}
 	else
 	{
-		vsf_debug("FreeFL 0x%x ", (uint32_t)ptr);
+		vsfdbg_printf("FreeFL 0x%x " VSFCFG_DEBUG_LINEEND, (uint32_t)ptr);
 	}
 #endif
 	
@@ -814,27 +859,31 @@ void vsf_bufmgr_free(void *ptr)
 // pool
 void vsfpool_init(struct vsfpool_t *pool)
 {
-	memset(pool->flags, 0, (pool->num + 31) >> 3);
+	pool->item_size = (pool->item_size + 3) & ~3;
+	memset(pool->flags, 0, (pool->item_num + 31) >> 3);
 }
 
-void* vsfpool_alloc(struct vsfpool_t *pool)
+void *vsfpool_alloc(struct vsfpool_t *pool)
 {
-	uint32_t index = mskarr_ffz(pool->flags, (pool->num + 31) >> 5);
+	uint32_t index = mskarr_ffz(pool->flags, (pool->item_num + 31) >> 5);
 
-	if (index >= pool->num)
+	if (index >= pool->item_num)
 	{
 		return NULL;
 	}
 	mskarr_set(pool->flags, index);
-	return (uint8_t *)pool->buffer + index * pool->size;
+	return (uint8_t *)pool->buffer + index * pool->item_size;
 }
 
-void vsfpool_free(struct vsfpool_t *pool, void *buffer)
+bool vsfpool_free(struct vsfpool_t *pool, void *buffer)
 {
-	uint32_t index = ((uint8_t *)buffer - (uint8_t *)pool->buffer) / pool->size;
+	uint32_t index = ((uint8_t *)buffer - (uint8_t *)pool->buffer) /
+		pool->item_size;
 
-	if (index < pool->num)
+	if (index < pool->item_num)
 	{
 		mskarr_clr(pool->flags, index);
+		return true;
 	}
+	return false;
 }

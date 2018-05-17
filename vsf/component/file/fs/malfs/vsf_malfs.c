@@ -39,7 +39,6 @@ vsf_err_t vsf_malfs_init(struct vsf_malfs_t *malfs)
 	malfs->mbufstream.stream.op = &mbufstream_op;
 	malfs->mbufstream.mem.multibuf.size = malfs->malstream.mal->cap.block_size;
 	malfs->mbufstream.mem.multibuf.buffer_list = malfs->mbufstream_buffer;
-	malfs->mbufstream.mem.multibuf.count = 1;
 
 	vsfsm_crit_init(&malfs->crit, VSF_MALFS_EVT_CRIT);
 	malfs->sector_buffer = vsf_bufmgr_malloc(bs);
@@ -71,8 +70,14 @@ vsf_err_t vsf_malfs_read(struct vsf_malfs_t *malfs, uint32_t sector,
 	{
 		return VSFERR_INVALID_PARAMETER;
 	}
+	if (num > dimof(malfs->mbufstream_buffer))
+	{
+		return VSFERR_NOT_ENOUGH_RESOURCES;
+	}
 
-	malfs->mbufstream_buffer[0] = buff;
+	for (uint32_t i = 0; i < num; i++, buff += bs)
+		malfs->mbufstream_buffer[i] = buff;
+	malfs->mbufstream.mem.multibuf.count = num;
 	STREAM_INIT(&malfs->mbufstream);
 	return vsf_malstream_read(&malfs->malstream, sector * bs, num * bs);
 }
@@ -87,8 +92,14 @@ vsf_err_t vsf_malfs_write(struct vsf_malfs_t *malfs, uint32_t sector,
 	{
 		return VSFERR_INVALID_PARAMETER;
 	}
+	if (num > dimof(malfs->mbufstream_buffer))
+	{
+		return VSFERR_NOT_ENOUGH_RESOURCES;
+	}
 
-	malfs->mbufstream_buffer[0] = buff;
+	for (uint32_t i = 0; i < num; i++, buff += bs)
+		malfs->mbufstream_buffer[i] = buff;
+	malfs->mbufstream.mem.multibuf.count = num;
 	STREAM_INIT(&malfs->mbufstream);
 	return vsf_malstream_write(&malfs->malstream, sector * bs, num * bs);
 }

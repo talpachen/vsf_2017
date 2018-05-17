@@ -152,6 +152,7 @@ static vsf_err_t vsfip_telnetd_thread(struct vsfsm_pt_t *pt, vsfsm_evt_t evt)
 	{
 		return VSFERR_FAIL;
 	}
+	telnetd->so->tx_timeout_ms = 100;
 
 	if ((vsfip_bind(telnetd->so, telnetd->port) != 0) ||
 		(vsfip_listen(telnetd->so, telnetd->session_num) != 0))

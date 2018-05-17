@@ -45,6 +45,7 @@ enum usb_HID_report_type_t
 	USB_HID_REPORT_INPUT = 1,
 	USB_HID_REPORT_OUTPUT = 2,
 	USB_HID_REPORT_FEATURE = 3,
+	USB_HID_REPORT_OUTPUT_NO_ID = 0x82,
 };
 
 struct vsfusbd_HID_param_t;

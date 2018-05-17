@@ -37,6 +37,10 @@
 #ifndef VSFUSBD_CFG_LP_EN
 #define VSFUSBD_CFG_LP_EN				0
 #endif
+#if !defined(VSFUSBD_CFG_HIGHSPEED) && !defined(VSFUSBD_CFG_FULLSPEED) &&\
+	!defined(VSFUSBD_CFG_LOWSPEED)
+#define VSFUSBD_CFG_FULLSPEED
+#endif
 
 #define VSFUSBD_EVT_DATAIO_INEP(ep)		(VSFUSBD_EVT_DATAIO_IN + (ep))
 #define VSFUSBD_EVT_DATAIO_OUTEP(ep)	(VSFUSBD_EVT_DATAIO_OUT + (ep))
@@ -146,8 +150,6 @@ struct vsfusbd_device_t
 	{
 		vsf_err_t (*init)(struct vsfusbd_device_t *device);
 		vsf_err_t (*fini)(struct vsfusbd_device_t *device);
-		vsf_err_t (*on_set_interface)(struct vsfusbd_device_t *device,
-							uint8_t iface, uint8_t alternate_setting);
 
 		void (*on_ATTACH)(struct vsfusbd_device_t *device);
 		void (*on_DETACH)(struct vsfusbd_device_t *device);
@@ -184,6 +186,17 @@ struct vsfusbd_device_t
 
 	vsf_err_t (*IN_handler[VSFUSBD_CFG_EPMAXNO + 1])(struct vsfusbd_device_t*, uint8_t);
 	vsf_err_t (*OUT_handler[VSFUSBD_CFG_EPMAXNO + 1])(struct vsfusbd_device_t*, uint8_t);
+
+#if defined(VSFUSBD_CFG_MPS)
+	// round up to dword boundary to avoid potential problem
+	uint8_t tmpbuf[(VSFUSBD_CFG_MPS + 3) & ~3];
+#elif defined(VSFUSBD_CFG_HIGHSPEED)
+	uint8_t tmpbuf[512];
+#elif defined(VSFUSBD_CFG_FULLSPEED)
+	uint8_t tmpbuf[64];
+#else
+	uint8_t tmpbuf[8];
+#endif
 };
 
 #ifndef VSFCFG_EXCLUDE_USBD

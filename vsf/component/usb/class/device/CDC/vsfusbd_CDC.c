@@ -279,7 +279,7 @@ vsfusbd_CDCData_class_init(uint8_t iface, struct vsfusbd_device_t *device)
 	param->IN_transact.ep = param->ep_in;
 	param->IN_transact.cb.on_finish = vsfusbd_CDCData_on_IN_finish;
 	param->IN_transact.cb.param = param;
-	param->IN_transact.zlp = false;
+	param->IN_transact.zlp = true;
 	param->OUT_transact.ep = param->ep_out;
 	param->OUT_transact.cb.on_finish = vsfusbd_CDCData_on_OUT_finish;
 	param->OUT_transact.cb.param = param;

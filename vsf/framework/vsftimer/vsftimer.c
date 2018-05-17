@@ -189,46 +189,23 @@ void vsftimer_free(struct vsftimer_t *timer)
 #endif
 }
 
-void vsftimer_clean_sm_cb(struct vsfsm_t *sm, void (*cb)(void *))
+void vsftimer_clean_sm(struct vsfsm_t *sm)
 {
-	if (!sm && !cb)
-		return;
-	
 #ifdef VSFCFG_THREAD_SAFTY
 	uint8_t origlevel = vsfhal_core_set_intlevel(VSFCFG_MAX_SRT_PRIO);
 #endif
 	struct vsftimer_t *timer = (struct vsftimer_t *)vsftimer.timerlist.head;
+	struct vsftimer_t *timer_next;
 	
 	while (timer != NULL)
 	{
-		struct vsfq_node_t *node;
-		
-		if (timer->evt != VSFSM_EVT_INVALID)
-		{
-			if (sm && (timer->sm == sm))
-			{
-				vsftimer_free(timer);
-				timer = (struct vsftimer_t *)vsftimer.timerlist.head;				
-				continue;
-			}
-		}
-		else
-		{
-			if (cb && (timer->cb == cb))
-			{
-				vsftimer_free(timer);
-				timer = (struct vsftimer_t *)vsftimer.timerlist.head;				
-				continue;
-			}
-		}
-
-		node = timer->node.next;
-		if (node != NULL)
-			timer = container_of(node, struct vsftimer_t, node);
-		else
-			timer = NULL;
+		timer_next = container_of(timer->node.next, struct vsftimer_t, node);
+		if (sm && (timer->sm == sm))
+			vsftimer_free(timer);
+		timer = timer_next;
 	}
 #ifdef VSFCFG_THREAD_SAFTY
 	vsfhal_core_set_intlevel(origlevel);
 #endif
 }
+

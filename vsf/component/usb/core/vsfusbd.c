@@ -279,7 +279,8 @@ static vsf_err_t vsfusbd_auto_init(struct vsfusbd_device_t *device)
 	enum vsfhal_usbd_eptype_t ep_type;
 	uint16_t pos;
 	uint8_t attr, feature;
-	uint16_t ep_size, ep_addr, ep_index, ep_attr;
+	uint16_t ep_size;
+	uint8_t ep_addr, ep_index, ep_attr;
 	int16_t cur_iface;
 
 	config = &device->config[device->configuration];
@@ -342,7 +343,7 @@ static vsf_err_t vsfusbd_auto_init(struct vsfusbd_device_t *device)
 		case USB_DT_ENDPOINT:
 			ep_addr = desc.buffer[pos + 2];
 			ep_attr = desc.buffer[pos + 3];
-			ep_size = desc.buffer[pos + 4];
+			ep_size = GET_LE_U16(&desc.buffer[pos + 4]);
 			ep_index = ep_addr & 0x0F;
 			if (ep_index > VSFUSBD_CFG_EPMAXNO)
 			{
@@ -439,6 +440,9 @@ static vsf_err_t vsfusbd_stdctrl_prepare(struct vsfusbd_device_t *device)
 			device->feature |= USB_CONFIG_ATT_WAKEUP;
 			break;
 		case USB_REQ_SET_ADDRESS:
+		#if APP_CONFIG_USBHOST_PROBE_EN
+			usbhost_probe_cmd_post(HOST_CMD_SET_ADDR, request->wValue, 0);
+		#endif
 			if ((request->wValue > 127) || (request->wIndex != 0) ||
 				(device->configuration != 0))
 			{
@@ -446,6 +450,9 @@ static vsf_err_t vsfusbd_stdctrl_prepare(struct vsfusbd_device_t *device)
 			}
 			break;
 		case USB_REQ_GET_DESCRIPTOR:
+		#if APP_CONFIG_USBHOST_PROBE_EN
+			usbhost_probe_cmd_post(HOST_CMD_GET_DESC, request->wValue, request->wLength);
+		#endif
 			{
 				uint8_t type = (request->wValue >> 8) & 0xFF;
 				uint8_t index = request->wValue & 0xFF;
@@ -527,11 +534,9 @@ static vsf_err_t vsfusbd_stdctrl_prepare(struct vsfusbd_device_t *device)
 			break;
 		case USB_REQ_SET_INTERFACE:
 			iface->alternate_setting = request->wValue;
-			if ((device->callback.on_set_interface != NULL) &&
-				device->callback.on_set_interface(device, iface_idx,
-													iface->alternate_setting))
+			if (protocol->request_prepare != NULL)
 			{
-				goto fail;
+				protocol->request_prepare(device);
 			}
 			break;
 		default:
@@ -660,6 +665,28 @@ static vsf_err_t vsfusbd_stdctrl_process(struct vsfusbd_device_t *device)
 			break;
 		}
 	}
+	else if (USB_RECIP_INTERFACE == recip)
+	{
+		uint8_t iface_idx = request->wIndex;
+		struct vsfusbd_config_t *config = &device->config[device->configuration];
+		struct vsfusbd_iface_t *iface = &config->iface[iface_idx];
+		struct vsfusbd_class_protocol_t *protocol = iface->class_protocol;
+
+		if (iface_idx >= config->num_of_ifaces)
+		{
+			return VSFERR_FAIL;
+		}
+
+		switch (request->bRequest)
+		{
+		case USB_REQ_SET_INTERFACE:
+			if (protocol->request_process != NULL)
+			{
+				protocol->request_process(device);
+			}
+			break;
+		}
+	}
 	return VSFERR_NONE;
 }
 
@@ -748,7 +775,6 @@ static vsf_err_t vsfusbd_on_IN_do(struct vsfusbd_device_t *device, uint8_t ep)
 		uint32_t data_size = stream_get_data_size(transact->stream);
 		uint16_t ep_size = device->drv->ep.get_IN_epsize(ep);
 		uint16_t cur_size = min(transact->data_size, ep_size);
-		uint8_t buff[64];
 
 		transact->idle = (data_size < cur_size);
 		if (transact->idle)
@@ -774,11 +800,11 @@ static vsf_err_t vsfusbd_on_IN_do(struct vsfusbd_device_t *device, uint8_t ep)
 		}
 
 		{
-			struct vsf_buffer_t buffer = {.buffer = buff, .size = cur_size,};
+			struct vsf_buffer_t buffer = {.buffer = device->tmpbuf, .size = cur_size,};
 			stream_read(transact->stream, &buffer);
 		}
 
-		device->drv->ep.write_IN_buffer(ep, buff, cur_size);
+		device->drv->ep.write_IN_buffer(ep, device->tmpbuf, cur_size);
 		device->drv->ep.set_IN_count(ep, cur_size);
 	}
 	else if (transact->zlp)
@@ -807,7 +833,6 @@ static vsf_err_t vsfusbd_on_OUT_do(struct vsfusbd_device_t *device, uint8_t ep)
 	uint16_t ep_size = device->drv->ep.get_OUT_epsize(ep);
 	uint16_t pkg_size, next_pkg_size;
 	uint32_t free_size = 0;
-	uint8_t buff[64];
 	bool last = true;
 
 #if VSFUSBD_CFG_DBUFFER_EN
@@ -817,7 +842,7 @@ static vsf_err_t vsfusbd_on_OUT_do(struct vsfusbd_device_t *device, uint8_t ep)
 	}
 #endif
 	pkg_size = device->drv->ep.get_OUT_count(ep);
-	device->drv->ep.read_OUT_buffer(ep, buff, pkg_size);
+	device->drv->ep.read_OUT_buffer(ep, device->tmpbuf, pkg_size);
 
 	if (transact->data_size < pkg_size)
 	{
@@ -844,7 +869,7 @@ static vsf_err_t vsfusbd_on_OUT_do(struct vsfusbd_device_t *device, uint8_t ep)
 
 	if (pkg_size > 0)
 	{
-		struct vsf_buffer_t buffer = {.buffer = buff, .size = pkg_size,};
+		struct vsf_buffer_t buffer = {.buffer = device->tmpbuf, .size = pkg_size,};
 		stream_write(transact->stream, &buffer);
 	}
 
@@ -1071,6 +1096,9 @@ vsfusbd_evt_handler(struct vsfsm_t *sm, vsfsm_evt_t evt)
 			struct vsf_buffer_t desc = {NULL, 0};
 			uint16_t ep_size;
 		#endif
+		#if APP_CONFIG_USBHOST_PROBE_EN
+			usbhost_probe_cmd_post(HOST_CMD_RESET, 0, 0);
+		#endif
 			memset(device->IN_transact, 0, sizeof(device->IN_transact));
 			memset(device->OUT_transact, 0,sizeof(device->OUT_transact));
 			memset(device->IN_handler, 0, sizeof(device->IN_handler));
@@ -1149,7 +1177,7 @@ vsfusbd_evt_handler(struct vsfsm_t *sm, vsfsm_evt_t evt)
 
 			if (device->callback.on_SETUP != NULL)
 				device->callback.on_SETUP(device);
-			
+
 			if (drv->get_setup((uint8_t *)request) ||
 				vsfusbd_ctrl_prepare(device))
 			{

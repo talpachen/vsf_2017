@@ -29,6 +29,8 @@ struct sllist
 #define sllist_insert(node, new)		((node).next = &(new))
 #define sllist_get_container(p, t, m)	container_of(p, t, m)
 
+int sllist_get_length(struct sllist *head);
+int sllist_get_idx(struct sllist *head, struct sllist *node);
 int sllist_is_in(struct sllist *head, struct sllist *node);
 int sllist_remove(struct sllist **head, struct sllist *node);
 void sllist_append(struct sllist *head, struct sllist *new_node);

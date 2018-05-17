@@ -321,7 +321,7 @@ vsf_err_t vsfile_memfs_read(struct vsfsm_pt_t *pt, vsfsm_evt_t evt,
 		return VSFERR_NONE;
 	}
 
-	*rsize = min(size, file->size - offset);
+	*rsize = (uint32_t)min(size, file->size - offset);
 	memcpy(buff, &memfile->f.buff[offset], *rsize);
 	return VSFERR_NONE;
 }
@@ -338,7 +338,7 @@ vsf_err_t vsfile_memfs_write(struct vsfsm_pt_t *pt, vsfsm_evt_t evt,
 		return VSFERR_NONE;
 	}
 
-	*wsize = min(size, file->size - offset);
+	*wsize = (uint32_t)min(size, file->size - offset);
 	memcpy(&memfile->f.buff[offset], buff, *wsize);
 	return VSFERR_NONE;
 }

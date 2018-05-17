@@ -76,6 +76,7 @@ struct vsffat_t
 
 	// for getchild_byname, getchild_byidx, read and write
 	uint32_t cur_cluster;
+	uint32_t last_sector;
 	uint32_t cur_sector;
 	union
 	{

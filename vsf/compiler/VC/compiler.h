@@ -25,8 +25,11 @@
 #define __VSF_FUNCNAME__				__FUNCTION__
 
 #define ROOTFUNC	
-#define PACKED_HEAD	#pragma pack(push, 1)
-#define PACKED_MID	
-#define PACKED_TAIL	#pragma pack(pop)
+#define PACKED_HEAD
+#define PACKED_MID
+#define PACKED_TAIL
+
+unsigned char * compiler_get_heap(void);
+long compiler_get_heap_size(void);
 
 #endif	// __COMPILER_H_INCLUDED__
