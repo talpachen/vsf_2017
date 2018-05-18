@@ -716,35 +716,24 @@ static void vsfdwcotg_interrupt(void *param)
 static vsf_err_t dwcotg_init_get_resource(struct vsfusbh_t *usbh,
 		uint32_t reg_base)
 {
+	struct vsfdwcotg_hcd_param_t *hcd_param = usbh->hcd.param;
 	struct dwcotg_t *dwcotg = vsf_bufmgr_malloc(sizeof(struct dwcotg_t));
 	if (dwcotg)
 		memset(dwcotg, 0, sizeof(struct dwcotg_t));	
+	usbh->hcd.priv = dwcotg;
 	
-	return VSFERR_NONE;
-}
-	
-	
-#if 0
-	struct vsfdwcotg_hcd_param_t *hcd_param = usbh->hcd_param;
-
-	dwcotg = vsf_bufmgr_malloc(sizeof(struct dwcotg_t));
-	if (dwcotg == NULL)
-		return VSFERR_NOT_ENOUGH_RESOURCES;
-	memset(dwcotg, 0, sizeof(struct dwcotg_t));
-	usbh->hcd_data = dwcotg;
-
 	// config init
 	dwcotg->speed = hcd_param->speed;
 	dwcotg->dma_en = hcd_param->dma_en;
 	dwcotg->ulpi_en = hcd_param->ulpi_en;
 	dwcotg->external_vbus_en = hcd_param->vbus_en;
 	dwcotg->hc_amount = hcd_param->hc_amount;
-
+	
 	//dwcotg->ep_in_amount = VSFUSBD_CFG_MAX_IN_EP;
 	//dwcotg->ep_out_amount = VSFUSBD_CFG_MAX_OUT_EP;
 	dwcotg->ep_in_amount = 0;
 	dwcotg->ep_out_amount = 0;
-
+	
 	// reg addr init
 	dwcotg->global_reg =
 			(struct dwcotg_core_global_regs_t *)(reg_base + 0);
@@ -767,13 +756,13 @@ static vsf_err_t dwcotg_init_get_resource(struct vsfusbh_t *usbh,
 	if (dwcotg->hc_pool == NULL)
 	{
 		vsf_bufmgr_free(dwcotg);
-		usbh->hcd_data = NULL;
+		usbh->hcd.priv = NULL;
 		return VSFERR_NOT_ENOUGH_RESOURCES;
 	}
 	memset(dwcotg->hc_pool, 0, sizeof(struct hc_t) * dwcotg->hc_amount);
-
+	
 	return VSFERR_NONE;
-#endif
+}
 
 static vsf_err_t dwcotgh_init_thread(struct vsfsm_pt_t *pt, vsfsm_evt_t evt)
 {

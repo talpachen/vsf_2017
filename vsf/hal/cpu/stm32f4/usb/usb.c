@@ -2,38 +2,34 @@
 
 #if VSFHAL_USB_EN
 
-#define USB_NUM			1
-#define USB_FS			0
-//#define USB_HS			1
-
 struct vsfhal_ohci_irq_t
 {
 	void *param;
 	void (*irq)(void*);
-} static vsfhal_usb_irq[USB_NUM];
+} static vsfhal_usb_irq[VSFHAL_USB_NUM];
 
-#ifdef USB_FS
+#ifdef VSFHAL_USB_FS_INDEX
 ROOTFUNC void OTG_FS_IRQHandler(void)
 {
-	if (vsfhal_usb_irq[USB_FS].irq != NULL)
+	if (vsfhal_usb_irq[VSFHAL_USB_FS_INDEX].irq != NULL)
 	{
-		vsfhal_usb_irq[USB_FS].irq(vsfhal_usb_irq[USB_FS].param);
+		vsfhal_usb_irq[VSFHAL_USB_FS_INDEX].irq(vsfhal_usb_irq[VSFHAL_USB_FS_INDEX].param);
 	}
 }
 #endif
-#ifdef USB_HS
+#ifdef VSFHAL_USB_HS_INDEX
 ROOTFUNC void OTG_HS_IRQHandler(void)
 {
-	if (vsfhal_usb_irq[USB_HS].irq != NULL)
+	if (vsfhal_usb_irq[VSFHAL_USB_HS_INDEX].irq != NULL)
 	{
-		vsfhal_usb_irq[USB_HS].irq(vsfhal_usb_irq[USB_HS].param);
+		vsfhal_usb_irq[VSFHAL_USB_HS_INDEX].irq(vsfhal_usb_irq[VSFHAL_USB_HS_INDEX].param);
 	}
 }
 #endif
 
-vsf_err_t vsfhal_hcd_init(uint32_t index, int32_t int_priority, void (*ohci_irq)(void *), void *param)
+vsf_err_t vsfhal_hcd_init(uint32_t index, int32_t int_priority, void (*irq)(void *), void *param)
 {
-	if (usb_id >= USB_NUM)
+	if (index >= VSFHAL_USB_NUM)
 		return VSFERR_NOT_SUPPORT;
 	
 	// enable 48M clock
@@ -42,8 +38,8 @@ vsf_err_t vsfhal_hcd_init(uint32_t index, int32_t int_priority, void (*ohci_irq)
 	vsfhal_usb_irq[index].irq = irq;
 	vsfhal_usb_irq[index].param = param;
 	
-#ifdef USB_FS
-	if (usb_id == USB_FS)
+#ifdef VSFHAL_USB_FS_INDEX
+	if (index == VSFHAL_USB_FS_INDEX)
 	{
 		SET_BIT(RCC->APB2ENR, RCC_APB2ENR_SYSCFGEN);
 		SET_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIOAEN);
@@ -74,8 +70,8 @@ vsf_err_t vsfhal_hcd_init(uint32_t index, int32_t int_priority, void (*ohci_irq)
 		NVIC_EnableIRQ(OTG_FS_IRQn);
 	}
 #endif
-#ifdef USB_HS
-	if (usb_id == USB_HS)
+#ifdef VSFHAL_USB_HS_INDEX
+	if (index == VSFHAL_USB_HS_INDEX)
 	{
 		// TODO
 	}
@@ -86,21 +82,21 @@ vsf_err_t vsfhal_hcd_init(uint32_t index, int32_t int_priority, void (*ohci_irq)
 
 vsf_err_t stm32f4_hcd_fini(uint32_t index)
 {
-	if (usb_id >= USB_NUM)
+	if (index >= VSFHAL_USB_NUM)
 		return VSFERR_NOT_SUPPORT;
 	
 	vsfhal_usb_irq[index].irq = NULL;
 	vsfhal_usb_irq[index].param = NULL;
 	
-#ifdef USB_FS
-	if (usb_id == USB_FS)
+#ifdef VSFHAL_USB_FS_INDEX
+	if (index == VSFHAL_USB_FS_INDEX)
 	{
 		CLEAR_BIT(RCC->AHB2ENR, RCC_AHB2ENR_OTGFSEN);
 		NVIC_DisableIRQ(OTG_FS_IRQn);
 	}
 #endif
-#ifdef USB_HS
-	if (usb_id == USB_HS)
+#ifdef VSFHAL_USB_HS_INDEX
+	if (usb_id == VSFHAL_USB_HS_INDEX)
 	{
 		// TODO
 	}
@@ -114,12 +110,12 @@ void* vsfhal_hcd_regbase(uint32_t index)
 {
 	switch (index)
 	{
-#ifdef USB_FS
-	case USB_FS:
+#ifdef VSFHAL_USB_FS_INDEX
+	case VSFHAL_USB_FS_INDEX:
 		return (void*)USB_OTG_FS;
 #endif
-#ifdef USB_HS
-	case USB_HS:
+#ifdef VSFHAL_USB_HS_INDEX
+	case VSFHAL_USB_HS_INDEX:
 		return (void*)USB_OTG_HS;
 #endif
 	default:

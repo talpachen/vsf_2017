@@ -45,4 +45,15 @@
 #	define CORE_VECTOR_TABLE				(FLASH_LOAD_OFFSET)
 #endif
 
+#define VSFHAL_USB_EN						1
+
+#if VSFHAL_USB_EN
+#	define VSFHAL_USB_NUM					1
+#	define VSFHAL_USB_FS_INDEX				0
+//#	define VSFHAL_USB_HS_INDEX				1
+#endif
+#if defined(VSFHAL_USB_FS_INDEX)
+#	define VSFHAL_USB_FS_PRIORITY			0xfe
+#endif
+
 #define STM32F411xE

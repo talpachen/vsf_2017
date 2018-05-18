@@ -3,7 +3,7 @@
 
 struct usrapp_t
 {
-	uint8_t dummy;
+	struct vsfusbh_t usbh;
 };
 
 extern struct usrapp_t usrapp;
