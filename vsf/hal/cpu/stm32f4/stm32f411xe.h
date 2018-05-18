@@ -3851,6 +3851,7 @@ USB_OTG_HostChannelTypeDef;
 /*                                       USB_OTG			                        */
 /*                                                                            */
 /******************************************************************************/
+#if 0
 /********************  Bit definition forUSB_OTG_GOTGCTL register  ********************/
 #define USB_OTG_GOTGCTL_SRQSCS                  ((uint32_t)0x00000001U)            /*!< Session request success */
 #define USB_OTG_GOTGCTL_SRQ                     ((uint32_t)0x00000002U)            /*!< Session request */
@@ -4500,7 +4501,7 @@ USB_OTG_HostChannelTypeDef;
 #define USB_OTG_PCGCCTL_STOPCLK                 ((uint32_t)0x00000001U)            /*!< SETUP packet count */
 #define USB_OTG_PCGCCTL_GATECLK                 ((uint32_t)0x00000002U)            /*!<Bit 0 */
 #define USB_OTG_PCGCCTL_PHYSUSP                 ((uint32_t)0x00000010U)            /*!<Bit 1 */
-
+#endif
 /**
   * @}
   */ 

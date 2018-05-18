@@ -20,7 +20,6 @@ static struct hc_t *alloc_hc(struct dwcotg_t *dwcotg)
 static void free_hc(struct hc_t *hc)
 {
 	// TODO reset hc reg
-
 	hc->alloced = 0;
 }
 
@@ -228,17 +227,16 @@ static vsf_err_t submit_priv_urb(struct dwcotg_t *dwcotg,
 		struct urb_priv_t *urb_priv)
 {
 	uint32_t interval;
-	struct vsfusbh_urb_t *vsfurb = container_of(urb_priv, struct vsfusbh_urb_t,
-			urb_priv);
+	struct vsfhcd_urb_t *urb = container_of(urb_priv, struct vsfhcd_urb_t, priv);
 	struct hc_t *hc = urb_priv->hc;
 
 	switch (urb_priv->phase)
 	{
 	case URB_PRIV_PHASE_PERIOD_WAIT:
 		if (dwcotg->speed == USB_SPEED_HIGH)
-			interval = vsfurb->interval * 8;
+			interval = urb->interval * 8;
 		else
-			interval = vsfurb->interval;
+			interval = urb->interval;
 		if (dwcotg->softick % interval == 0)
 		{
 			hc->hc_state = HC_START;
@@ -254,7 +252,7 @@ static vsf_err_t submit_priv_urb(struct dwcotg_t *dwcotg,
 		hc->dir_o0_i1 = 0;
 		hc->dpid = HC_DPID_SETUP;
 
-		return submit_hc(dwcotg, hc, (uint32_t *)(&vsfurb->setup_packet),
+		return submit_hc(dwcotg, hc, (uint32_t *)(&urb->setup_packet),
 				sizeof(struct usb_ctrlrequest_t));
 	case URB_PRIV_PHASE_DATA_WAIT:
 		hc->dir_o0_i1 = urb_priv->dir_o0_i1;
@@ -285,27 +283,25 @@ static vsf_err_t submit_priv_urb(struct dwcotg_t *dwcotg,
 
 static void free_priv_urb(struct urb_priv_t *urb_priv)
 {
-	struct vsfusbh_urb_t *vsfurb = container_of(urb_priv, struct vsfusbh_urb_t,
-			urb_priv);
+	struct vsfhcd_urb_t *urb = container_of(urb_priv, struct vsfhcd_urb_t, priv);
 
 	hc_fini(&urb_priv->hc);
-	if (vsfurb->transfer_buffer != NULL)
-		vsf_bufmgr_free(vsfurb->transfer_buffer);
-	vsf_bufmgr_free(vsfurb);
+	if (urb->transfer_buffer != NULL)
+		vsf_bufmgr_free(urb->transfer_buffer);
+	vsf_bufmgr_free(urb);
 }
 
 static void vsfdwcotg_hc_done_handler(struct dwcotg_t *dwcotg,
 		struct urb_priv_t *urb_priv, struct hc_t *hc)
 {
-	struct vsfusbh_urb_t *vsfurb = container_of(urb_priv, struct vsfusbh_urb_t,
-			urb_priv);
+	struct vsfhcd_urb_t *urb = container_of(urb_priv, struct vsfhcd_urb_t, priv);
 	struct dwcotg_device_t *dev_priv = hc->owner_dev;
-	struct vsfusbh_device_t *vsfdev = dev_priv->vsfdev;
+	struct vsfhcd_device_t *hcddev = dev_priv->hcddev;
 
-	if ((vsfdev == NULL) || (urb_priv->discarded))
+	if ((hcddev == NULL) || (urb_priv->discarded))
 	{
 		free_priv_urb(urb_priv);
-		if (vsfdev == NULL)
+		if (hcddev == NULL)
 		{
 			if (dev_priv->hc_num == 0)
 				vsf_bufmgr_free(dev_priv);
@@ -330,30 +326,30 @@ static void vsfdwcotg_hc_done_handler(struct dwcotg_t *dwcotg,
 			urb_priv->toggle_start = urb_priv->toggle_next;
 			if (urb_priv->toggle_next)
 			{
-				vsfdev->toggle[hc->dir_o0_i1] |= 0x1ul << hc->ep_num;
+				hcddev->toggle[hc->dir_o0_i1] |= 0x1ul << hc->ep_num;
 			}
 			else
 			{
-				vsfdev->toggle[hc->dir_o0_i1] &= ~(0x1ul << hc->ep_num);
+				hcddev->toggle[hc->dir_o0_i1] &= ~(0x1ul << hc->ep_num);
 			}
 		case URB_PRIV_TYPE_ISO:
-			vsfurb->actual_length = urb_priv->actual_length;
-			vsfurb->status = URB_OK;
-			vsfsm_post_evt_pending(vsfurb->sm, VSFSM_EVT_URB_COMPLETE);
+			urb->actual_length = urb_priv->actual_length;
+			urb->status = URB_OK;
+			vsfsm_post_evt_pending(urb->notifier_sm, VSFSM_EVT_URB_COMPLETE);
 			break;
 		case URB_PRIV_TYPE_BULK:
 			if (urb_priv->toggle_next)
 			{
-				vsfdev->toggle[hc->dir_o0_i1] |= 0x1ul << hc->ep_num;
+				hcddev->toggle[hc->dir_o0_i1] |= 0x1ul << hc->ep_num;
 			}
 			else
 			{
-				vsfdev->toggle[hc->dir_o0_i1] &= ~(0x1ul << hc->ep_num);
+				hcddev->toggle[hc->dir_o0_i1] &= ~(0x1ul << hc->ep_num);
 			}
-			vsfurb->actual_length = urb_priv->actual_length;
+			urb->actual_length = urb_priv->actual_length;
 			hc_fini(&urb_priv->hc);
-			vsfurb->status = URB_OK;
-			vsfsm_post_evt_pending(vsfurb->sm, VSFSM_EVT_URB_COMPLETE);
+			urb->status = URB_OK;
+			vsfsm_post_evt_pending(urb->notifier_sm, VSFSM_EVT_URB_COMPLETE);
 			break;
 		case URB_PRIV_TYPE_CTRL:
 			if ((urb_priv->phase == URB_PRIV_PHASE_SETUP_WAIT) &&
@@ -363,7 +359,7 @@ static void vsfdwcotg_hc_done_handler(struct dwcotg_t *dwcotg,
 			}
 			else if (urb_priv->phase == URB_PRIV_PHASE_DATA_WAIT)
 			{
-				vsfurb->actual_length = urb_priv->actual_length;
+				urb->actual_length = urb_priv->actual_length;
 				urb_priv->phase++;
 			}
 			else
@@ -371,8 +367,8 @@ static void vsfdwcotg_hc_done_handler(struct dwcotg_t *dwcotg,
 			if (urb_priv->phase == URB_PRIV_PHASE_DONE)
 			{
 				hc_fini(&urb_priv->hc);
-				vsfurb->status = URB_OK;
-				vsfsm_post_evt_pending(vsfurb->sm, VSFSM_EVT_URB_COMPLETE);
+				urb->status = URB_OK;
+				vsfsm_post_evt_pending(urb->notifier_sm, VSFSM_EVT_URB_COMPLETE);
 			}
 			else
 			{
@@ -383,8 +379,8 @@ static void vsfdwcotg_hc_done_handler(struct dwcotg_t *dwcotg,
 		break;
 	default:
 		hc_fini(&urb_priv->hc);
-		vsfurb->status = VSFERR_FAIL;
-		vsfsm_post_evt_pending(vsfurb->sm, VSFSM_EVT_URB_COMPLETE);
+		urb->status = VSFERR_FAIL;
+		vsfsm_post_evt_pending(urb->notifier_sm, VSFSM_EVT_URB_COMPLETE);
 		break;
 	}
 }
@@ -647,14 +643,14 @@ static void vsfdwcotg_hc_out_handler(struct dwcotg_t *dwcotg, uint8_t hc_num)
 		vsfdwcotg_hc_done_handler(dwcotg, urb_priv, hc);
 	}
 }
-static vsf_err_t vsfdwcotg_interrupt(void *param)
+static void vsfdwcotg_interrupt(void *param)
 {
 	struct dwcotg_t *dwcotg = (struct dwcotg_t *)param;
 	uint32_t intsts = dwcotg->global_reg->gintmsk;
 	intsts &= dwcotg->global_reg->gintsts;
 
 	if (!intsts)
-		return VSFERR_NONE;
+		return;
 
 	if (dwcotg->global_reg->gintsts & USB_OTG_GINTSTS_CMOD) // host mode
 	{
@@ -714,13 +710,21 @@ static vsf_err_t vsfdwcotg_interrupt(void *param)
 		// TODO
 	}
 
-	return VSFERR_NONE;
+	return;
 }
 
 static vsf_err_t dwcotg_init_get_resource(struct vsfusbh_t *usbh,
 		uint32_t reg_base)
 {
-	struct dwcotg_t *dwcotg;
+	struct dwcotg_t *dwcotg = vsf_bufmgr_malloc(sizeof(struct dwcotg_t));
+	if (dwcotg)
+		memset(dwcotg, 0, sizeof(struct dwcotg_t));	
+	
+	return VSFERR_NONE;
+}
+	
+	
+#if 0
 	struct vsfdwcotg_hcd_param_t *hcd_param = usbh->hcd_param;
 
 	dwcotg = vsf_bufmgr_malloc(sizeof(struct dwcotg_t));
@@ -769,26 +773,26 @@ static vsf_err_t dwcotg_init_get_resource(struct vsfusbh_t *usbh,
 	memset(dwcotg->hc_pool, 0, sizeof(struct hc_t) * dwcotg->hc_amount);
 
 	return VSFERR_NONE;
-}
+#endif
 
 static vsf_err_t dwcotgh_init_thread(struct vsfsm_pt_t *pt, vsfsm_evt_t evt)
 {
 	uint8_t i;
 	vsf_err_t err;
-	struct vsfusbh_t *usbh = (struct vsfusbh_t *)pt->user_data;
-	struct vsfdwcotg_hcd_param_t *hcd_param = usbh->hcd_param;
-	struct dwcotg_t *dwcotg = (struct dwcotg_t *)usbh->hcd_data;
+	struct vsfusbh_t *usbh = pt->user_data;
+	struct dwcotg_t *dwcotg = usbh->hcd.priv;
+	struct vsfdwcotg_hcd_param_t *hcd_param = usbh->hcd.param;
 
 	vsfsm_pt_begin(pt);
 
-	usbh->hcd_rh_speed = hcd_param->speed;
+	usbh->hcd.rh_speed = hcd_param->speed;
 	err = dwcotg_init_get_resource(usbh,
 			(uint32_t)vsfhal_hcd_regbase(hcd_param->index));
 	if (err)
 		return err;
-	dwcotg = (struct dwcotg_t *)usbh->hcd_data;
-
-	vsfhal_hcd_init(hcd_param->index, vsfdwcotg_interrupt, usbh->hcd_data);
+	dwcotg = usbh->hcd.priv;
+	
+	vsfhal_hcd_init(hcd_param->index, hcd_param->int_priority, vsfdwcotg_interrupt, dwcotg);
 
 	// disable global int
 	dwcotg->global_reg->gahbcfg &= ~USB_OTG_GAHBCFG_GINT;
@@ -931,87 +935,80 @@ static vsf_err_t dwcotgh_init_thread(struct vsfsm_pt_t *pt, vsfsm_evt_t evt)
 	return VSFERR_NONE;
 }
 
-static vsf_err_t dwcotgh_fini(void *param)
+static vsf_err_t dwcotgh_fini(struct vsfhcd_t *hcd)
 {
 	return VSFERR_NONE;
 }
 
-static vsf_err_t dwcotgh_suspend(void *param)
+static vsf_err_t dwcotgh_suspend(struct vsfhcd_t *hcd)
 {
 	return VSFERR_NONE;
 }
 
-static vsf_err_t dwcotgh_resume(void *param)
+static vsf_err_t dwcotgh_resume(struct vsfhcd_t *hcd)
 {
 	return VSFERR_NONE;
 }
 
-static vsf_err_t dwcotgh_alloc_device(void *param, struct vsfusbh_device_t *dev)
+vsf_err_t dwcotgh_alloc_device(struct vsfhcd_t *hcd, struct vsfhcd_device_t *hcddev)
 {
 	struct dwcotg_device_t *dev_priv = vsf_bufmgr_malloc(sizeof(struct dwcotg_device_t));
-	if (dev_priv == NULL)
+	
+	if (!dev_priv)
 		return VSFERR_FAIL;
 	memset(dev_priv, 0, sizeof(struct dwcotg_device_t));
-	dev->priv = dev_priv;
-	dev_priv->vsfdev = dev;
+	hcddev->priv = dev_priv;
+	dev_priv->hcddev = hcddev;
 	return VSFERR_NONE;
 }
 
-static vsf_err_t dwcotgh_free_device(void *param, struct vsfusbh_device_t *dev)
+void dwcotgh_free_device(struct vsfhcd_t *hcd, struct vsfhcd_device_t *hcddev)
 {
-	struct dwcotg_device_t *dev_priv = dev->priv;
+	struct dwcotg_device_t *dev_priv = hcddev->priv;
 	if (dev_priv->hc_num == 0)
 		vsf_bufmgr_free(dev_priv);
-	dev_priv->vsfdev = NULL;
-	dev->priv = NULL;
-	return VSFERR_NONE;
+	hcddev->priv = NULL;
+	dev_priv->hcddev = NULL;
+	return;
 }
 
-static struct vsfusbh_urb_t *dwcotgh_alloc_urb(void)
+static struct vsfhcd_urb_t *dwcotgh_alloc_urb(struct vsfhcd_t *hcd)
 {
 	uint32_t size;
-	struct vsfusbh_urb_t *vsfurb;
-	size = sizeof(struct vsfusbh_urb_t) - 4 + sizeof(struct urb_priv_t);
-	vsfurb = vsf_bufmgr_malloc_aligned(size, 16);
-	if (vsfurb == NULL)
-		return NULL;
-	memset(vsfurb, 0, size);
-	return vsfurb;
+	struct vsfhcd_urb_t *urb;
+	
+	size = sizeof(struct vsfhcd_urb_t) - 4 + sizeof(struct urb_priv_t);
+	urb = vsf_bufmgr_malloc_aligned(size, 16);
+	if (urb)
+		memset(urb, 0, size);
+	return urb;
 }
 
-static vsf_err_t dwcotgh_free_urb(void *param, struct vsfusbh_urb_t **vsfurbp)
+static void dwcotgh_free_urb(struct vsfhcd_t *hcd, struct vsfhcd_urb_t *urb)
 {
-	struct vsfusbh_urb_t *vsfurb = *vsfurbp;
-	struct urb_priv_t *urb_priv = (struct urb_priv_t *)vsfurb->urb_priv;
-
-	if (vsfurb == NULL)
-		return VSFERR_FAIL;
-	*vsfurbp = NULL;
+	//struct dwcotg_t *dwcotg = hcd->priv;
+	struct urb_priv_t *urb_priv = (struct urb_priv_t *)urb->priv;
+	
+	if (!urb)
+		return;
 
 	if (urb_priv->hc)
-	{
 		urb_priv->discarded = 1;
-	}
 	else
 	{
-		if (vsfurb->transfer_buffer != NULL)
-			vsf_bufmgr_free(vsfurb->transfer_buffer);
-		vsf_bufmgr_free(vsfurb);
+		if (urb->transfer_buffer != NULL)
+			vsf_bufmgr_free(urb->transfer_buffer);
+		vsf_bufmgr_free(urb);
 	}
-	return VSFERR_NONE;
 }
 
-static vsf_err_t dwcotgh_submit_urb(void *param, struct vsfusbh_urb_t *vsfurb)
+static vsf_err_t dwcotgh_submit_urb(struct vsfhcd_t *hcd, struct vsfhcd_urb_t *urb)
 {
 	vsf_err_t err;
 	struct hc_t *hc;
-	struct dwcotg_t *dwcotg = (struct dwcotg_t *)param;
-	struct urb_priv_t *urb_priv = (struct urb_priv_t *)vsfurb->urb_priv;
-	uint32_t pipe = vsfurb->pipe;
-
-	// rh address check
-	if (usb_pipedevice(pipe) == 1)
-		return VSFERR_FAIL;
+	struct dwcotg_t *dwcotg = hcd->priv;
+	struct urb_priv_t *urb_priv = (struct urb_priv_t *)urb->priv;
+	uint32_t pipe = urb->pipe;
 
 	if (dwcotg->dwcotg_state == DWCOTG_DISABLE)
 		return VSFERR_FAIL;
@@ -1028,20 +1025,20 @@ static vsf_err_t dwcotgh_submit_urb(void *param, struct vsfusbh_urb_t *vsfurb)
 
 	if ((urb_priv->type == URB_PRIV_TYPE_INT) ||
 		(urb_priv->type == URB_PRIV_TYPE_BULK))
-	{
-		urb_priv->toggle_start = vsfurb->vsfdev->toggle[usb_pipein(pipe)] &
+	{ 
+		urb_priv->toggle_start = urb->hcddev->toggle[usb_pipein(pipe)] &
 				(0x1ul << usb_pipeendpoint(pipe));
 
 		urb_priv->do_ping = dwcotg->dma_en ? 0 :
 				(usb_pipespeed(pipe) == USB_SPEED_HIGH);
 	}
 
-	urb_priv->transfer_buffer = vsfurb->transfer_buffer;
-	urb_priv->transfer_length = vsfurb->transfer_length;
-	urb_priv->packet_size = vsfurb->packet_size;
+	urb_priv->transfer_buffer = urb->transfer_buffer;
+	urb_priv->transfer_length = urb->transfer_length;
+	urb_priv->packet_size = urb->packet_size;
 	urb_priv->dir_o0_i1 = usb_pipein(pipe);
 
-	hc = hc_init(dwcotg, (struct dwcotg_device_t *)vsfurb->vsfdev->priv);
+	hc = hc_init(dwcotg, urb->hcddev->priv);
 	if (hc)
 	{
 		hc->dev_addr = usb_pipedevice(pipe);
@@ -1059,18 +1056,15 @@ static vsf_err_t dwcotgh_submit_urb(void *param, struct vsfusbh_urb_t *vsfurb)
 		err = VSFERR_NOT_ENOUGH_RESOURCES;
 	}
 
-	vsfurb->status = URB_FAIL;
+	urb->status = URB_FAIL;
 	return err;
 }
 
 // use for int/iso urb
-static vsf_err_t dwcotgh_relink_urb(void *param, struct vsfusbh_urb_t *vsfurb)
+static vsf_err_t dwcotgh_relink_urb(struct vsfhcd_t *hcd, struct vsfhcd_urb_t *urb)
 {
-	return submit_priv_urb((struct dwcotg_t *)param,
-			(struct urb_priv_t *)vsfurb->urb_priv);
+	return submit_priv_urb(hcd->priv, (struct urb_priv_t *)urb->priv);
 }
-
-
 
 const static uint8_t root_hub_str_index0[] =
 {
@@ -1135,21 +1129,17 @@ static uint32_t rd_rh_portstat(volatile uint32_t *port)
 	return value;
 }
 
-static vsf_err_t dwcotgh_rh_control(void *param,
-		struct vsfusbh_urb_t *vsfurb)
+static int dwcotgh_rh_control(struct vsfhcd_t *hcd, struct vsfhcd_urb_t *urb)
 {
-	//uint16_t typeReq, wValue, wIndex, wLength;
 	uint16_t typeReq, wValue, wLength;
-	struct dwcotg_t *dwcotg = (struct dwcotg_t *)param;
-	struct usb_ctrlrequest_t *cmd = &vsfurb->setup_packet;
+	struct dwcotg_t *dwcotg = hcd->priv;
+	struct usb_ctrlrequest_t *cmd = &urb->setup_packet;
 	uint32_t datadw[4];
 	uint8_t *data = (uint8_t*)datadw;
 	uint8_t len = 0;
 
-
 	typeReq = (cmd->bRequestType << 8) | cmd->bRequest;
 	wValue = cmd->wValue;
-	//wIndex = cmd->wIndex;
 	wLength = cmd->wLength;
 
 	switch (typeReq)
@@ -1245,25 +1235,21 @@ static vsf_err_t dwcotgh_rh_control(void *param,
 	default:
 		goto error;
 	}
-
 	if (len)
 	{
-		if (vsfurb->transfer_length < len)
-			len = vsfurb->transfer_length;
-		vsfurb->actual_length = len;
-
-		memcpy (vsfurb->transfer_buffer, data, len);
+		if (urb->transfer_length < len)
+			len = urb->transfer_length;
+		urb->actual_length = len;
+		memcpy(urb->transfer_buffer, data, len);
 	}
-
-	vsfusbh_rh_urb_complete(vsfurb, URB_OK);
-	return VSFERR_NONE;
+	return len;
 
 error:
-	vsfurb->status = URB_FAIL;
+	urb->status = URB_FAIL;
 	return VSFERR_FAIL;
 }
 
-const struct vsfusbh_hcddrv_t vsfdwcotgh_drv =
+const struct vsfhcd_drv_t vsfdwcotgh_drv =
 {
 	.init_thread = dwcotgh_init_thread,
 	.fini = dwcotgh_fini,

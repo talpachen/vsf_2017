@@ -26,6 +26,7 @@
 struct vsfdwcotg_hcd_param_t
 {
 	uint32_t index;
+	int32_t int_priority;
 
 	uint8_t speed;
 	uint8_t dma_en;
@@ -40,6 +41,6 @@ struct vsfdwcotg_hcd_param_t
 	uint16_t in_packet_size_max;
 };
 
-extern const struct vsfusbh_hcddrv_t vsfdwcotgh_drv;
+extern const struct vsfhcd_drv_t vsfdwcotgh_drv;
 
 #endif // __VSFDWCOTG_H___

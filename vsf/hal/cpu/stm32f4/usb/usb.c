@@ -1,42 +1,48 @@
-#include "app_cfg.h"
-#include "app_type.h"
-#include "interfaces.h"
+#include "vsf.h"
 
-#include "stm32f4xx.h"
+#if VSFHAL_USB_EN
 
-#if IFS_HCD_EN
+#define USB_NUM			1
+#define USB_FS			0
+//#define USB_HS			1
 
-#define STM32F4_USB_NUM			2
-#define USB_FS					0
-#define USB_HS					1
+struct vsfhal_ohci_irq_t
+{
+	void *param;
+	void (*irq)(void*);
+} static vsfhal_usb_irq[USB_NUM];
 
-static vsf_err_t (*otg_irq[STM32F4_USB_NUM])(void*);
-static void *otg_irq_param[STM32F4_USB_NUM];
+#ifdef USB_FS
 ROOTFUNC void OTG_FS_IRQHandler(void)
 {
-	if(otg_irq[USB_FS] != NULL)
-		otg_irq[USB_FS](otg_irq_param[USB_FS]);
+	if (vsfhal_usb_irq[USB_FS].irq != NULL)
+	{
+		vsfhal_usb_irq[USB_FS].irq(vsfhal_usb_irq[USB_FS].param);
+	}
 }
-
+#endif
+#ifdef USB_HS
 ROOTFUNC void OTG_HS_IRQHandler(void)
 {
-	if(otg_irq[USB_HS] != NULL)
-		otg_irq[USB_HS](otg_irq_param[USB_HS]);
+	if (vsfhal_usb_irq[USB_HS].irq != NULL)
+	{
+		vsfhal_usb_irq[USB_HS].irq(vsfhal_usb_irq[USB_HS].param);
+	}
 }
+#endif
 
-vsf_err_t stm32f4_hcd_init(uint32_t index, vsf_err_t (*irq)(void *), void *param)
+vsf_err_t vsfhal_hcd_init(uint32_t index, int32_t int_priority, void (*ohci_irq)(void *), void *param)
 {
-	uint16_t usb_id = index >> 16;
-
-	if (usb_id >= STM32F4_USB_NUM)
+	if (usb_id >= USB_NUM)
 		return VSFERR_NOT_SUPPORT;
-
+	
 	// enable 48M clock
 	// see core.c
 	
-	otg_irq[usb_id] = irq;
-	otg_irq_param[usb_id] = param;
-
+	vsfhal_usb_irq[index].irq = irq;
+	vsfhal_usb_irq[index].param = param;
+	
+#ifdef USB_FS
 	if (usb_id == USB_FS)
 	{
 		SET_BIT(RCC->APB2ENR, RCC_APB2ENR_SYSCFGEN);
@@ -67,52 +73,59 @@ vsf_err_t stm32f4_hcd_init(uint32_t index, vsf_err_t (*irq)(void *), void *param
 		SET_BIT(RCC->AHB2ENR, RCC_AHB2ENR_OTGFSEN);
 		NVIC_EnableIRQ(OTG_FS_IRQn);
 	}
-	else if (usb_id == USB_HS)
+#endif
+#ifdef USB_HS
+	if (usb_id == USB_HS)
 	{
 		// TODO
 	}
+#endif
 
 	return VSFERR_NONE;
 }
 
 vsf_err_t stm32f4_hcd_fini(uint32_t index)
 {
-	uint16_t usb_id = index >> 16;
-
-	if (usb_id >= STM32F4_USB_NUM)
+	if (usb_id >= USB_NUM)
 		return VSFERR_NOT_SUPPORT;
-
-	otg_irq[usb_id] = NULL;
-	otg_irq_param[usb_id] = NULL;
 	
+	vsfhal_usb_irq[index].irq = NULL;
+	vsfhal_usb_irq[index].param = NULL;
+	
+#ifdef USB_FS
 	if (usb_id == USB_FS)
 	{
 		CLEAR_BIT(RCC->AHB2ENR, RCC_AHB2ENR_OTGFSEN);
 		NVIC_DisableIRQ(OTG_FS_IRQn);
 	}
-	else if (usb_id == USB_HS)
+#endif
+#ifdef USB_HS
+	if (usb_id == USB_HS)
 	{
 		// TODO
 	}
+#endif
 
 	return VSFERR_NONE;
 }
 
 
-void* stm32f4_hcd_regbase(uint32_t index)
+void* vsfhal_hcd_regbase(uint32_t index)
 {
-	switch (index >> 16)
+	switch (index)
 	{
-	case 0:
+#ifdef USB_FS
+	case USB_FS:
 		return (void*)USB_OTG_FS;
+#endif
+#ifdef USB_HS
+	case USB_HS:
+		return (void*)USB_OTG_HS;
+#endif
 	default:
 		return NULL;
 	}
 }
 
-#endif // IFS_HCD_EN
-
-#if IFS_USB_DCD_EN
-
-#endif // IFS_HCD_EN
+#endif // VSFHAL_USB_EN
 

@@ -114,7 +114,7 @@ struct dwcotg_device_t
 	struct hc_t *hc[MAX_HC_NUM_EACH_DEVICE];
 	uint32_t hc_num;
 
-	struct vsfusbh_device_t *vsfdev;
+	struct vsfhcd_device_t *hcddev;
 };
 
 enum dwcotg_state_t
