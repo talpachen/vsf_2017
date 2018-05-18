@@ -32,9 +32,6 @@ vsf_err_t vsfhal_hcd_init(uint32_t index, int32_t int_priority, void (*irq)(void
 	if (index >= VSFHAL_USB_NUM)
 		return VSFERR_NOT_SUPPORT;
 	
-	// enable 48M clock
-	// see core.c
-	
 	vsfhal_usb_irq[index].irq = irq;
 	vsfhal_usb_irq[index].param = param;
 	

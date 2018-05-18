@@ -30,16 +30,16 @@
 #	define HSE_FREQ_HZ						(12 * 1000 * 1000)
 #endif
 #ifndef CORE_PLL_FREQ_HZ
-#	define CORE_PLL_FREQ_HZ					(144 * 1000 * 1000)
+#	define CORE_PLL_FREQ_HZ					(84 * 1000 * 1000)
 #endif
 #ifndef CORE_HCLK_FREQ_HZ
-#	define CORE_HCLK_FREQ_HZ				(16 * 1000 * 1000)
+#	define CORE_HCLK_FREQ_HZ				(84 * 1000 * 1000)
 #endif
 #ifndef CORE_PCLK1_FREQ_HZ
-#	define CORE_PCLK1_FREQ_HZ				(16 * 1000 * 1000)
+#	define CORE_PCLK1_FREQ_HZ				(84 * 1000 * 1000)
 #endif
 #ifndef CORE_PCLK2_FREQ_HZ
-#	define CORE_PCLK2_FREQ_HZ				(16 * 1000 * 1000)
+#	define CORE_PCLK2_FREQ_HZ				(84 * 1000 * 1000)
 #endif
 #ifndef CORE_VECTOR_TABLE
 #	define CORE_VECTOR_TABLE				(FLASH_LOAD_OFFSET)

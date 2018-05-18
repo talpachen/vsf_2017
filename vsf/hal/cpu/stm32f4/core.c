@@ -102,6 +102,11 @@ vsf_err_t vsfhal_core_init(void *p)
 	FLASH->ACR |= FLASH_ACR_DCEN;
 	FLASH->ACR |= FLASH_ACR_PRFTEN;
 	
+	(*(__IO uint8_t *)0x40023C00U = (uint8_t)(2));
+	
+	RCC->APB1ENR |= RCC_APB1ENR_PWREN;
+	
+	
 	// enable hsi and select hclksrc to hsi
 	RCC->CR |= RCC_CR_HSION;
 	while (!(RCC->CR & RCC_CR_HSIRDY));
@@ -122,30 +127,22 @@ vsf_err_t vsfhal_core_init(void *p)
 	RCC->CR &= ~RCC_CR_PLLON;
     if (vsfhal_info.clk_enable & STM32F4_HCLKSRC_PLL)
 	{
-		uint32_t n, m, p, input, output, pllcfgr;
-		pllcfgr = RCC->PLLCFGR & 0xf0000000;
+		uint32_t n, m, p, input, output, pllcfgr = 0;
 
 		pllcfgr |= vsfhal_info.pllsrc == STM32F4_PLLSRC_HSI ? 0 :
 				RCC_PLLCFGR_PLLSRC_HSE;
 		input = vsfhal_info.pllsrc == STM32F4_PLLSRC_HSI ?
 				vsfhal_info.hsi_freq_hz : vsfhal_info.hse_freq_hz;
 
-		if (input % 2000000)
-		{
-			m = input / 1000000;
-			input = 1000000;
-		}
-		else
-		{
-			m = input / 2000000;
-			input = 2000000;
-		}
+		m = input / 1000000;
+		input = 1000000;
 		pllcfgr |= m;
 
 		for (p = 2; p <= 8; p += 2)
 		{
 			if ((vsfhal_info.pll_freq_hz * p >= 192000000) &&
-				(vsfhal_info.pll_freq_hz * p <= 432000000))
+				(vsfhal_info.pll_freq_hz * p <= 432000000) &&
+				((vsfhal_info.pll_freq_hz * p % 48000000) == 0))
 			{
 				break;
 			}
@@ -168,34 +165,34 @@ vsf_err_t vsfhal_core_init(void *p)
 	// set pclk and hclk
 	RCC->CFGR &= ~(RCC_CFGR_HPRE | RCC_CFGR_PPRE1 | RCC_CFGR_PPRE2);
 	
-	if (vsfhal_info.pll_freq_hz > vsfhal_info.hclk_freq_hz * 4)
-		RCC->CFGR |= 0x8 << 4 | 0x2 << 4;
-	else if (vsfhal_info.pll_freq_hz > vsfhal_info.hclk_freq_hz * 2)
-		RCC->CFGR |= 0x8 << 4 | 0x1 << 4;
-	else if (vsfhal_info.pll_freq_hz > vsfhal_info.hclk_freq_hz * 1)
-		RCC->CFGR |= 0x8 << 4 | 0x0 << 4;
-	else
-		RCC->CFGR |= 0;
-	
 	if (vsfhal_info.hclk_freq_hz > vsfhal_info.pclk1_freq_hz * 8)
-		RCC->CFGR |= 0x4 << 10 | 0x3 << 10;
+		RCC->CFGR |= 0x7 << 10;
 	else if (vsfhal_info.hclk_freq_hz > vsfhal_info.pclk1_freq_hz * 4)
-		RCC->CFGR |= 0x4 << 10 | 0x2 << 10;
+		RCC->CFGR |= 0x6 << 10;
 	else if (vsfhal_info.hclk_freq_hz > vsfhal_info.pclk1_freq_hz * 2)
-		RCC->CFGR |= 0x4 << 10 | 0x1 << 10;
+		RCC->CFGR |= 0x5 << 10;
 	else if (vsfhal_info.hclk_freq_hz > vsfhal_info.pclk1_freq_hz * 1)
-		RCC->CFGR |= 0x4 << 10 | 0x0 << 10;
+		RCC->CFGR |= 0x4 << 10;
 	else
 		RCC->CFGR |= 0;
 	
 	if (vsfhal_info.hclk_freq_hz > vsfhal_info.pclk2_freq_hz * 8)
-		RCC->CFGR |= 0x4 << 13 | 0x3 << 13;
+		RCC->CFGR |= 0x7 << 13;
 	else if (vsfhal_info.hclk_freq_hz > vsfhal_info.pclk2_freq_hz * 4)
-		RCC->CFGR |= 0x4 << 13 | 0x2 << 13;
+		RCC->CFGR |= 0x6 << 13;
 	else if (vsfhal_info.hclk_freq_hz > vsfhal_info.pclk2_freq_hz * 2)
-		RCC->CFGR |= 0x4 << 13 | 0x1 << 13;
+		RCC->CFGR |= 0x5 << 13;
 	else if (vsfhal_info.hclk_freq_hz > vsfhal_info.pclk2_freq_hz * 1)
-		RCC->CFGR |= 0x4 << 13 | 0x0 << 13;
+		RCC->CFGR |= 0x4 << 13;
+	else
+		RCC->CFGR |= 0;
+	
+	if (vsfhal_info.pll_freq_hz > vsfhal_info.hclk_freq_hz * 4)
+		RCC->CFGR |= 0xa << 4;
+	else if (vsfhal_info.pll_freq_hz > vsfhal_info.hclk_freq_hz * 2)
+		RCC->CFGR |= 0x9 << 4;
+	else if (vsfhal_info.pll_freq_hz > vsfhal_info.hclk_freq_hz * 1)
+		RCC->CFGR |= 0x8 << 4;
 	else
 		RCC->CFGR |= 0;
 
