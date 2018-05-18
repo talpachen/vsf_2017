@@ -578,10 +578,10 @@ static void vsfdwcotg_hc_out_handler(struct dwcotg_t *dwcotg, uint8_t hc_num)
 			urb_priv->actual_length = hc->transfer_size;
 		}
 
-		hc->hc_state = HC_XFRC;
-		hc_reg->hcint = USB_OTG_HCINT_XFRC;
 		hc_reg->hcintmsk |= USB_OTG_HCINTMSK_CHHM;
 		hc_halt(dwcotg, hc_num);
+		hc_reg->hcint = USB_OTG_HCINT_XFRC;
+		hc->hc_state = HC_XFRC;
 	}
 	else if (intsts & USB_OTG_HCINT_NAK)
 	{
@@ -672,7 +672,11 @@ static void vsfdwcotg_interrupt(void *param)
 		}
 		if (intsts & USB_OTG_GINTSTS_RXFLVL)
 		{
+			dwcotg->global_reg->gintmsk &= ~USB_OTG_GINTMSK_RXFLVLM;
+			
 			// TODO
+			
+			dwcotg->global_reg->gintmsk |= USB_OTG_GINTMSK_RXFLVLM;
 		}
 		if (intsts & USB_OTG_GINTSTS_NPTXFE)
 		{
@@ -850,14 +854,16 @@ static vsf_err_t dwcotgh_init_thread(struct vsfsm_pt_t *pt, vsfsm_evt_t evt)
 	// Enable Core
 	// USBx->GCCFG |= USB_OTG_GCCFG_VBDEN;
 	dwcotg->global_reg->gccfg |= USB_OTG_GCCFG_VBDEN;
-
+	vsfsm_pt_delay(pt, 50);
+	
 	if (dwcotg->speed == USB_SPEED_HIGH)
 	{
 		dwcotg->host_global_regs->hcfg &= ~USB_OTG_HCFG_FSLSS;
 	}
 	else
 	{
-		dwcotg->host_global_regs->hcfg |= USB_OTG_HCFG_FSLSS;
+		dwcotg->host_global_regs->hcfg |= USB_OTG_HCFG_FSLSPCS;
+		dwcotg->host_global_regs->hfir = 48000;
 	}
 
 	// Flush FIFO
