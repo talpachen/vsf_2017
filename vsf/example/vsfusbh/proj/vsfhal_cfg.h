@@ -19,8 +19,12 @@
 #ifndef __VSFHAL_CFG_H__
 #define __VSFHAL_CFG_H__
 
-#if _HARDWARE_VER == NUCLEOF411RE
+#if defined(BOARD_TYPE_NUCLED_F411RE)
 #include "vsfhal_cfg_nucleo_f411re.h"
+#define SOC_TYPE_STM32F411
+#elif defined(BOARD_TYPE_TEST_CMEM7)
+#include "vsfhal_cfg_test_cmem7.h"
+#define SOC_TYPE_CMEM7
 #endif
 
 #endif // __VSFHAL_CFG_H__

@@ -22,8 +22,8 @@
 
 #define VSFCFG_MAX_SRT_PRIO			0xFF
 
-#define VSFCFG_DEBUG
-#define VSFCFG_DEBUG_BUFLEN			512
+//#define VSFCFG_DEBUG
+//#define VSFCFG_DEBUG_BUFLEN			512
 //#define VSFCFG_BUFMGR_LOG
 
 #define VSFCFG_BUFFER

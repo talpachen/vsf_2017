@@ -1,5 +1,6 @@
 #define APPCFG_VSFTIMER_NUM				32
-#define APPCFG_BUFMGR_SIZE				compiler_get_heap_size()
+#define APPCFG_BUFMGR_ADDR				heap_buf
+#define APPCFG_BUFMGR_SIZE				sizeof(heap_buf)
 
 // The 3 MACROs below define the Hard/Soft/Non-RealTime event queue
 // undefine to indicate that the corresponding event queue is not supported

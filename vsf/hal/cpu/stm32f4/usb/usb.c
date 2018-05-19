@@ -2,7 +2,7 @@
 
 #if VSFHAL_USB_EN
 
-struct vsfhal_ohci_irq_t
+struct
 {
 	void *param;
 	void (*irq)(void*);
@@ -64,6 +64,7 @@ vsf_err_t vsfhal_hcd_init(uint32_t index, int32_t int_priority, void (*irq)(void
 		GPIOA->PUPDR &= ~(3 << (12 * 2));		
 		
 		SET_BIT(RCC->AHB2ENR, RCC_AHB2ENR_OTGFSEN);
+		NVIC_SetPriority(OTG_FS_IRQn, int_priority);
 		NVIC_EnableIRQ(OTG_FS_IRQn);
 	}
 #endif
@@ -77,7 +78,7 @@ vsf_err_t vsfhal_hcd_init(uint32_t index, int32_t int_priority, void (*irq)(void
 	return VSFERR_NONE;
 }
 
-vsf_err_t stm32f4_hcd_fini(uint32_t index)
+vsf_err_t vsfhal_hcd_fini(uint32_t index)
 {
 	if (index >= VSFHAL_USB_NUM)
 		return VSFERR_NOT_SUPPORT;
@@ -103,7 +104,7 @@ vsf_err_t stm32f4_hcd_fini(uint32_t index)
 }
 
 
-void* vsfhal_hcd_regbase(uint32_t index)
+void *vsfhal_hcd_regbase(uint32_t index)
 {
 	switch (index)
 	{

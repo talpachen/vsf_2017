@@ -1157,7 +1157,7 @@
         <option>
           <name>CCDefines</name>
           <state>FLASH_LOAD_OFFSET=0x08000000</state>
-          <state>_HARDWARE_VER=NUCLEOF411RE</state>
+          <state>BOARD_TYPE_NUCLED_F411RE</state>
         </option>
         <option>
           <name>CCPreprocFile</name>
@@ -1955,6 +1955,9 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\vsfhal_cfg_nucleo_f411re.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\vsfhal_cfg_test_cmem7.h</name>
     </file>
   </group>
   <group>

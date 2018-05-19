@@ -301,7 +301,7 @@ HCD(OHCI...)
 *******************************************************************************/
 vsf_err_t vsfhal_hcd_init(uint32_t index, int32_t int_priority, void (*irq)(void *), void *param);
 vsf_err_t vsfhal_hcd_fini(uint32_t index);
-void* vsfhal_hcd_regbase(uint32_t index);
+void *vsfhal_hcd_regbase(uint32_t index);
 
 #endif	// __VSFHAL_H_INCLUDED__
 

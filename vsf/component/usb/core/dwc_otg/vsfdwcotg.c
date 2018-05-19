@@ -805,7 +805,6 @@ static vsf_err_t dwcotgh_init_thread(struct vsfsm_pt_t *pt, vsfsm_evt_t evt)
 		{
 			dwcotg->global_reg->gusbcfg |= USB_OTG_GUSBCFG_ULPIEVBUSD;
 		}
-
 	}
 	else
 	{

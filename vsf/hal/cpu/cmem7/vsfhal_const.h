@@ -13,20 +13,18 @@
  *      YYYY-MM-DD:     What(by Who)                                      *
  *      2011-04-08:     created(by SimonQian)                             *
  **************************************************************************/
-#ifndef __CMEM7_INTERFACE_CONST_H_INCLUDED__
-#define __CMEM7_INTERFACE_CONST_H_INCLUDED__
+#ifndef __VSFHAL_CONST_H_INCLUDED__
+#define __VSFHAL_CONST_H_INCLUDED__
 
-// cmem7 usart
-#define cmem7_USART_STOPBITS_0P5	(0x0 << 0)
-#define cmem7_USART_STOPBITS_1		(0x1 << 0)
-#define cmem7_USART_STOPBITS_1P5	(0x2 << 0)
-#define cmem7_USART_STOPBITS_2		(0x3 << 0)
-#define cmem7_USART_PARITY_NONE		(0x0 << 4)
-#define cmem7_USART_PARITY_ODD		(0x1 << 4)
-#define cmem7_USART_PARITY_EVEN		(0x2 << 4)
-#define cmem7_USART_DATALEN_8		(0x0 << 8)
-#define cmem7_USART_DATALEN_9		(0x1 << 8)
+#include "cmem7.h"
+
+// common
+#define VSFHAL_DUMMY_PORT					0xFF
+
+// core
+#define VSFHAL_SLEEP_WFI					(0x1ul << 0)
+#define VSFHAL_SLEEP_PWRDOWN				(0x1ul << 1)
 
 
-#endif	// __CMEM7_INTERFACE_CONST_H_INCLUDED__
+#endif	// __VSFHAL_CONST_H_INCLUDED__
 

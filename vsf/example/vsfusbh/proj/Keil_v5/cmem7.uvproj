@@ -10,6 +10,8 @@
       <TargetName>M7</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
+      <pCCUsed>5060528::V5.06 update 5 (build 528)::ARMCC</pCCUsed>
+      <uAC6>0</uAC6>
       <TargetOption>
         <TargetCommonOption>
           <Device>M7</Device>
@@ -147,7 +149,7 @@
             <RestoreSysVw>1</RestoreSysVw>
           </Target>
           <RunDebugAfterBuild>0</RunDebugAfterBuild>
-          <TargetSelection>15</TargetSelection>
+          <TargetSelection>19</TargetSelection>
           <SimDlls>
             <CpuDll></CpuDll>
             <CpuDllArguments></CpuDllArguments>
@@ -227,6 +229,7 @@
             <useUlib>0</useUlib>
             <EndSel>0</EndSel>
             <uLtcg>0</uLtcg>
+            <nSecure>0</nSecure>
             <RoSelD>3</RoSelD>
             <RwSelD>3</RwSelD>
             <CodeSel>0</CodeSel>
@@ -363,11 +366,16 @@
             <useXO>0</useXO>
             <v6Lang>0</v6Lang>
             <v6LangP>0</v6LangP>
+            <vShortEn>1</vShortEn>
+            <vShortWch>1</vShortWch>
+            <v6Lto>0</v6Lto>
+            <v6WtE>0</v6WtE>
+            <v6Rtti>0</v6Rtti>
             <VariousControls>
-              <MiscControls></MiscControls>
-              <Define>__TARGET_CHIP__=cmem7</Define>
+              <MiscControls>--gnu</MiscControls>
+              <Define>FLASH_LOAD_OFFSET=0x08000000 BOARD_TYPE_TEST_CMEM7</Define>
               <Undefine></Undefine>
-              <IncludePath>..\Keil_v5_CMEM7;..\..\vsf_cfg;..\..\..\..\compiler\ARMCC;..\..\..\..\interfaces;..\..\..\..\interfaces\cpu\cmem7;..\..\..\..\</IncludePath>
+              <IncludePath>..;..\..;..\..\..\..;..\..\..\..\compiler\ARMCC;..\..\..\..\hal;..\..\..\..\hal\cpu\cmem7</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -380,6 +388,7 @@
             <NoWarn>0</NoWarn>
             <uSurpInc>0</uSurpInc>
             <useXO>0</useXO>
+            <uClangAs>0</uClangAs>
             <VariousControls>
               <MiscControls></MiscControls>
               <Define></Define>
@@ -408,8 +417,78 @@
       </TargetOption>
       <Groups>
         <Group>
-          <GroupName>framework</GroupName>
+          <GroupName>proj</GroupName>
           <Files>
+            <File>
+              <FileName>app_cfg.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\app_cfg.h</FilePath>
+            </File>
+            <File>
+              <FileName>vsf_cfg.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\vsf_cfg.h</FilePath>
+            </File>
+            <File>
+              <FileName>vsfhal_cfg.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\vsfhal_cfg.h</FilePath>
+            </File>
+            <File>
+              <FileName>vsfhal_cfg_nucleo_f411re.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\vsfhal_cfg_nucleo_f411re.h</FilePath>
+            </File>
+            <File>
+              <FileName>vsfhal_cfg_test_cmem7.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\vsfhal_cfg_test_cmem7.h</FilePath>
+            </File>
+            <File>
+              <FileName>usrapp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\usrapp.c</FilePath>
+            </File>
+            <File>
+              <FileName>usrapp.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\usrapp.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>vsf</GroupName>
+          <Files>
+            <File>
+              <FileName>vsf.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\vsf.h</FilePath>
+            </File>
+            <File>
+              <FileName>vsf_err.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\vsf_err.h</FilePath>
+            </File>
+            <File>
+              <FileName>vsf_type.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\vsf_type.h</FilePath>
+            </File>
+            <File>
+              <FileName>vsfmain.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\vsfmain.c</FilePath>
+            </File>
+            <File>
+              <FileName>compiler.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\compiler\ARMCC\compiler.c</FilePath>
+            </File>
+            <File>
+              <FileName>compiler.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\compiler\ARMCC\compiler.h</FilePath>
+            </File>
             <File>
               <FileName>vsfsm.c</FileName>
               <FileType>1</FileType>
@@ -430,255 +509,205 @@
               <FileType>5</FileType>
               <FilePath>..\..\..\..\framework\vsftimer\vsftimer.h</FilePath>
             </File>
-            <File>
-              <FileName>vsfshell.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\framework\vsfshell\vsfshell.c</FilePath>
-            </File>
-            <File>
-              <FileName>vsfshell.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\framework\vsfshell\vsfshell.h</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>
-          <GroupName>interfaces</GroupName>
-          <Files>
-            <File>
-              <FileName>interfaces.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\interfaces\interfaces.c</FilePath>
-            </File>
-            <File>
-              <FileName>interfaces.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\interfaces\interfaces.h</FilePath>
-            </File>
-            <File>
-              <FileName>core.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\interfaces\cpu\cmem7\core.c</FilePath>
-            </File>
-            <File>
-              <FileName>core.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\interfaces\cpu\cmem7\core.h</FilePath>
-            </File>
-            <File>
-              <FileName>interfaces_const.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\interfaces\cpu\cmem7\interfaces_const.h</FilePath>
-            </File>
-            <File>
-              <FileName>vsf_basetype.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\interfaces\cpu\cmem7\vsf_basetype.h</FilePath>
-            </File>
-            <File>
-              <FileName>startup_cmem7.s</FileName>
-              <FileType>2</FileType>
-              <FilePath>..\..\..\..\interfaces\cpu\cmem7\startup\startup_cmem7.s</FilePath>
-            </File>
-            <File>
-              <FileName>CMEM7_USB.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\interfaces\cpu\cmem7\usb\CMEM7_USB.c</FilePath>
-            </File>
-            <File>
-              <FileName>CMEM7_USB.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\interfaces\cpu\cmem7\usb\CMEM7_USB.h</FilePath>
-            </File>
-            <File>
-              <FileName>CMEM7_USART.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\interfaces\cpu\cmem7\usart\CMEM7_USART.c</FilePath>
-            </File>
-            <File>
-              <FileName>CMEM7_USART.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\interfaces\cpu\cmem7\usart\CMEM7_USART.h</FilePath>
-            </File>
-            <File>
-              <FileName>cmem7.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\interfaces\cpu\cmem7\cmem7.h</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>stack</GroupName>
-          <Files>
-            <File>
-              <FileName>vsfusbh.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\stack\usb\core\vsfusbh.c</FilePath>
-            </File>
-            <File>
-              <FileName>vsfusbh.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\stack\usb\core\vsfusbh.h</FilePath>
-            </File>
-            <File>
-              <FileName>hcd.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\stack\usb\core\hcd.h</FilePath>
-            </File>
-            <File>
-              <FileName>vsfdwcotg.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\stack\usb\core\dwc_otg\vsfdwcotg.h</FilePath>
-            </File>
-            <File>
-              <FileName>vsfusb.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\stack\usb\vsfusb.h</FilePath>
-            </File>
-            <File>
-              <FileName>usb_ch9.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\stack\usb\common\usb_ch9.h</FilePath>
-            </File>
-            <File>
-              <FileName>usb_ch11.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\stack\usb\common\usb_ch11.h</FilePath>
-            </File>
-            <File>
-              <FileName>usb_common.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\stack\usb\common\usb_common.h</FilePath>
-            </File>
-            <File>
-              <FileName>usb_type.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\stack\usb\common\usb_type.h</FilePath>
-            </File>
-            <File>
-              <FileName>vsfusbh_HUB.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\stack\usb\class\host\HUB\vsfusbh_HUB.c</FilePath>
-            </File>
-            <File>
-              <FileName>vsfusbh_HUB.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\stack\usb\class\host\HUB\vsfusbh_HUB.h</FilePath>
-            </File>
-            <File>
-              <FileName>vsfusbh_UVC.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\stack\usb\class\host\UVC\vsfusbh_UVC.c</FilePath>
-            </File>
-            <File>
-              <FileName>vsfusbh_UVC.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\stack\usb\class\host\UVC\vsfusbh_UVC.h</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>tool</GroupName>
+          <GroupName>vsf_component</GroupName>
           <Files>
             <File>
               <FileName>bittool.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\tool\bittool\bittool.c</FilePath>
+              <FilePath>..\..\..\..\component\fundation\bittool\bittool.c</FilePath>
             </File>
             <File>
               <FileName>bittool.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\..\..\..\tool\bittool\bittool.h</FilePath>
+              <FilePath>..\..\..\..\component\fundation\bittool\bittool.h</FilePath>
             </File>
             <File>
               <FileName>buffer.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\tool\buffer\buffer.c</FilePath>
+              <FilePath>..\..\..\..\component\fundation\buffer\buffer.c</FilePath>
             </File>
             <File>
               <FileName>buffer.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\..\..\..\tool\buffer\buffer.h</FilePath>
+              <FilePath>..\..\..\..\component\fundation\buffer\buffer.h</FilePath>
             </File>
             <File>
               <FileName>list.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\tool\list\list.c</FilePath>
+              <FilePath>..\..\..\..\component\fundation\list\list.c</FilePath>
             </File>
             <File>
               <FileName>list.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\..\..\..\tool\list\list.h</FilePath>
+              <FilePath>..\..\..\..\component\fundation\list\list.h</FilePath>
             </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>app</GroupName>
-          <Files>
-            <File>
-              <FileName>app_cfg.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\app_cfg.h</FilePath>
-            </File>
-            <File>
-              <FileName>hw_cfg_cmem7.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\hw_cfg_cmem7.h</FilePath>
-            </File>
-            <File>
-              <FileName>interfaces_cfg.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\interfaces_cfg.h</FilePath>
-            </File>
-            <File>
-              <FileName>app_interfaces.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\app_interfaces.h</FilePath>
-            </File>
-            <File>
-              <FileName>main.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\main.c</FilePath>
-            </File>
-            <File>
-              <FileName>dal_cfg.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\vsf_cfg\dal_cfg.h</FilePath>
-            </File>
-            <File>
-              <FileName>vsfsm_cfg.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\vsf_cfg\vsfsm_cfg.h</FilePath>
-            </File>
-            <File>
-              <FileName>vsfusbh_cfg.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\vsf_cfg\vsfusbh_cfg.h</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>dal</GroupName>
-          <Files>
             <File>
               <FileName>stream.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\dal\stream\stream.c</FilePath>
+              <FilePath>..\..\..\..\component\fundation\stream\stream.c</FilePath>
             </File>
             <File>
               <FileName>stream.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\..\..\..\dal\stream\stream.h</FilePath>
+              <FilePath>..\..\..\..\component\fundation\stream\stream.h</FilePath>
             </File>
             <File>
-              <FileName>usart_stream.c</FileName>
+              <FileName>vsf_dynarr.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\dal\usart_stream\usart_stream.c</FilePath>
+              <FilePath>..\..\..\..\component\tool\dynarr\vsf_dynarr.c</FilePath>
             </File>
             <File>
-              <FileName>usart_stream.h</FileName>
+              <FileName>vsf_dynarr.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\..\..\..\dal\usart_stream\usart_stream.h</FilePath>
+              <FilePath>..\..\..\..\component\tool\dynarr\vsf_dynarr.h</FilePath>
+            </File>
+            <File>
+              <FileName>vsf_dynpool.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\component\tool\dynpool\vsf_dynpool.c</FilePath>
+            </File>
+            <File>
+              <FileName>vsf_dynpool.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\component\tool\dynpool\vsf_dynpool.h</FilePath>
+            </File>
+            <File>
+              <FileName>vsf_dynstack.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\component\tool\dynstack\vsf_dynstack.c</FilePath>
+            </File>
+            <File>
+              <FileName>vsf_dynstack.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\component\tool\dynstack\vsf_dynstack.h</FilePath>
+            </File>
+            <File>
+              <FileName>vsfusbh_HUB.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\component\usb\class\host\HUB\vsfusbh_HUB.c</FilePath>
+            </File>
+            <File>
+              <FileName>vsfusbh_HUB.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\component\usb\class\host\HUB\vsfusbh_HUB.h</FilePath>
+            </File>
+            <File>
+              <FileName>vsfusbh_UVC.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\component\usb\class\host\UVC\vsfusbh_UVC.h</FilePath>
+            </File>
+            <File>
+              <FileName>usb_ch9.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\component\usb\common\usb_ch9.h</FilePath>
+            </File>
+            <File>
+              <FileName>usb_ch11.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\component\usb\common\usb_ch11.h</FilePath>
+            </File>
+            <File>
+              <FileName>usb_common.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\component\usb\common\usb_common.c</FilePath>
+            </File>
+            <File>
+              <FileName>usb_common.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\component\usb\common\usb_common.h</FilePath>
+            </File>
+            <File>
+              <FileName>usb_type.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\component\usb\common\usb_type.h</FilePath>
+            </File>
+            <File>
+              <FileName>vsfusbh.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\component\usb\core\vsfusbh.c</FilePath>
+            </File>
+            <File>
+              <FileName>vsfusbh.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\component\usb\core\vsfusbh.h</FilePath>
+            </File>
+            <File>
+              <FileName>dwcotg_regs.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\component\usb\core\dwc_otg\dwcotg_regs.h</FilePath>
+            </File>
+            <File>
+              <FileName>vsfdwcotg.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\component\usb\core\dwc_otg\vsfdwcotg.c</FilePath>
+            </File>
+            <File>
+              <FileName>vsfdwcotg.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\component\usb\core\dwc_otg\vsfdwcotg.h</FilePath>
+            </File>
+            <File>
+              <FileName>vsfdwcotg_priv.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\component\usb\core\dwc_otg\vsfdwcotg_priv.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>vsf_hal</GroupName>
+          <Files>
+            <File>
+              <FileName>vsfhal.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\hal\vsfhal.c</FilePath>
+            </File>
+            <File>
+              <FileName>vsfhal.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\hal\vsfhal.h</FilePath>
+            </File>
+            <File>
+              <FileName>cmem7.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\hal\cpu\cmem7\cmem7.h</FilePath>
+            </File>
+            <File>
+              <FileName>core.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\hal\cpu\cmem7\core.c</FilePath>
+            </File>
+            <File>
+              <FileName>core.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\hal\cpu\cmem7\core.h</FilePath>
+            </File>
+            <File>
+              <FileName>vsf_basetype.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\hal\cpu\cmem7\vsf_basetype.h</FilePath>
+            </File>
+            <File>
+              <FileName>startup_cmem7.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>..\..\..\..\hal\cpu\cmem7\startup\startup_cmem7.s</FilePath>
+            </File>
+            <File>
+              <FileName>CMEM7_USB.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\hal\cpu\cmem7\usb\CMEM7_USB.c</FilePath>
+            </File>
+            <File>
+              <FileName>CMEM7_USB.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\hal\cpu\cmem7\usb\CMEM7_USB.h</FilePath>
+            </File>
+            <File>
+              <FileName>vsfhal_const.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\hal\cpu\cmem7\vsfhal_const.h</FilePath>
             </File>
           </Files>
         </Group>
