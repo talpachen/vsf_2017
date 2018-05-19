@@ -8,7 +8,7 @@ struct usrapp_t
 
 extern struct usrapp_t usrapp;
 #if defined(SOC_TYPE_CMEM7)
-extern uint8_t heap_buf[4096];
+extern uint8_t heap_buf[1024 * 8];
 #endif
 
 void usrapp_initial_init(struct usrapp_t *app);

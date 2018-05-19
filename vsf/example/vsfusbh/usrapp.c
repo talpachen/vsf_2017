@@ -20,7 +20,7 @@ static struct vsfdwcotg_hcd_param_t fs_dwcotg_param =
 #define USBH_HCDDRV		&vsfdwcotgh_drv
 #define USBH_HCDPARAM	&fs_dwcotg_param
 #elif defined(SOC_TYPE_CMEM7)
-uint8_t heap_buf[4096];
+uint8_t heap_buf[1024 * 8];
 
 static struct vsfdwcotg_hcd_param_t hs_dwcotg_param = 
 {
@@ -51,6 +51,49 @@ struct usrapp_t usrapp =
 	},
 };
 
+static void *test_uvc_data;
+
+static uint32_t frame_cnt = 0;
+static uint32_t frame_bytes[300];
+
+void uvc_decode_report_recv(void *dev_data, struct vsfusbh_uvc_param_t *param,
+		struct vsfusbh_uvc_payload_t *payload)
+{
+	if (dev_data == NULL)
+		return;
+	
+	if (test_uvc_data == NULL)
+	{
+		struct vsfusbh_uvc_param_t param = {1, 1, 0, 
+				VSFUSBH_UVC_VIDEO_FORMAT_YUY2, 30, 640, 480};
+		test_uvc_data = dev_data;
+		vsfusbh_uvc_set(dev_data, &param);
+	}
+	else if (payload != NULL)
+	{
+		if (payload->len > 12)
+		{
+			if (frame_cnt < 300)
+			{
+				frame_bytes[frame_cnt] += payload->len - 12;
+				if (payload->buf[1] & 0x2)
+				{
+					frame_cnt++;
+				}
+			}
+			else
+			{
+				frame_cnt = 0;
+				memset(frame_bytes, 0, sizeof(frame_bytes));
+			}
+		}
+	}
+	else
+	{
+		// get current param
+	}
+}
+
 static void usrapp_pendsv_do(void *p)
 {
 	struct usrapp_t *app = p;
@@ -58,6 +101,8 @@ static void usrapp_pendsv_do(void *p)
 	// usbh
 	vsfusbh_init(&app->usbh);
 	vsfusbh_register_driver(&app->usbh, &vsfusbh_hub_drv);
+	vsfusbh_register_driver(&app->usbh, &vsfusbh_uvc_drv);
+	vsfusbh_uvc_report = uvc_decode_report_recv;
 }
 
 void usrapp_initial_init(struct usrapp_t *app)

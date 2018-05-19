@@ -2273,7 +2273,6 @@
               <name>UVC</name>
               <excluded>
                 <configuration>Release</configuration>
-                <configuration>NUCLEO-F411RE_Debug</configuration>
               </excluded>
               <file>
                 <name>$PROJ_DIR$\..\..\..\..\component\usb\class\host\UVC\vsfusbh_UVC.c</name>

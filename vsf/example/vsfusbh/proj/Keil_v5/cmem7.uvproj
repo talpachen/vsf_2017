@@ -654,6 +654,11 @@
               <FileType>5</FileType>
               <FilePath>..\..\..\..\component\usb\core\dwc_otg\vsfdwcotg_priv.h</FilePath>
             </File>
+            <File>
+              <FileName>vsfusbh_UVC.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\component\usb\class\host\UVC\vsfusbh_UVC.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
