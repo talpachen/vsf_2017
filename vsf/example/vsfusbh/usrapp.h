@@ -7,7 +7,7 @@ struct usrapp_t
 };
 
 extern struct usrapp_t usrapp;
-#if defined(SOC_TYPE_CMEM7)
+#if defined(SOC_TYPE_CMEM7_KEIL)
 extern uint8_t heap_buf[1024 * 8];
 #endif
 

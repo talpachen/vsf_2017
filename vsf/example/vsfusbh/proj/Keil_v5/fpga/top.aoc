@@ -34,6 +34,7 @@
 		<IO signal_name="gpio0_29_" location="" inst_name="io_cell_gpio0_29__inst" direction="inout" operation_mode="normal"/>
 		<IO signal_name="gpio0_30_" location="" inst_name="io_cell_gpio0_30__inst" direction="inout" operation_mode="normal"/>
 		<IO signal_name="gpio0_31_" location="" inst_name="io_cell_gpio0_31__inst" direction="inout" operation_mode="normal"/>
+		<IO signal_name="p1" location="" inst_name="io_cell_p1_inst" direction="input" operation_mode="normal"/>
 	</ioConstraint>
 	<dedicatedIo>
 		<DIO signal_name="UART2_RXD_I" location="IO00_UART2_RXD_10" inst_name="dedicated_io_cell_u318_inst" direction="input" operation_mode="dedicated"/>

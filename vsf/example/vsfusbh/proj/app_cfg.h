@@ -1,5 +1,5 @@
 #define APPCFG_VSFTIMER_NUM				32
-#if defined(SOC_TYPE_CMEM7)
+#if defined(SOC_TYPE_CMEM7_KEIL)
 #define APPCFG_BUFMGR_ADDR				heap_buf
 #define APPCFG_BUFMGR_SIZE				sizeof(heap_buf)
 #else

@@ -18,9 +18,7 @@
         <argument name="io_default">x</argument>
     </command-args>
     <command-args toolName="synthesis">
-        <argument name="adv_timing_opt">0</argument>
         <argument name="ast_extra_options"></argument>
-        <argument name="ast_frontend_verbose">0</argument>
         <argument name="ast_timing">0</argument>
         <argument name="carry_chain_opt">1</argument>
         <argument name="col_add">6</argument>
@@ -29,11 +27,9 @@
         <argument name="fast_io">0</argument>
         <argument name="incPath"></argument>
         <argument name="keep_floating">1</argument>
-        <argument name="keep_hierarchy_en">0</argument>
         <argument name="keep_latch">1</argument>
         <argument name="latch_inf_en">1</argument>
         <argument name="mem_inf_en">1</argument>
-        <argument name="mem_low_width">4</argument>
         <argument name="min_ce_fanout">4</argument>
         <argument name="mode">best_timing</argument>
         <argument name="preserve_name">1</argument>

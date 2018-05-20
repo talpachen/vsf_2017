@@ -20,7 +20,9 @@ static struct vsfdwcotg_hcd_param_t fs_dwcotg_param =
 #define USBH_HCDDRV		&vsfdwcotgh_drv
 #define USBH_HCDPARAM	&fs_dwcotg_param
 #elif defined(SOC_TYPE_CMEM7)
+#if defined(SOC_TYPE_CMEM7_KEIL)
 uint8_t heap_buf[1024 * 8];
+#endif
 
 static struct vsfdwcotg_hcd_param_t hs_dwcotg_param = 
 {
