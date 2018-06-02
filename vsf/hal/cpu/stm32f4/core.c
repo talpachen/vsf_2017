@@ -35,11 +35,7 @@ vsf_err_t vsfhal_core_pendsv_config(void (*on_pendsv)(void *), void *param)
 {
 	vsfhal_pendsv.on_pendsv = on_pendsv;
 	vsfhal_pendsv.param = param;
-
-	if (vsfhal_pendsv.on_pendsv != NULL)
-	{
-		SCB->SHP[10] = 0xFF;
-	}
+	NVIC_SetPriority(PendSV_IRQn, 0xFF);
 	return VSFERR_NONE;
 }
 
@@ -63,34 +59,6 @@ vsf_err_t vsfhal_core_set_stack(uint32_t sp)
 {
 	__set_MSP(sp);
 	return VSFERR_NONE;
-}
-
-vsf_err_t vsfhal_core_fini(void *p)
-{
-	return VSFERR_NONE;
-}
-
-vsf_err_t vsfhal_core_reset(void *p)
-{
-	// TODO
-	return VSFERR_NONE;
-}
-
-uint8_t vsfhal_core_set_intlevel(uint8_t level)
-{
-	uint8_t origlevel = __get_BASEPRI();
-	__set_BASEPRI(level);
-	return origlevel;
-}
-
-// sleep will enable interrupt
-// for cortex processor, if an interrupt occur between enable the interrupt
-// 		and __WFI, wfi will not make the core sleep
-void vsfhal_core_sleep(uint32_t mode)
-{
-	vsf_leave_critical();
-	// TODO
-	__WFI();
 }
 
 vsf_err_t vsfhal_core_init(void *p)
@@ -212,18 +180,25 @@ vsf_err_t vsfhal_core_fini(void *p)
 
 vsf_err_t vsfhal_core_reset(void *p)
 {
+	// TODO
 	return VSFERR_NONE;
 }
 
-uint32_t vsfhal_core_get_stack(void)
+uint8_t vsfhal_core_set_intlevel(uint8_t level)
 {
-	return __get_MSP();
+	uint8_t origlevel = __get_BASEPRI();
+	__set_BASEPRI(level);
+	return origlevel;
 }
 
-vsf_err_t vsfhal_core_set_stack(uint32_t sp)
+// sleep will enable interrupt
+// for cortex processor, if an interrupt occur between enable the interrupt
+// 		and __WFI, wfi will not make the core sleep
+void vsfhal_core_sleep(uint32_t mode)
 {
-	__set_MSP(sp);
-	return VSFERR_NONE;
+	vsf_leave_critical();
+	// TODO
+	__WFI();
 }
 
 static void (*tickclk_callback)(void *param) = NULL;

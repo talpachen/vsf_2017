@@ -2,45 +2,63 @@
 #include "usrapp.h"
 
 #if defined(SOC_TYPE_STM32F411)
-static struct vsfdwcotg_hcd_param_t fs_dwcotg_param = 
-{
-	.index = VSFHAL_USB_FS_INDEX,
-	.int_priority = VSFHAL_USB_FS_PRIORITY,
+	static struct vsfdwcotg_hcd_param_t fs_dwcotg_param = 
+	{
+		.index = VSFHAL_USB_FS_INDEX,
+		.int_priority = VSFHAL_USB_FS_PRIORITY,
 
-	.speed = USB_SPEED_FULL,
-	.dma_en = 0,
-	.ulpi_en = 0,
-	.vbus_en = 0,
-	.hc_amount = 8,
-	.fifo_size = 0x500,
-	.periodic_out_packet_size_max = 256,
-	.non_periodic_out_packet_size_max = 256,
-	.in_packet_size_max = 256,
-};
-#define USBH_HCDDRV		&vsfdwcotgh_drv
-#define USBH_HCDPARAM	&fs_dwcotg_param
+		.speed = USB_SPEED_FULL,
+		.dma_en = 0,
+		.ulpi_en = 0,
+		.vbus_en = 0,
+		.hc_amount = 8,
+		.fifo_size = 0x500,
+		.periodic_out_packet_size_max = 256,
+		.non_periodic_out_packet_size_max = 256,
+		.in_packet_size_max = 256,
+	};
+	#define USBH_HCDDRV		&vsfdwcotgh_drv
+	#define USBH_HCDPARAM	&fs_dwcotg_param
 #elif defined(SOC_TYPE_CMEM7)
-#if defined(SOC_TYPE_CMEM7_KEIL)
-uint8_t heap_buf[1024 * 8];
-#endif
+	#if defined(SOC_TYPE_CMEM7_KEIL)
+	uint8_t heap_buf[1024 * 8];
+	#endif
 
-static struct vsfdwcotg_hcd_param_t hs_dwcotg_param = 
-{
-	.index = VSFHAL_USB_HS_INDEX,
-	.int_priority = VSFHAL_USB_HS_PRIORITY,
+	static struct vsfdwcotg_hcd_param_t hs_dwcotg_param = 
+	{
+		.index = VSFHAL_USB_HS_INDEX,
+		.int_priority = VSFHAL_USB_HS_PRIORITY,
 
-	.speed = USB_SPEED_HIGH,
-	.dma_en = 1,
-	.ulpi_en = 1,
-	.vbus_en = 0,
-	.hc_amount = 8,
-	.fifo_size = 0x500,
-	.periodic_out_packet_size_max = 256,
-	.non_periodic_out_packet_size_max = 256,
-	.in_packet_size_max = 256,
-};
-#define USBH_HCDDRV		&vsfdwcotgh_drv
-#define USBH_HCDPARAM	&hs_dwcotg_param
+		.speed = USB_SPEED_HIGH,
+		.dma_en = 1,
+		.ulpi_en = 1,
+		.vbus_en = 0,
+		.hc_amount = 8,
+		.fifo_size = 0x500,
+		.periodic_out_packet_size_max = 256,
+		.non_periodic_out_packet_size_max = 256,
+		.in_packet_size_max = 256,
+	};
+	#define USBH_HCDDRV		&vsfdwcotgh_drv
+	#define USBH_HCDPARAM	&hs_dwcotg_param
+#elif defined(BOARD_TYPE_STM32F769I_DISCO)
+	static struct vsfdwcotg_hcd_param_t hs_dwcotg_param = 
+	{
+		.index = VSFHAL_USB_HS_INDEX,
+		.int_priority = VSFHAL_USB_HS_PRIORITY,
+
+		.speed = USB_SPEED_HIGH,
+		.dma_en = 1,
+		.ulpi_en = 1,
+		.vbus_en = 0,
+		.hc_amount = 8,
+		.fifo_size = 0x500,
+		.periodic_out_packet_size_max = 256,
+		.non_periodic_out_packet_size_max = 256,
+		.in_packet_size_max = 256,
+	};
+	#define USBH_HCDDRV		&vsfdwcotgh_drv
+	#define USBH_HCDPARAM	&hs_dwcotg_param
 #endif
 
 

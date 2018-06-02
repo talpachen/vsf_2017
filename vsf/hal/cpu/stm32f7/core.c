@@ -35,11 +35,7 @@ vsf_err_t vsfhal_core_pendsv_config(void (*on_pendsv)(void *), void *param)
 {
 	vsfhal_pendsv.on_pendsv = on_pendsv;
 	vsfhal_pendsv.param = param;
-
-	if (vsfhal_pendsv.on_pendsv != NULL)
-	{
-		SCB->SHP[10] = 0xFF;
-	}
+	NVIC_SetPriority(PendSV_IRQn, 0xFF);
 	return VSFERR_NONE;
 }
 
@@ -68,9 +64,7 @@ vsf_err_t vsfhal_core_set_stack(uint32_t sp)
 vsf_err_t vsfhal_core_init(void *p)
 { 
 	if (p != NULL)
-	{
-		stm32f7_info = *(struct stm32f7_info_t *)p;
-	}
+		vsfhal_info = *(struct vsfhal_info_t *)p;
 
 	// enable cache
 	SCB_EnableICache();
@@ -86,7 +80,7 @@ vsf_err_t vsfhal_core_init(void *p)
 	while ((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_HSI);
 
     // enable clk
-    if (stm32f7_info.clk_enable & STM32F7_CLK_HSE)
+    if (vsfhal_info.clk_enable & STM32F7_CLK_HSE)
     {
 		RCC->CR |= RCC_CR_HSEON;
 		while (!(RCC->CR & RCC_CR_HSERDY));
@@ -97,15 +91,15 @@ vsf_err_t vsfhal_core_init(void *p)
 	}
 
 	RCC->CR &= ~RCC_CR_PLLON;
-    if (stm32f7_info.clk_enable & STM32F7_HCLKSRC_PLL)
+    if (vsfhal_info.clk_enable & STM32F7_HCLKSRC_PLL)
 	{
 		uint32_t n, m, p, input, output, pllcfgr;
 		pllcfgr = RCC->PLLCFGR & 0xf0000000;
 
-		pllcfgr |= stm32f7_info.pllsrc == STM32F7_PLLSRC_HSI ? 0 :
+		pllcfgr |= vsfhal_info.pllsrc == STM32F7_PLLSRC_HSI ? 0 :
 				RCC_PLLCFGR_PLLSRC_HSE;
-		input = stm32f7_info.pllsrc == STM32F7_PLLSRC_HSI ?
-				stm32f7_info.hsi_freq_hz : stm32f7_info.hse_freq_hz;
+		input = vsfhal_info.pllsrc == STM32F7_PLLSRC_HSI ?
+				vsfhal_info.hsi_freq_hz : vsfhal_info.hse_freq_hz;
 
 		if (input % 2000000)
 		{
@@ -121,8 +115,8 @@ vsf_err_t vsfhal_core_init(void *p)
 
 		for (p = 2; p <= 8; p += 2)
 		{
-			if ((stm32f7_info.pll_freq_hz * p >= 192000000) &&
-				(stm32f7_info.pll_freq_hz * p <= 432000000))
+			if ((vsfhal_info.pll_freq_hz * p >= 192000000) &&
+				(vsfhal_info.pll_freq_hz * p <= 432000000))
 			{
 				break;
 			}
@@ -131,7 +125,7 @@ vsf_err_t vsfhal_core_init(void *p)
 			return  VSFERR_FAIL;
 		pllcfgr |= (p / 2 - 1) << 16;
 
-		output = stm32f7_info.pll_freq_hz * p;
+		output = vsfhal_info.pll_freq_hz * p;
 		n = output / input;
 		pllcfgr |= n << 6;
 
@@ -148,11 +142,11 @@ vsf_err_t vsfhal_core_init(void *p)
 	RCC->CFGR |= (0x6ul << 10) | (0x6ul << 13) | (0 << 4);
 
 	// select
-	RCC->CFGR |= stm32f7_info.hclksrc;
-	while (((RCC->CFGR & RCC_CFGR_SWS) >> 2) != stm32f7_info.hclksrc);
+	RCC->CFGR |= vsfhal_info.hclksrc;
+	while (((RCC->CFGR & RCC_CFGR_SWS) >> 2) != vsfhal_info.hclksrc);
 
-	SCB->VTOR = stm32f7_info.vector_table;
-	SCB->AIRCR = 0x05FA0000 | stm32f7_info.priority_group;
+	SCB->VTOR = vsfhal_info.vector_table;
+	SCB->AIRCR = 0x05FA0000 | vsfhal_info.priority_group;
 	return VSFERR_NONE;
 }
 

@@ -1,25 +1,31 @@
 #include "vsf.h"
 
-#if IFS_HCD_EN
+#if VSFHAL_USB_EN
 
-#define STM32F7_USB_NUM			2
-
-static vsf_err_t (*irq0)(void*);
-static void *irq0_param;
-static vsf_err_t (*irq1)(void*);
-static void *irq1_param;
-
-ROOTFUNC void OTG_HS_IRQHandler(void)
+struct
 {
-	if (irq0 != NULL)
-		irq0(irq0_param);
-}
+	void *param;
+	void (*irq)(void*);
+} static vsfhal_usb_irq[VSFHAL_USB_NUM];
 
+#ifdef VSFHAL_USB_FS_INDEX
 ROOTFUNC void OTG_FS_IRQHandler(void)
 {
-	if(irq1 != NULL)
-		irq1(irq1_param);
+	if (vsfhal_usb_irq[VSFHAL_USB_FS_INDEX].irq != NULL)
+	{
+		vsfhal_usb_irq[VSFHAL_USB_FS_INDEX].irq(vsfhal_usb_irq[VSFHAL_USB_FS_INDEX].param);
+	}
 }
+#endif
+#ifdef VSFHAL_USB_HS_INDEX
+ROOTFUNC void OTG_HS_IRQHandler(void)
+{
+	if (vsfhal_usb_irq[VSFHAL_USB_HS_INDEX].irq != NULL)
+	{
+		vsfhal_usb_irq[VSFHAL_USB_HS_INDEX].irq(vsfhal_usb_irq[VSFHAL_USB_HS_INDEX].param);
+	}
+}
+#endif
 
 static void ulpi_io_config(GPIO_TypeDef *gpiox, uint8_t io)
 {
@@ -40,27 +46,53 @@ static void ulpi_io_config(GPIO_TypeDef *gpiox, uint8_t io)
 	}
 }
 
-vsf_err_t stm32f7_hcd_init(uint32_t index, vsf_err_t (*irq)(void *), void *param)
+vsf_err_t vsfhal_hcd_init(uint32_t index, int32_t int_priority, void (*irq)(void *), void *param)
 {
-	uint16_t usb_id = index >> 16;
-
-	if (usb_id >= STM32F7_USB_NUM)
+	if (index >= VSFHAL_USB_NUM)
 		return VSFERR_NOT_SUPPORT;
-
-	// enable 48M clock
-	RCC->PLLSAICFGR = (96 << 16) | (0 << 16) | (2 << 24) | (2 << 28);
-	RCC->CR |= RCC_CR_PLLSAION;
-	while (!(RCC->CR & RCC_CR_PLLSAIRDY));	
-	RCC->DCKCFGR2 |= RCC_DCKCFGR2_CK48MSEL;
-
-	if (usb_id == 0) // HS
+	
+	vsfhal_usb_irq[index].irq = irq;
+	vsfhal_usb_irq[index].param = param;
+	
+#ifdef VSFHAL_USB_FS_INDEX
+	if (index == VSFHAL_USB_FS_INDEX)
 	{
-		irq0 = irq;
-		irq0_param = param;
+		SET_BIT(RCC->APB2ENR, RCC_APB2ENR_SYSCFGEN);
+		SET_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIOAEN);
+		// PA10 id AF OD
+		GPIOA->MODER &= ~(3 << (10 * 2));
+		GPIOA->MODER |= 2 << (10 * 2);
+		GPIOA->AFR[1] |= 10 << (10 * 4 - 32);
+		// GPIOA->OSPEEDR |= 3 << (10 * 2);
+		GPIOA->OTYPER |= 1 << 10;
+		GPIOA->PUPDR &= ~(3 << (10 * 2));
+		GPIOA->PUPDR |= 1 << (10 * 2);
+
+		//  PA11
+		GPIOA->MODER &= ~(3 << (11 * 2));
+		GPIOA->MODER |= 2 << (11 * 2);
+		GPIOA->AFR[1] |= 10 << (11 * 4 - 32);
+		GPIOA->OSPEEDR |= 3 << (11 * 2);
+		GPIOA->PUPDR &= ~(3 << (11 * 2));
 		
+		// PA12
+		GPIOA->MODER &= ~(3 << (12 * 2));
+		GPIOA->MODER |= 2 << (12 * 2);
+		GPIOA->AFR[1] |= 10 << (12 * 4 - 32);
+		GPIOA->OSPEEDR |= 3 << (12 * 2);
+		GPIOA->PUPDR &= ~(3 << (12 * 2));		
+		
+		SET_BIT(RCC->AHB2ENR, RCC_AHB2ENR_OTGFSEN);
+		NVIC_SetPriority(OTG_FS_IRQn, int_priority);
+		NVIC_EnableIRQ(OTG_FS_IRQn);
+	}
+#endif
+#ifdef VSFHAL_USB_HS_INDEX
+	if (index == VSFHAL_USB_HS_INDEX)
+	{		
 		RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN | RCC_AHB1ENR_GPIOBEN |
 				RCC_AHB1ENR_GPIOCEN | RCC_AHB1ENR_GPIOHEN;
-		
+
 		// CLK
 		ulpi_io_config(GPIOA, 5);
 
@@ -87,66 +119,54 @@ vsf_err_t stm32f7_hcd_init(uint32_t index, vsf_err_t (*irq)(void *), void *param
 		SET_BIT(RCC->AHB1ENR, RCC_AHB1ENR_OTGHSEN);
 		NVIC_EnableIRQ(OTG_HS_IRQn);
 	}
-	else if (usb_id == 1) // FS
-	{
-		irq1 = irq;
-		irq1_param = param;
-
-		SET_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIOAEN);
-
-		// TODO GPIO init
-
-		SET_BIT(RCC->AHB2ENR, RCC_AHB2ENR_OTGFSEN);
-		SET_BIT(RCC->APB2ENR, RCC_APB2ENR_SYSCFGEN);
-
-		NVIC_EnableIRQ(OTG_FS_IRQn);
-	}
+#endif
 
 	return VSFERR_NONE;
 }
 
-vsf_err_t stm32f7_hcd_fini(uint32_t index)
+vsf_err_t vsfhal_hcd_fini(uint32_t index)
 {
-	uint16_t usb_id = index >> 16;
-
-	if (usb_id >= STM32F7_USB_NUM)
+	if (index >= VSFHAL_USB_NUM)
 		return VSFERR_NOT_SUPPORT;
-
-	if (usb_id == 0) // HS
+	
+	vsfhal_usb_irq[index].irq = NULL;
+	vsfhal_usb_irq[index].param = NULL;
+	
+#ifdef VSFHAL_USB_FS_INDEX
+	if (index == VSFHAL_USB_FS_INDEX)
+	{
+		RCC->AHB2ENR &= ~(RCC_AHB2ENR_OTGFSEN);
+		NVIC_DisableIRQ(OTG_FS_IRQn);
+	}
+#endif
+#ifdef VSFHAL_USB_HS_INDEX
+	if (index == VSFHAL_USB_HS_INDEX)
 	{
 		RCC->AHB1ENR &= ~(RCC_AHB1ENR_OTGHSULPIEN);
 		RCC->AHB1ENR &= ~(RCC_AHB1ENR_OTGHSEN);
-
 		NVIC_DisableIRQ(OTG_HS_IRQn);
 	}
-	else if (usb_id == 1) // FS
-	{
-		RCC->AHB2ENR &= ~(RCC_AHB2ENR_OTGFSEN);
-		// RCC->APB2ENR &= ~(RCC_APB2ENR_SYSCFGEN);
-
-		NVIC_DisableIRQ(OTG_FS_IRQn);
-	}
-
+#endif
 	return VSFERR_NONE;
 }
 
 
-void* stm32f7_hcd_regbase(uint32_t index)
+void *vsfhal_hcd_regbase(uint32_t index)
 {
-	switch (index >> 16)
+	switch (index)
 	{
-	case 0:
-		return (void*)USB_OTG_HS;
-	case 1:
+#ifdef VSFHAL_USB_FS_INDEX
+	case VSFHAL_USB_FS_INDEX:
 		return (void*)USB_OTG_FS;
+#endif
+#ifdef VSFHAL_USB_HS_INDEX
+	case VSFHAL_USB_HS_INDEX:
+		return (void*)USB_OTG_HS;
+#endif
 	default:
 		return NULL;
 	}
 }
 
-#endif // IFS_HCD_EN
+#endif // VSFHAL_USB_EN
 
-
-#if IFS_USB_DCD_EN
-
-#endif // IFS_HCD_EN
