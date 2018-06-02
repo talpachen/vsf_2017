@@ -265,9 +265,9 @@ static struct vsfsm_state_t *uvc_evt_handler_video(struct vsfsm_t *sm,
 			urb->transfer_length = uvc->video_iso_packet_len;
 			urb->pipe = usb_rcvisocpipe(urb->hcddev, uvc->video_iso_ep);
 			urb->transfer_flags |= USB_ISO_ASAP;
-			urb->number_of_packets = 1;
-			urb->iso_frame_desc[0].offset = 0;
-			urb->iso_frame_desc[0].length = uvc->video_iso_packet_len;
+			//urb->number_of_packets = 1;
+			//urb->iso_frame_desc[0].offset = 0;
+			//urb->iso_frame_desc[0].length = uvc->video_iso_packet_len;
 			err = vsfusbh_submit_urb(uvc->usbh, urb);
 			if (err != VSFERR_NONE)
 				goto error;

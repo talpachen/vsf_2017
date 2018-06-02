@@ -25,6 +25,9 @@
 #elif defined(BOARD_TYPE_TEST_CMEM7)
 #include "vsfhal_cfg_test_cmem7.h"
 #define SOC_TYPE_CMEM7
+#elif defined(BOARD_TYPE_STM32F769I_DISCO)
+#include "vsfhal_cfg_stm32f769i_disco.h"
+#define SOC_TYPE_STM32F769
 #endif
 
 #endif // __VSFHAL_CFG_H__
