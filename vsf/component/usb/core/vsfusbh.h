@@ -97,14 +97,6 @@ struct vsfusbh_device_id_t
 #endif
 };
 
-struct iso_packet_descriptor_t
-{
-	uint32_t offset;			/*!< Start offset in transfer buffer	*/
-	uint32_t length;			/*!< Length in transfer buffer			*/
-	uint32_t actual_length;		/*!< Actual transfer length				*/
-	int32_t status;				/*!< Transfer status					*/
-};
-
 struct vsfusbh_t;
 struct vsfusbh_class_drv_t
 {

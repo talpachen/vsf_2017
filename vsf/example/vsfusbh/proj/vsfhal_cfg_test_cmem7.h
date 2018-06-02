@@ -23,11 +23,13 @@
 #define VSFHAL_USB_EN							1
 
 #if VSFHAL_USB_EN
-#	define VSFHAL_USB_NUM						1
-//#	define VSFHAL_USB_FS_INDEX		0
-#	define VSFHAL_USB_HS_INDEX			0
+#define VSFHAL_USB_NUM						1
+//#define VSFHAL_USB_FS_INDEX				0
+#define VSFHAL_USB_HS_INDEX					0
+#define VSFHAL_HCD_ISO_SUPPORT				1
+#define VSFHAL_HCD_ISO_PACKET_LIMIT			4
 #endif
 #if defined(VSFHAL_USB_HS_INDEX)
-#	define VSFHAL_USB_HS_PRIORITY			0xfe
+#define VSFHAL_USB_HS_PRIORITY			0xfe
 #endif
 

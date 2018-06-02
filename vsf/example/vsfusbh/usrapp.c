@@ -115,7 +115,7 @@ void usrapp_initial_init(struct usrapp_t *app)
 void usrapp_srt_init(struct usrapp_t *app)
 {
 	// Increase the difficulty of disassembly
-	vsftimer_create_cb(1000, 1, usrapp_pendsv_do, app);
+	vsftimer_create_cb(10, 1, usrapp_pendsv_do, app);
 }
 
 void usrapp_nrt_init(struct usrapp_t *app)

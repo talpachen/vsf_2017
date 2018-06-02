@@ -133,9 +133,9 @@ static struct vsfsm_state_t *uvc_evt_handler_init(struct vsfsm_t *sm,
 
 static const uint8_t negotiate_temp[26] =
 {
-	0x00, 0x00, 0x01, 0x03, 0x15, 0x16, 0x05, 0x00,
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x5c, 0x45, 0x02, 0x01, 0x40, 0x42, 0x0f, 0x00, 
+	0x91, 0x13, 0xa7, 0x33, 0x00, 0x00, 0x7c, 0x2a, 
+	0xb0, 0xaf, 0x00, 0x20, 0x1c, 0x00, 0x00, 0x0c, 
 	0x00, 0x00
 };
 
@@ -258,7 +258,6 @@ static struct vsfsm_state_t *uvc_evt_handler_video(struct vsfsm_t *sm,
 	case UAV_ISO_ENABLE:
 		if (uvc->video_urb_buf == NULL)
 		{
-			//urb->hcddev->epmaxpacketin[uvc->video_iso_ep] = uvc->video_iso_packet_len;
 			uvc->video_urb_buf = vsf_bufmgr_malloc(uvc->video_iso_packet_len);
 			if (uvc->video_urb_buf == NULL)
 				return NULL;
@@ -266,9 +265,9 @@ static struct vsfsm_state_t *uvc_evt_handler_video(struct vsfsm_t *sm,
 			urb->transfer_length = uvc->video_iso_packet_len;
 			urb->pipe = usb_rcvisocpipe(urb->hcddev, uvc->video_iso_ep);
 			urb->transfer_flags |= USB_ISO_ASAP;
-			//urb->number_of_packets = 1;
-			//urb->iso_frame_desc[0].offset = 0;
-			//urb->iso_frame_desc[0].length = uvc->video_iso_packet_len;
+			urb->number_of_packets = 1;
+			urb->iso_frame_desc[0].offset = 0;
+			urb->iso_frame_desc[0].length = uvc->video_iso_packet_len;
 			err = vsfusbh_submit_urb(uvc->usbh, urb);
 			if (err != VSFERR_NONE)
 				goto error;

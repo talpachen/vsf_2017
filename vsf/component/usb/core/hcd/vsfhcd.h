@@ -84,6 +84,14 @@ struct vsfhcd_device_t
 		((PIPE_CONTROL << 30) | default_pipe(dev) | USB_DIR_IN)
 /*-------------------------------------------------------------------------*/
 
+struct iso_packet_descriptor_t
+{
+	uint32_t offset;				/*!< Start offset in transfer buffer	*/
+	uint32_t length;				/*!< Length in transfer buffer			*/
+	uint32_t actual_length;			/*!< Actual transfer length				*/
+	int32_t status;					/*!< Transfer status					*/
+};
+
 // urb is the interface between higher software and hcd
 #define URB_DIR_IN				0x0200		// Transfer from device to host
 #define URB_DIR_OUT				0
@@ -117,9 +125,15 @@ struct vsfhcd_urb_t
 
 	struct usb_ctrlrequest_t setup_packet;
 
-	uint32_t start_frame;			/*!< start frame (iso/irq only)		*/
-	uint16_t interval;				/*!< polling interval (iso/irq only)*/
 	int16_t status;					/*!< returned status				*/
+	uint16_t interval;				/*!< polling interval (iso/irq only)*/
+#if VSFHAL_HCD_ISO_SUPPORT
+	uint32_t start_frame;			/*!< start frame (iso/irq only)		*/
+	uint32_t number_of_packets;		/*!< number of packets (iso)		*/
+	//uint32_t error_count;			/*!< number of errors (iso only)	*/
+	struct iso_packet_descriptor_t iso_frame_desc[VSFHAL_HCD_ISO_PACKET_LIMIT];
+#endif // VSFHAL_HCD_ISO_SUPPORT
+	
 	uint32_t timeout;
 	struct vsfsm_t *notifier_sm;
 
