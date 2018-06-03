@@ -28,17 +28,24 @@ struct vsfdwcotg_hcd_param_t
 	uint32_t index;
 	int32_t int_priority;
 
-	uint8_t speed;
-	uint8_t dma_en;
-	uint8_t ulpi_en;
-	uint8_t vbus_en;
+	uint8_t speed;	
+	uint8_t dma_en : 1;
+	uint8_t ulpi_en : 1;
+	uint8_t utmi_en : 1;
+	uint8_t vbus_en : 1;
+	uint8_t : 4;	
 	uint8_t hc_amount;
 	uint8_t iso_packet_limit;
 
-	uint16_t fifo_size;
+	uint16_t rx_fifo_size;
+	uint16_t non_periodic_tx_fifo_size;
+	uint16_t periodic_tx_fifo_size;
+	
 	uint16_t periodic_out_packet_size_max;
 	uint16_t non_periodic_out_packet_size_max;
 	uint16_t in_packet_size_max;
+	
+	uint32_t fifo_size;
 };
 
 extern const struct vsfhcd_drv_t vsfdwcotgh_drv;

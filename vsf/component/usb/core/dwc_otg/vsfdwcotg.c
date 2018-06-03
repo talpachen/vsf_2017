@@ -654,46 +654,40 @@ static void vsfdwcotg_interrupt(void *param)
 
 	if (dwcotg->global_reg->gintsts & USB_OTG_GINTSTS_CMOD) // host mode
 	{
-		if (intsts & USB_OTG_GINTSTS_SOF)
+		if (intsts & USB_OTG_GINTSTS_DISCINT)
 		{
-			uint8_t i;
-			struct hc_t *hc = dwcotg->hc_pool;
-
-			dwcotg->softick++;
-			dwcotg->global_reg->gintsts = USB_OTG_GINTSTS_SOF;
-
-			for (i = 0; i < dwcotg->hc_amount; i++)
-			{
-				if ((hc[i].alloced) && (hc[i].hc_state == HC_WAIT))
-				{
-					submit_priv_urb(dwcotg, hc[i].owner_priv);
-				}
-			}
-		}
-		if (intsts & USB_OTG_GINTSTS_RXFLVL)
-		{
-			dwcotg->global_reg->gintmsk &= ~USB_OTG_GINTMSK_RXFLVLM;
-			
-			// TODO
-			
-			dwcotg->global_reg->gintmsk |= USB_OTG_GINTMSK_RXFLVLM;
-		}
-		if (intsts & USB_OTG_GINTSTS_NPTXFE)
-		{
-			// TODO
+			dwcotg->host_global_regs->hcfg &= ~USB_OTG_HCFG_FSLSPCS;
+			dwcotg->host_global_regs->hcfg |= USB_OTG_HCFG_FSLSPCS_0;
+			// dwcotg->host_global_regs->hfir = 48000;
+			dwcotg->global_reg->gintsts = USB_OTG_GINTSTS_DISCINT;
 		}
 		if (intsts & USB_OTG_GINTSTS_HPRTINT)
 		{
-			// TODO
-		}
-		if (intsts & USB_OTG_GINTSTS_HCINT)
+			
+			
+			dwcotg->global_reg->gintsts = USB_OTG_GINTSTS_HPRTINT;
+		}		
+		if (intsts & USB_OTG_GINTSTS_SOF)	// Handle Host SOF Interrupts
 		{
+#if 0 // TODO
 			uint8_t i;
-			uint32_t hc_intsts = dwcotg->host_global_regs->haint;
-
+			struct hc_t *hc = dwcotg->hc_pool;
 			for (i = 0; i < dwcotg->hc_amount; i++)
 			{
-				if (hc_intsts & (0x1ul << i))
+				if ((hc[i].alloced) && (hc[i].hc_state == HC_WAIT))
+					submit_priv_urb(dwcotg, hc[i].owner_priv);
+			}
+#endif
+			dwcotg->softick++;
+			dwcotg->global_reg->gintsts = USB_OTG_GINTSTS_SOF;
+		}
+		if (intsts & USB_OTG_GINTSTS_HCINT)	// Handle Host channel Interrupts
+		{
+			uint8_t i;
+			uint32_t haint = dwcotg->host_global_regs->haint;
+			for (i = 0; i < dwcotg->hc_amount; i++)
+			{
+				if (haint & (0x1ul << i))
 				{
 					if (dwcotg->hc_regs[i].hcchar & USB_OTG_HCCHAR_EPDIR)
 						vsfdwcotg_hc_in_handler(dwcotg, i);
@@ -701,8 +695,33 @@ static void vsfdwcotg_interrupt(void *param)
 						vsfdwcotg_hc_out_handler(dwcotg, i);
 				}
 			}
-
 			dwcotg->global_reg->gintsts = USB_OTG_GINTSTS_HCINT;
+		}
+		if (intsts & USB_OTG_GINTSTS_RXFLVL)
+		{
+			dwcotg->global_reg->gintmsk &= ~USB_OTG_GINTMSK_RXFLVLM;
+			
+			// TODO used for non-dma mode
+			// HCD_RXQLVL_IRQHandler (hhcd);
+			
+			dwcotg->global_reg->gintmsk |= USB_OTG_GINTMSK_RXFLVLM;
+		}
+		
+		
+		
+#if 0
+	; 
+			USB_OTG_GINTMSK_WUIM;
+#endif
+		
+
+		if (intsts & USB_OTG_GINTSTS_NPTXFE)
+		{
+			// TODO
+		}
+		if (intsts & USB_OTG_GINTSTS_HPRTINT)
+		{
+			// TODO
 		}
 		if (intsts & USB_OTG_GINTSTS_PTXFE)
 		{
@@ -730,7 +749,8 @@ static vsf_err_t dwcotg_init_get_resource(struct vsfusbh_t *usbh,
 	dwcotg->speed = hcd_param->speed;
 	dwcotg->dma_en = hcd_param->dma_en;
 	dwcotg->ulpi_en = hcd_param->ulpi_en;
-	dwcotg->external_vbus_en = hcd_param->vbus_en;
+	dwcotg->utmi_en = hcd_param->utmi_en;
+	dwcotg->vbus_en = hcd_param->vbus_en;
 	dwcotg->hc_amount = hcd_param->hc_amount;
 	
 	//dwcotg->ep_in_amount = VSFUSBD_CFG_MAX_IN_EP;
@@ -792,22 +812,29 @@ static vsf_err_t dwcotgh_init_thread(struct vsfsm_pt_t *pt, vsfsm_evt_t evt)
 
 	if (dwcotg->ulpi_en)
 	{
-		// GCCFG &= ~(USB_OTG_GCCFG_PWRDWN)
 		dwcotg->global_reg->gccfg &= ~USB_OTG_GCCFG_PWRDWN;
-
 		// Init The ULPI Interface
-		dwcotg->global_reg->gusbcfg &= ~(USB_OTG_GUSBCFG_TSDPS |
-				USB_OTG_GUSBCFG_ULPIFSLS | USB_OTG_GUSBCFG_PHYSEL);
+		dwcotg->global_reg->gusbcfg &= ~(USB_OTG_GUSBCFG_TSDPS | USB_OTG_GUSBCFG_ULPIFSLS | USB_OTG_GUSBCFG_PHYSEL);
 		// Select vbus source
-		dwcotg->global_reg->gusbcfg &= ~(USB_OTG_GUSBCFG_ULPIEVBUSD |
-				USB_OTG_GUSBCFG_ULPIEVBUSI);
-		if (dwcotg->external_vbus_en)
-		{
+		dwcotg->global_reg->gusbcfg &= ~(USB_OTG_GUSBCFG_ULPIEVBUSD | USB_OTG_GUSBCFG_ULPIEVBUSI);
+		if (dwcotg->vbus_en)
 			dwcotg->global_reg->gusbcfg |= USB_OTG_GUSBCFG_ULPIEVBUSD;
-		}
+	}
+	else if (dwcotg->utmi_en)
+	{
+		dwcotg->global_reg->gccfg &= ~USB_OTG_GCCFG_PWRDWN;
+		// Init The UTMI Interface
+		dwcotg->global_reg->gusbcfg &= ~(USB_OTG_GUSBCFG_TSDPS | USB_OTG_GUSBCFG_ULPIFSLS | USB_OTG_GUSBCFG_PHYSEL);
+		// Select vbus source
+		dwcotg->global_reg->gusbcfg &= ~(USB_OTG_GUSBCFG_ULPIEVBUSD | USB_OTG_GUSBCFG_ULPIEVBUSI);
+		// Select UTMI Interace
+		dwcotg->global_reg->gusbcfg &= ~USB_OTG_GUSBCFG_ULPI_UTMI_SEL;
+		if (dwcotg->vbus_en)
+			dwcotg->global_reg->gusbcfg |= USB_OTG_GUSBCFG_ULPIEVBUSD;
 	}
 	else
 	{
+		// Select FS Embedded PHY
 		dwcotg->global_reg->gusbcfg |= USB_OTG_GUSBCFG_PHYSEL;
 	}
 
@@ -823,8 +850,7 @@ static vsf_err_t dwcotgh_init_thread(struct vsfsm_pt_t *pt, vsfsm_evt_t evt)
 	}
 	dwcotg->global_reg->grstctl |= USB_OTG_GRSTCTL_CSRST;
 	dwcotg->retry = 0;
-	while ((dwcotg->global_reg->grstctl & USB_OTG_GRSTCTL_CSRST) ==
-			USB_OTG_GRSTCTL_CSRST)
+	while ((dwcotg->global_reg->grstctl & USB_OTG_GRSTCTL_CSRST) == USB_OTG_GRSTCTL_CSRST)
 	{
 		if (dwcotg->retry > 10)
 			return VSFERR_FAIL;
@@ -833,41 +859,29 @@ static vsf_err_t dwcotgh_init_thread(struct vsfsm_pt_t *pt, vsfsm_evt_t evt)
 		dwcotg->retry++;
 	}
 
-	if (dwcotg->ulpi_en == 0)
-	{
+	// Deactivate the power down
+	if (!dwcotg->ulpi_en && !dwcotg->utmi_en)
 		dwcotg->global_reg->gccfg = USB_OTG_GCCFG_PWRDWN;
-	}
 
 	if (dwcotg->dma_en)
-	{
-		dwcotg->global_reg->gahbcfg |= USB_OTG_GAHBCFG_DMAEN |
-				USB_OTG_GAHBCFG_HBSTLEN_1 | USB_OTG_GAHBCFG_HBSTLEN_2;
-	}
+		dwcotg->global_reg->gahbcfg |= USB_OTG_GAHBCFG_DMAEN | USB_OTG_GAHBCFG_HBSTLEN_1 | USB_OTG_GAHBCFG_HBSTLEN_2;
 
 	// Force Host Mode
 	dwcotg->global_reg->gusbcfg &= ~USB_OTG_GUSBCFG_FDMOD;
 	dwcotg->global_reg->gusbcfg |= USB_OTG_GUSBCFG_FHMOD;
-
 	vsfsm_pt_delay(pt, 50);
 
 	// Enable Core
-	// USBx->GCCFG |= USB_OTG_GCCFG_VBDEN;
 	dwcotg->global_reg->gccfg |= USB_OTG_GCCFG_VBDEN;
 	vsfsm_pt_delay(pt, 50);
 	
 	if (dwcotg->speed == USB_SPEED_HIGH)
-	{
 		dwcotg->host_global_regs->hcfg &= ~USB_OTG_HCFG_FSLSS;
-	}
 	else
-	{
 		dwcotg->host_global_regs->hcfg |= USB_OTG_HCFG_FSLSPCS;
-		dwcotg->host_global_regs->hfir = 48000;
-	}
 
 	// Flush FIFO
-	dwcotg->global_reg->grstctl = USB_OTG_GRSTCTL_TXFFLSH |
-			USB_OTG_GRSTCTL_TXFNUM_4;
+	dwcotg->global_reg->grstctl = USB_OTG_GRSTCTL_TXFFLSH | USB_OTG_GRSTCTL_TXFNUM_4;
 	dwcotg->retry = 0;
 	while ((dwcotg->global_reg->grstctl & USB_OTG_GRSTCTL_TXFFLSH) ==
 			USB_OTG_GRSTCTL_TXFFLSH)
@@ -894,7 +908,7 @@ static vsf_err_t dwcotgh_init_thread(struct vsfsm_pt_t *pt, vsfsm_evt_t evt)
 		dwcotg->hc_regs[i].hcint = 0xffffffff;
 		dwcotg->hc_regs[i].hcintmsk = 0;
 	}
-
+	
 	vsfsm_pt_delay(pt, 10);
 
 	// Disable all interrupts
@@ -904,25 +918,24 @@ static vsf_err_t dwcotgh_init_thread(struct vsfsm_pt_t *pt, vsfsm_evt_t evt)
 	dwcotg->global_reg->gintsts = 0xffffffff;
 
 	// fifo size
-	dwcotg->global_reg->grxfsiz = (((hcd_param->in_packet_size_max / 4) + 1) * 2);
-	dwcotg->global_reg->gnptxfsiz = ((hcd_param->non_periodic_out_packet_size_max / 4) << 16) |
-			(dwcotg->global_reg->grxfsiz & 0xffff);
-	dwcotg->global_reg->hptxfsiz = ((hcd_param->periodic_out_packet_size_max / 4 * 2) << 16) |
-			(dwcotg->global_reg->gnptxfsiz & 0xffff);
+	dwcotg->global_reg->grxfsiz = hcd_param->rx_fifo_size;
+	dwcotg->global_reg->gnptxfsiz = hcd_param->rx_fifo_size +
+			((uint32_t)hcd_param->non_periodic_tx_fifo_size << 16);
+	dwcotg->global_reg->hptxfsiz = hcd_param->rx_fifo_size + hcd_param->non_periodic_tx_fifo_size +
+			((uint32_t)hcd_param->periodic_tx_fifo_size << 16);
 
-	if (dwcotg->dma_en == 0)
+	// Enable the common interrupts
+	if (!dwcotg->dma_en)
 		dwcotg->global_reg->gintmsk |= USB_OTG_GINTMSK_RXFLVLM;
 
 	// Enable interrupts matching to the Host mode ONLY
-	dwcotg->global_reg->gintmsk |= USB_OTG_GINTMSK_HCIM | USB_OTG_GINTMSK_SOFM |
-			USB_OTG_GINTMSK_PXFRM_IISOOXFRM;
-
+	dwcotg->global_reg->gintmsk |= USB_OTG_GINTMSK_PRTIM | USB_OTG_GINTSTS_DISCINT |
+			USB_OTG_GINTMSK_HCIM | USB_OTG_GINTMSK_SOFM;
+	
 	vsfsm_pt_delay(pt, 10);
 
 	// enable global int
 	dwcotg->global_reg->gahbcfg |= USB_OTG_GAHBCFG_GINT;
-
-	dwcotg->dwcotg_state = DWCOTG_WORKING;
 
 	vsfsm_pt_end(pt);
 
@@ -1003,9 +1016,6 @@ static vsf_err_t dwcotgh_submit_urb(struct vsfhcd_t *hcd, struct vsfhcd_urb_t *u
 	struct dwcotg_t *dwcotg = hcd->priv;
 	struct urb_priv_t *urb_priv = (struct urb_priv_t *)urb->priv;
 	uint32_t pipe = urb->pipe;
-
-	if (dwcotg->dwcotg_state == DWCOTG_DISABLE)
-		return VSFERR_FAIL;
 
 	memset(urb_priv, 0, sizeof(struct urb_priv_t));
 
@@ -1149,17 +1159,21 @@ static int dwcotgh_rh_control(struct vsfhcd_t *hcd, struct vsfhcd_urb_t *urb)
 	case SetPortFeature:
 		switch (wValue)
 		{
-		case(USB_PORT_FEAT_ENABLE):
-			*dwcotg->hprt0 |= USB_OTG_HPRT_PENA;
-			len = 0;
-			break;
 		case(USB_PORT_FEAT_RESET):
 			if (*dwcotg->hprt0 & USB_OTG_HPRT_PCSTS)
-				*dwcotg->hprt0 |= USB_OTG_HPRT_PRST;
+			{
+				uint32_t hprt0 = *dwcotg->hprt0 & ~(USB_OTG_HPRT_PENA |
+						USB_OTG_HPRT_PCDET | USB_OTG_HPRT_PENCHNG | USB_OTG_HPRT_POCCHNG);
+				*dwcotg->hprt0 = hprt0 | USB_OTG_HPRT_PRST;
+			}
 			len = 0;
 			break;
 		case(USB_PORT_FEAT_POWER):
-			*dwcotg->hprt0 |= USB_OTG_HPRT_PPWR;
+			{
+				uint32_t hprt0 = *dwcotg->hprt0 & ~(USB_OTG_HPRT_PENA |
+						USB_OTG_HPRT_PCDET | USB_OTG_HPRT_PENCHNG | USB_OTG_HPRT_POCCHNG);
+				*dwcotg->hprt0 = hprt0 | USB_OTG_HPRT_PPWR;
+			}
 			len = 0;
 			break;
 		default:
@@ -1170,27 +1184,37 @@ static int dwcotgh_rh_control(struct vsfhcd_t *hcd, struct vsfhcd_urb_t *urb)
 		switch (wValue)
 		{
 		case(USB_PORT_FEAT_ENABLE):
-			*dwcotg->hprt0 &= ~USB_OTG_HPRT_PENA;
+			*dwcotg->hprt0 &= ~(USB_OTG_HPRT_PENA | USB_OTG_HPRT_PCDET |
+					USB_OTG_HPRT_PENCHNG | USB_OTG_HPRT_POCCHNG);
 			len = 0;
 			break;
 		case(USB_PORT_FEAT_C_RESET):
-			*dwcotg->hprt0 &= ~USB_OTG_HPRT_PRST;
+			*dwcotg->hprt0 &= ~(USB_OTG_HPRT_PRST |
+					USB_OTG_HPRT_PCDET | USB_OTG_HPRT_PENCHNG | USB_OTG_HPRT_POCCHNG);
 			len = 0;
 			break;
 		case(USB_PORT_FEAT_C_CONNECTION):
-			*dwcotg->hprt0 |= USB_OTG_HPRT_PCDET;
+			{
+				uint32_t hprt0 = *dwcotg->hprt0 & ~(USB_OTG_HPRT_PENCHNG | USB_OTG_HPRT_POCCHNG);
+				*dwcotg->hprt0 = hprt0 | USB_OTG_HPRT_PCDET;
+			}
 			len = 0;
 			break;
 		case(USB_PORT_FEAT_C_ENABLE):
-			*dwcotg->hprt0 &= ~USB_OTG_HPRT_PENCHNG;
+			{
+				uint32_t hprt0 = *dwcotg->hprt0 & ~(USB_OTG_HPRT_PCDET | USB_OTG_HPRT_POCCHNG);
+				*dwcotg->hprt0 = hprt0 | USB_OTG_HPRT_PENCHNG;
+			}
 			len = 0;
 			break;
 		case(USB_PORT_FEAT_C_SUSPEND):
-			*dwcotg->hprt0 &= ~USB_OTG_HPRT_PSUSP;
+			*dwcotg->hprt0 &= ~(USB_OTG_HPRT_PSUSP | USB_OTG_HPRT_PCDET |
+					USB_OTG_HPRT_PENCHNG | USB_OTG_HPRT_POCCHNG);
 			len = 0;
 			break;
 		case(USB_PORT_FEAT_C_OVER_CURRENT):
-			*dwcotg->hprt0 &= ~USB_OTG_HPRT_POCA;
+			*dwcotg->hprt0 &= ~(USB_OTG_HPRT_POCA | USB_OTG_HPRT_PCDET |
+					USB_OTG_HPRT_PENCHNG | USB_OTG_HPRT_POCCHNG);
 			len = 0;
 			break;
 		default:

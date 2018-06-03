@@ -117,19 +117,15 @@ struct dwcotg_device_t
 	struct vsfhcd_device_t *hcddev;
 };
 
-enum dwcotg_state_t
-{
-	DWCOTG_DISABLE = 0,
-	DWCOTG_WORKING,
-};
 struct dwcotg_t
 {
 	// common config
-	uint8_t dwcotg_state;
 	uint8_t speed;	// USB_SPEED_LOW / USB_SPEED_FULL / USB_SPEED_HIGH
-	uint8_t dma_en;
-	uint8_t ulpi_en;
-	uint8_t external_vbus_en;
+	uint8_t dma_en : 1;
+	uint8_t ulpi_en : 1;
+	uint8_t utmi_en : 1;
+	uint8_t vbus_en : 1;
+	uint8_t : 4;
 
 	uint8_t ep_in_amount;
 	uint8_t ep_out_amount;

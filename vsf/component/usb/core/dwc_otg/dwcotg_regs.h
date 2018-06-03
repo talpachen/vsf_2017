@@ -519,20 +519,6 @@ struct dwcotg_dev_global_regs_t {
 #define USB_OTG_DEACHINTMSK_OEP1INTM          ((uint32_t)0x00020000)            /*!< OUT Endpoint 1 interrupt mask bit */
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /**
  * The Host Global Registers structure defines the size and relative
  * field offsets for the Host Mode Global Registers.  Host Global

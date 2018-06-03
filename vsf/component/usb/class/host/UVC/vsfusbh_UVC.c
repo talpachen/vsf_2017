@@ -45,7 +45,6 @@ struct vsfusbh_uvc_t
 {
 	struct vsfusbh_t *usbh;
 	struct vsfusbh_device_t *dev;
-	struct vsfusbh_ifs_t *ifs;
 
 	struct vsfsm_t init_sm;
 	struct vsfsm_pt_t init_pt;
@@ -265,9 +264,9 @@ static struct vsfsm_state_t *uvc_evt_handler_video(struct vsfsm_t *sm,
 			urb->transfer_length = uvc->video_iso_packet_len;
 			urb->pipe = usb_rcvisocpipe(urb->hcddev, uvc->video_iso_ep);
 			urb->transfer_flags |= USB_ISO_ASAP;
-			//urb->number_of_packets = 1;
-			//urb->iso_frame_desc[0].offset = 0;
-			//urb->iso_frame_desc[0].length = uvc->video_iso_packet_len;
+			urb->number_of_packets = 1;
+			urb->iso_frame_desc[0].offset = 0;
+			urb->iso_frame_desc[0].length = uvc->video_iso_packet_len;
 			err = vsfusbh_submit_urb(uvc->usbh, urb);
 			if (err != VSFERR_NONE)
 				goto error;
@@ -305,37 +304,34 @@ static void *vsfusbh_uvc_probe(struct vsfusbh_t *usbh,
 		struct vsfusbh_device_t *dev, struct vsfusbh_ifs_t *ifs, 
 		const struct vsfusbh_device_id_t *id)
 {
+	struct usb_interface_desc_t *ifs_desc = ifs->alt[ifs->cur_alt].ifs_desc;
 	struct vsfusbh_uvc_t *uvc;
 
+	// only probe interface 0
+	if (ifs_desc->bInterfaceNumber != 0)
+		return NULL;
+	
 	uvc = vsf_bufmgr_malloc(sizeof(struct vsfusbh_uvc_t));
 	if (!uvc)
 		return NULL;
 	memset(uvc, 0, sizeof(struct vsfusbh_uvc_t));
 
 	uvc->ctrl_urb = vsfusbh_alloc_urb(usbh);
-	if (uvc->ctrl_urb == NULL)
-	{
-		vsf_bufmgr_free(uvc);
-		return NULL;
-	}
 	uvc->video_urb = vsfusbh_alloc_urb(usbh);
-	if (uvc->video_urb == NULL)
-	{
-		vsfusbh_free_urb(usbh, &uvc->ctrl_urb);
-		vsf_bufmgr_free(uvc);
-		return NULL;
-	}
+	//uvc->audio_urb = vsfusbh_alloc_urb(usbh);
+	if (!uvc->ctrl_urb || !uvc->video_urb)
+		goto free_and_fail;
 	
 	uvc->usbh = usbh;
 	uvc->dev = dev;
-	uvc->ifs = ifs;
-
+	
 	uvc->video_payload.type = VSFUSBH_UVC_PAYLOAD_VIDEO;
 	uvc->video_payload.buf = uvc->video_urb_buf;
-
+	
 	uvc->ctrl_urb->hcddev = &dev->hcddev;
-	uvc->ctrl_urb->timeout = 200;
 	uvc->ctrl_urb->notifier_sm = &uvc->init_sm;
+	uvc->ctrl_urb->timeout = 200;
+	
 	uvc->video_urb->hcddev = &dev->hcddev;
 	uvc->video_urb->timeout = 200;
 	uvc->video_urb->notifier_sm = &uvc->video_sm;
@@ -353,6 +349,7 @@ static void *vsfusbh_uvc_probe(struct vsfusbh_t *usbh,
 	uvc->ctrl_pt.user_data = uvc;
 	uvc->ctrl_pt.sm = &uvc->ctrl_sm;
 	uvc->ctrl_pt.state = 0;
+
 	uvc->video_sm.init_state.evt_handler = uvc_evt_handler_video;
 	uvc->video_sm.user_data = uvc;
 	
@@ -360,6 +357,14 @@ static void *vsfusbh_uvc_probe(struct vsfusbh_t *usbh,
 	vsfsm_init(&uvc->ctrl_sm);
 	vsfsm_init(&uvc->video_sm);
 	return uvc;
+	
+free_and_fail:
+	if (uvc->ctrl_urb != NULL)
+		vsfusbh_free_urb(usbh, &uvc->ctrl_urb);
+	if (uvc->video_urb != NULL)
+		vsfusbh_free_urb(usbh, &uvc->video_urb);
+	vsf_bufmgr_free(uvc);
+	return NULL;
 }
 
 static void vsfusbh_uvc_disconnect(struct vsfusbh_t *usbh,

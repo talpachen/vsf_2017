@@ -4484,6 +4484,7 @@
         <group>
           <name>stm32f7</name>
           <excluded>
+            <configuration>CME-M7_Debug</configuration>
             <configuration>NUCLEO-F411RE_Debug</configuration>
           </excluded>
           <group>
