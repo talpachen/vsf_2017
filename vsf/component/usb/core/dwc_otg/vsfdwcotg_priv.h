@@ -1,7 +1,5 @@
 #include "dwcotg_regs.h"
 
-#define MAX_HC_NUM_EACH_DEVICE	8
-
 /* USB HUB CONSTANTS */
 /* Requests: bRequest << 8 | bmRequestType */
 #define RH_GET_STATUS			0x0080
@@ -107,14 +105,6 @@ struct urb_priv_t
 	uint16_t packet_size;
 
 	struct hc_t *hc;
-};
-
-struct dwcotg_device_t
-{
-	struct hc_t *hc[MAX_HC_NUM_EACH_DEVICE];
-	uint32_t hc_num;
-
-	struct vsfhcd_device_t *hcddev;
 };
 
 struct dwcotg_t
