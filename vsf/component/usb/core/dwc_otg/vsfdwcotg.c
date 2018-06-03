@@ -654,19 +654,20 @@ static void vsfdwcotg_interrupt(void *param)
 
 	if (dwcotg->global_reg->gintsts & USB_OTG_GINTSTS_CMOD) // host mode
 	{
+#if 0
 		if (intsts & USB_OTG_GINTSTS_DISCINT)
 		{
-			dwcotg->host_global_regs->hcfg &= ~USB_OTG_HCFG_FSLSPCS;
-			dwcotg->host_global_regs->hcfg |= USB_OTG_HCFG_FSLSPCS_0;
+			//dwcotg->host_global_regs->hcfg &= ~USB_OTG_HCFG_FSLSPCS;
+			//dwcotg->host_global_regs->hcfg |= USB_OTG_HCFG_FSLSPCS_0;
 			// dwcotg->host_global_regs->hfir = 48000;
 			dwcotg->global_reg->gintsts = USB_OTG_GINTSTS_DISCINT;
 		}
 		if (intsts & USB_OTG_GINTSTS_HPRTINT)
 		{
-			
-			
+			// TODO
 			dwcotg->global_reg->gintsts = USB_OTG_GINTSTS_HPRTINT;
-		}		
+		}
+#endif
 		if (intsts & USB_OTG_GINTSTS_SOF)	// Handle Host SOF Interrupts
 		{
 #if 0 // TODO
@@ -929,8 +930,10 @@ static vsf_err_t dwcotgh_init_thread(struct vsfsm_pt_t *pt, vsfsm_evt_t evt)
 		dwcotg->global_reg->gintmsk |= USB_OTG_GINTMSK_RXFLVLM;
 
 	// Enable interrupts matching to the Host mode ONLY
-	dwcotg->global_reg->gintmsk |= USB_OTG_GINTMSK_PRTIM | USB_OTG_GINTSTS_DISCINT |
-			USB_OTG_GINTMSK_HCIM | USB_OTG_GINTMSK_SOFM;
+	dwcotg->global_reg->gintmsk |= USB_OTG_GINTMSK_HCIM | USB_OTG_GINTMSK_SOFM;
+#if 0
+	dwcotg->global_reg->gintmsk |= USB_OTG_GINTMSK_PRTIM | USB_OTG_GINTSTS_DISCINT;
+#endif
 	
 	vsfsm_pt_delay(pt, 10);
 
@@ -1165,6 +1168,27 @@ static int dwcotgh_rh_control(struct vsfhcd_t *hcd, struct vsfhcd_urb_t *urb)
 				uint32_t hprt0 = *dwcotg->hprt0 & ~(USB_OTG_HPRT_PENA |
 						USB_OTG_HPRT_PCDET | USB_OTG_HPRT_PENCHNG | USB_OTG_HPRT_POCCHNG);
 				*dwcotg->hprt0 = hprt0 | USB_OTG_HPRT_PRST;
+				
+				if (dwcotg->ulpi_en || dwcotg->utmi_en)
+				{
+					if (dwcotg->speed == USB_SPEED_FULL)
+						dwcotg->host_global_regs->hfir = 60000;
+				}
+				else
+				{
+					if ((hprt0 & USB_OTG_HPRT_PSPD) == USB_OTG_HPRT_PSPD_1)	// USB_SPEED_LOW
+					{
+						dwcotg->host_global_regs->hcfg &= ~USB_OTG_HCFG_FSLSPCS;
+						dwcotg->host_global_regs->hcfg |= USB_OTG_HCFG_FSLSPCS_1;
+						dwcotg->host_global_regs->hfir = 6000;
+					}
+					else
+					{
+						dwcotg->host_global_regs->hcfg &= ~USB_OTG_HCFG_FSLSPCS;
+						dwcotg->host_global_regs->hcfg |= USB_OTG_HCFG_FSLSPCS_0;
+						dwcotg->host_global_regs->hfir = 48000;
+					}
+				}				
 			}
 			len = 0;
 			break;
