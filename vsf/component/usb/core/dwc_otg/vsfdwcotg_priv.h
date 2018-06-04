@@ -52,7 +52,7 @@ struct hc_t
 
 	uint8_t hc_state : 4;
 	uint8_t dpid : 2;
-	uint8_t : 1;
+	uint8_t do_ping : 1;
 
 	uint32_t transfer_size;
 

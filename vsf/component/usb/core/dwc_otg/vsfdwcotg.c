@@ -71,21 +71,42 @@ static void hc_halt(struct dwcotg_t *dwcotg, uint8_t hc_num)
 	}
 }
 
+static void hc_manual_write(uint32_t *dfifo, uint8_t hc_num, uint32_t *buf, uint16_t size)
+{
+	uint16_t i;
+	dfifo = dfifo + 0x1000 * hc_num;
+	for (i = 0; i < size; i += 4)
+		*dfifo = buf[i >> 2];
+}
+
+static void hc_manual_read(uint32_t *dfifo, uint8_t hc_num, uint32_t *buf, uint16_t size)
+{
+	uint16_t i;
+	for (i = 0; i < size; i += 4)
+		buf[i >> 2] = *dfifo;
+}
+
 const uint8_t pipetype_to_dwctype[4] = {1, 3, 0, 2};
-static vsf_err_t submit_hc(struct dwcotg_t *dwcotg, struct hc_t *hc,
+static vsf_err_t hc_submit(struct dwcotg_t *dwcotg, struct hc_t *hc,
 		uint32_t *buf, uint16_t size)
 {
 	uint32_t pkt_num, tmp;
 	struct urb_priv_t *urb_priv = hc->owner_priv;
 	struct dwcotg_hc_regs_t *reg = &dwcotg->hc_regs[hc->hc_num];
 
+	reg->hcint = 0xffffffff;
+	
 	switch (urb_priv->type)
 	{
-	case URB_PRIV_TYPE_ISO:
-		reg->hcintmsk = USB_OTG_HCINTMSK_XFRCM | USB_OTG_HCINTMSK_ACKM |
-				USB_OTG_HCINTMSK_AHBERR | USB_OTG_HCINTMSK_FRMORM ;
-		if (hc->dir_o0_i1)
-			reg->hcintmsk |= USB_OTG_HCINTMSK_TXERRM;
+	case URB_PRIV_TYPE_CTRL:
+	case URB_PRIV_TYPE_BULK:
+		reg->hcintmsk = USB_OTG_HCINTMSK_XFRCM  | USB_OTG_HCINTMSK_STALLM |
+				USB_OTG_HCINTMSK_TXERRM | USB_OTG_HCINTMSK_DTERRM |
+				USB_OTG_HCINTMSK_AHBERR | USB_OTG_HCINTMSK_NAKM;
+#if 0
+		if (!hc->dir_o0_i1 && (hc->speed == USB_SPEED_HIGH))
+			reg->hcintmsk |= USB_OTG_HCINTMSK_NYET | USB_OTG_HCINTMSK_ACKM;
+#endif
 		break;
 	case URB_PRIV_TYPE_INT:
 		reg->hcintmsk = USB_OTG_HCINTMSK_XFRCM | USB_OTG_HCINTMSK_STALLM |
@@ -93,13 +114,11 @@ static vsf_err_t submit_hc(struct dwcotg_t *dwcotg, struct hc_t *hc,
 				USB_OTG_HCINTMSK_NAKM | USB_OTG_HCINTMSK_AHBERR |
 				USB_OTG_HCINTMSK_FRMORM;
 		break;
-	case URB_PRIV_TYPE_CTRL:
-	case URB_PRIV_TYPE_BULK:
-		reg->hcintmsk = USB_OTG_HCINTMSK_XFRCM  | USB_OTG_HCINTMSK_STALLM |
-				USB_OTG_HCINTMSK_TXERRM | USB_OTG_HCINTMSK_DTERRM |
-				USB_OTG_HCINTMSK_AHBERR | USB_OTG_HCINTMSK_NAKM;
-		if (!hc->dir_o0_i1)
-			reg->hcintmsk |= USB_OTG_HCINTMSK_NYET;
+	case URB_PRIV_TYPE_ISO:
+		reg->hcintmsk = USB_OTG_HCINTMSK_XFRCM | USB_OTG_HCINTMSK_ACKM |
+				USB_OTG_HCINTMSK_AHBERR | USB_OTG_HCINTMSK_FRMORM ;
+		if (hc->dir_o0_i1)
+			reg->hcintmsk |= USB_OTG_HCINTMSK_TXERRM;
 		break;
 	}
 	if (hc->dir_o0_i1)
@@ -107,16 +126,30 @@ static vsf_err_t submit_hc(struct dwcotg_t *dwcotg, struct hc_t *hc,
 
 	dwcotg->host_global_regs->haintmsk |= 0x1ul << hc->hc_num;
 
-	reg->hcchar = (hc->dev_addr << 22) | (hc->ep_num << 11) |
+	reg->hcchar = ((hc->dev_addr << 22) & USB_OTG_HCCHAR_DAD) |
+			((hc->ep_num << 11) & USB_OTG_HCCHAR_EPNUM) |
 			(hc->dir_o0_i1 ? USB_OTG_HCCHAR_EPDIR : 0) |
-			((hc->speed == USB_SPEED_LOW) << 17) |
-			((uint32_t)pipetype_to_dwctype[urb_priv->type] << 18) |
+			((hc->speed == USB_SPEED_LOW) ? USB_OTG_HCCHAR_EPDIR : 0) |
+			(((uint32_t)pipetype_to_dwctype[urb_priv->type] << 18) & USB_OTG_HCCHAR_EPTYP) |
 			(urb_priv->packet_size & USB_OTG_HCCHAR_MPSIZ);
-
 	if (urb_priv->type == URB_PRIV_TYPE_INT)
-	{
 		reg->hcchar |= USB_OTG_HCCHAR_ODDFRM;
+
+#if 0
+	if (hc->speed == USB_SPEED_HIGH)
+	{
+		if (!dwcotg->dma_en && hc->do_ping)
+		{
+			// TODO
+			// USB_DoPing
+		}
+		else if (dwcotg->dma_en)
+		{
+			reg->hcintmsk &= ~(USB_OTG_HCINTMSK_NYET | USB_OTG_HCINTMSK_ACKM);
+			hc->do_ping = 0;
+		}			
 	}
+#endif
 
 	// transfer size
 	if (size > 0)
@@ -131,43 +164,52 @@ static vsf_err_t submit_hc(struct dwcotg_t *dwcotg, struct hc_t *hc,
 	else
 		pkt_num = 1;
 	urb_priv->toggle_next = urb_priv->toggle_start ^ (pkt_num & 0x1);
-
 	if (hc->dir_o0_i1)
 		size = urb_priv->packet_size * pkt_num;
 	hc->transfer_size = size;
 
 	reg->hctsiz = ((pkt_num << 19) & USB_OTG_HCTSIZ_PKTCNT) |
-			((uint32_t)hc->dpid << 29) | size;
+			(((uint32_t)hc->dpid << 29) & USB_OTG_HCTSIZ_DPID) |
+			(size & USB_OTG_HCTSIZ_XFRSIZ);
 
 	if (dwcotg->dma_en)
 		reg->hcdma = (uint32_t)buf;
 
-	tmp = dwcotg->host_global_regs->hfnum & 0x1 ? 0x0ul : 0x1ul;
-	reg->hcchar |= tmp << 29;
+	tmp = (dwcotg->host_global_regs->hfnum & 0x1) ? 0x0 : USB_OTG_HCCHAR_ODDFRM;
+	reg->hcchar &= ~USB_OTG_HCCHAR_ODDFRM;
+	reg->hcchar |= tmp;
 
-	// enable hc, TODO merge up code
-	tmp = (reg->hcchar & (~USB_OTG_HCCHAR_CHDIS)) | USB_OTG_HCCHAR_CHENA;
+	// Set host channel enable
+	tmp = (reg->hcchar & ~USB_OTG_HCCHAR_CHDIS) | USB_OTG_HCCHAR_CHENA;
+	if (hc->dir_o0_i1)
+		tmp |= USB_OTG_HCCHAR_EPDIR;
+	else
+		tmp &= ~USB_OTG_HCCHAR_EPDIR;
 	reg->hcchar = tmp;
 
-	if ((dwcotg->dma_en == 0) && (hc->dir_o0_i1 == 0) && (hc->transfer_size))
+	if (!dwcotg->dma_en && (hc->dir_o0_i1 == 0) && (hc->transfer_size))
 	{
-		// TODO: check if there is enough space in FIFO space
+		tmp = (hc->transfer_size + 3) / 4;
 		switch (urb_priv->type)
 		{
 		case URB_PRIV_TYPE_CTRL:
 		case URB_PRIV_TYPE_BULK:
+			if (tmp > (dwcotg->global_reg->gnptxsts & 0xffff))
+			{
+				tmp = dwcotg->global_reg->gnptxsts & 0xfffc;
+				dwcotg->global_reg->gintmsk |= USB_OTG_GINTMSK_PTXFEM;
+			}
 			break;
 		case URB_PRIV_TYPE_ISO:
 		case URB_PRIV_TYPE_INT:
+			if (tmp > (dwcotg->host_global_regs->hptxsts & 0xffff))
+			{
+				tmp = dwcotg->global_reg->gnptxsts & 0xfffc;
+				dwcotg->global_reg->gintmsk |= USB_OTG_GINTMSK_PTXFEM;
+			}
 			break;
-		}
-		//size = (size + 3) >> 2;
-		tmp = 0;
-		while (tmp < size)
-		{
-			dwcotg->dfifo[hc->hc_num] = buf[tmp >> 2];
-			tmp += 4;
-		}
+		}		
+		hc_manual_write(dwcotg->dfifo, hc->hc_num, buf, tmp);
 	}
 
 	return VSFERR_NONE;
@@ -187,23 +229,19 @@ static vsf_err_t submit_priv_urb(struct dwcotg_t *dwcotg,
 			interval = urb->interval * 8;
 		else
 			interval = urb->interval;
-		if (dwcotg->softick % interval == 0)
+		if (!interval || (dwcotg->softick % interval == 0))
 		{
 			hc->hc_state = HC_START;
 			urb_priv->phase = URB_PRIV_PHASE_DATA_WAIT;
 			return submit_priv_urb(dwcotg, urb_priv);
 		}
 		else
-		{
 			hc->hc_state = HC_WAIT;
-		}
 		return VSFERR_NONE;
 	case URB_PRIV_PHASE_SETUP_WAIT:
 		hc->dir_o0_i1 = 0;
 		hc->dpid = HC_DPID_SETUP;
-
-		return submit_hc(dwcotg, hc, (uint32_t *)(&urb->setup_packet),
-				sizeof(struct usb_ctrlrequest_t));
+		return hc_submit(dwcotg, hc, (uint32_t *)(&urb->setup_packet), sizeof(struct usb_ctrlrequest_t));
 	case URB_PRIV_PHASE_DATA_WAIT:
 		hc->dir_o0_i1 = urb_priv->dir_o0_i1;
 		switch (urb_priv->type)
@@ -211,22 +249,21 @@ static vsf_err_t submit_priv_urb(struct dwcotg_t *dwcotg,
 		case URB_PRIV_TYPE_ISO:
 			hc->dpid = HC_DPID_DATA0;
 			break;
+		// TODO
+		case URB_PRIV_TYPE_CTRL:
+			hc->dpid = HC_DPID_DATA1;
+			break;
 		case URB_PRIV_TYPE_INT:
 		case URB_PRIV_TYPE_BULK:
 			hc->dpid = urb_priv->toggle_start ? HC_DPID_DATA1 : HC_DPID_DATA0;
 			break;
-		case URB_PRIV_TYPE_CTRL:
-			hc->dpid = HC_DPID_DATA1;
-			break;
 		}
-		return submit_hc(dwcotg, hc, (uint32_t *)urb_priv->transfer_buffer,
-				urb_priv->transfer_length);
+		return hc_submit(dwcotg, hc, urb_priv->transfer_buffer, urb_priv->transfer_length);
 	case URB_PRIV_PHASE_STATE_WAIT:
 		hc->dir_o0_i1 = !urb_priv->dir_o0_i1;
 		hc->dpid = HC_DPID_DATA1;
-
-		return submit_hc(dwcotg, hc, NULL, 0);
-	default :
+		return hc_submit(dwcotg, hc, NULL, 0);
+	default:
 		return VSFERR_FAIL;
 	}
 }
@@ -340,47 +377,38 @@ static void vsfdwcotg_hc_in_handler(struct dwcotg_t *dwcotg, uint8_t hc_num)
 	struct dwcotg_hc_regs_t *hc_reg = &dwcotg->hc_regs[hc_num];
 	struct hc_t *hc = &dwcotg->hc_pool[hc_num];
 	struct urb_priv_t *urb_priv = hc->owner_priv;
-	uint32_t intsts = hc_reg->hcintmsk;
-	intsts &= hc_reg->hcint;
 
-	if (intsts & USB_OTG_HCINT_AHBERR)
+	if (hc_reg->hcint & USB_OTG_HCINT_AHBERR)
 	{
 		hc_reg->hcint = USB_OTG_HCINT_AHBERR;
 		hc_reg->hcintmsk |= USB_OTG_HCINTMSK_CHHM;
 	}
-	else if (intsts & USB_OTG_HCINT_STALL)
-	{
-		hc->hc_state = HC_STALL;
-		hc_reg->hcint = USB_OTG_HCINT_NAK | USB_OTG_HCINT_STALL;
-		hc_reg->hcintmsk |= USB_OTG_HCINTMSK_CHHM;
-		hc_halt(dwcotg, hc_num);
-	}
-	else if (intsts & USB_OTG_HCINT_DTERR)
-	{
-		hc->hc_state = HC_DATATGLERR;
-		hc_reg->hcint = USB_OTG_HCINT_NAK | USB_OTG_HCINT_DTERR;
-		hc_reg->hcintmsk |= USB_OTG_HCINTMSK_CHHM;
-		hc_halt(dwcotg, hc_num);
-	}
-	else if (intsts & USB_OTG_HCINT_FRMOR)
-	{
-		hc_reg->hcint = USB_OTG_HCINT_FRMOR;
-		hc_reg->hcintmsk |= USB_OTG_HCINTMSK_CHHM;
-		hc_halt(dwcotg, hc_num);
-	}
-	else if (intsts & USB_OTG_HCINT_TXERR)
-	{
-		hc_reg->hcint = USB_OTG_HCINT_TXERR;
-		hc_reg->hcintmsk |= USB_OTG_HCINTMSK_CHHM;
-		hc->hc_state = HC_XACTERR;
-		hc_halt(dwcotg, hc_num);
-	}
-	else if (intsts & USB_OTG_HCINT_ACK)
+	else if (hc_reg->hcint & USB_OTG_HCINT_ACK)
 	{
 		hc_reg->hcint = USB_OTG_HCINT_ACK;
 	}
-
-	if (intsts & USB_OTG_HCINT_XFRC)
+	else if (hc_reg->hcint & USB_OTG_HCINT_STALL)
+	{
+		hc_reg->hcintmsk |= USB_OTG_HCINTMSK_CHHM;
+		hc->hc_state = HC_STALL;
+		hc_halt(dwcotg, hc_num);
+		hc_reg->hcint = USB_OTG_HCINT_NAK | USB_OTG_HCINT_STALL;
+	}
+	else if (hc_reg->hcint & USB_OTG_HCINT_DTERR)
+	{
+		hc_reg->hcintmsk |= USB_OTG_HCINTMSK_CHHM;
+		hc->hc_state = HC_DATATGLERR;
+		hc_halt(dwcotg, hc_num);
+		hc_reg->hcint = USB_OTG_HCINT_NAK | USB_OTG_HCINT_DTERR;
+	}
+	
+	if (hc_reg->hcint & USB_OTG_HCINT_FRMOR)
+	{
+		hc_reg->hcintmsk |= USB_OTG_HCINTMSK_CHHM;
+		hc_halt(dwcotg, hc_num);
+		hc_reg->hcint = USB_OTG_HCINT_FRMOR;
+	}
+	else if (hc_reg->hcint & USB_OTG_HCINT_XFRC)
 	{
 		if (dwcotg->dma_en)
 		{
@@ -390,11 +418,11 @@ static void vsfdwcotg_hc_in_handler(struct dwcotg_t *dwcotg, uint8_t hc_num)
 
 		hc->hc_state = HC_XFRC;
 		hc_reg->hcint = USB_OTG_HCINT_XFRC;
-		hc_reg->hcintmsk |= USB_OTG_HCINTMSK_CHHM;
+		hc_reg->hcintmsk |= USB_OTG_HCINT_XFRC;
 
-		if ((urb_priv->type == URB_PRIV_TYPE_CTRL) ||
-			(urb_priv->type == URB_PRIV_TYPE_BULK))
+		if ((urb_priv->type == URB_PRIV_TYPE_CTRL) || (urb_priv->type == URB_PRIV_TYPE_BULK))
 		{
+			hc_reg->hcintmsk |= USB_OTG_HCINTMSK_CHHM;
 			hc_halt(dwcotg, hc_num);
 			hc_reg->hcint = USB_OTG_HCINT_NAK;
 		}
@@ -402,152 +430,154 @@ static void vsfdwcotg_hc_in_handler(struct dwcotg_t *dwcotg, uint8_t hc_num)
 		{
 			hc_reg->hcchar |= USB_OTG_HCCHAR_ODDFRM;
 			urb_priv->state = URB_PRIV_STATE_DONE;
+			// vsfdwcotg_hc_done_handler(dwcotg, urb_priv, hc);
 		}
+		// Maybe TODO : toggle
 	}
-	else if (intsts & USB_OTG_HCINT_NAK)
-	{
-		hc->hc_state = HC_NAK;
-		hc_reg->hcint = USB_OTG_HCINT_NAK;
-
-		if (urb_priv->type == URB_PRIV_TYPE_INT)
-		{
-			hc_reg->hcintmsk |= USB_OTG_HCINTMSK_CHHM;
-			hc_halt(dwcotg, hc_num);
-		}
-		else if ((urb_priv->type == URB_PRIV_TYPE_CTRL) ||
-				(urb_priv->type == URB_PRIV_TYPE_BULK))
-		{
-			// re-activate the channel
-			hc_reg->hcchar &= ~USB_OTG_HCCHAR_CHDIS;
-			hc_reg->hcchar |= USB_OTG_HCCHAR_CHENA;
-		}
-	}
-
-	intsts = hc_reg->hcintmsk;
-	intsts &= hc_reg->hcint;
-
-	if (intsts & USB_OTG_HCINT_CHH)
+	else if (hc_reg->hcint & USB_OTG_HCINT_CHH)
 	{
 		hc_reg->hcintmsk &= ~USB_OTG_HCINTMSK_CHHM;
-		hc_reg->hcint = USB_OTG_HCINT_CHH;
-
+		
 		if (hc->hc_state == HC_XFRC)
 			urb_priv->state = URB_PRIV_STATE_DONE;
 		else if (hc->hc_state == HC_STALL)
 			urb_priv->state = URB_PRIV_STATE_STALL;
-		else if ((hc->hc_state == HC_XACTERR) ||
-				(hc->hc_state == HC_DATATGLERR))
+		else if ((hc->hc_state == HC_XACTERR) || (hc->hc_state == HC_DATATGLERR))
 		{
-			if (++hc->err_cnt > 8)
+			if (hc->err_cnt == 3)
 			{
 				hc->err_cnt = 0;
 				urb_priv->state = URB_PRIV_STATE_ERROR;
 			}
 			else
 			{
+				hc->err_cnt++;
 				urb_priv->state = URB_PRIV_STATE_NOTREADY;
 			}
+			// Maybe TODO : re-activate the channel
 		}
 		else if (hc->hc_state == HC_NAK)
 		{
 			urb_priv->state = URB_PRIV_STATE_NAK;
+			// Maybe TODO : re-activate the channel
 		}
 		else
-		{
 			urb_priv->state = URB_PRIV_STATE_ERROR;
-		}
 
+		hc_reg->hcint = USB_OTG_HCINT_CHH;
 		vsfdwcotg_hc_done_handler(dwcotg, urb_priv, hc);
+	}	
+	else if (hc_reg->hcint & USB_OTG_HCINT_TXERR)
+	{
+		hc_reg->hcintmsk |= USB_OTG_HCINTMSK_CHHM;
+		if (hc->err_cnt < 3)
+			hc->err_cnt++;
+		hc->hc_state = HC_XACTERR;
+		hc_halt(dwcotg, hc_num);	
+		hc_reg->hcint = USB_OTG_HCINT_TXERR;
+	}
+	else if (hc_reg->hcint & USB_OTG_HCINT_NAK)
+	{
+		if (urb_priv->type == URB_PRIV_TYPE_INT)
+		{
+			hc->err_cnt = 0;
+			hc_reg->hcintmsk |= USB_OTG_HCINTMSK_CHHM;
+			hc_halt(dwcotg, hc_num);
+		}
+		else if ((urb_priv->type == URB_PRIV_TYPE_CTRL) || (urb_priv->type == URB_PRIV_TYPE_BULK))
+		{
+			hc->err_cnt = 0;
+			if (!dwcotg->dma_en)
+			{
+				hc->hc_state = HC_NAK;
+				hc_reg->hcintmsk |= USB_OTG_HCINTMSK_CHHM;
+				hc_halt(dwcotg, hc_num);
+			}
+		}
+		hc_reg->hcint = USB_OTG_HCINT_NAK;
 	}
 }
+
 static void vsfdwcotg_hc_out_handler(struct dwcotg_t *dwcotg, uint8_t hc_num)
 {
 	struct dwcotg_hc_regs_t *hc_reg = &dwcotg->hc_regs[hc_num];
 	struct hc_t *hc = &dwcotg->hc_pool[hc_num];
 	struct urb_priv_t *urb_priv = hc->owner_priv;
-	uint32_t intsts = hc_reg->hcintmsk;
-	intsts &= hc_reg->hcint;
 
-	if (intsts & USB_OTG_HCINT_AHBERR)
+	if (hc_reg->hcint & USB_OTG_HCINT_AHBERR)
 	{
 		hc_reg->hcint = USB_OTG_HCINT_AHBERR;
 		hc_reg->hcintmsk |= USB_OTG_HCINTMSK_CHHM;
 	}
-	else if (intsts & USB_OTG_HCINT_NYET)
-	{
-		hc->hc_state = HC_NYET;
-		hc->err_cnt = 0;
-		hc_reg->hcint = USB_OTG_HCINT_NYET;
-		hc_reg->hcintmsk |= USB_OTG_HCINTMSK_CHHM;
-		hc_halt(dwcotg, hc_num);
-	}
-	else if (intsts & USB_OTG_HCINT_FRMOR)
-	{
-		hc_reg->hcint = USB_OTG_HCINT_FRMOR;
-		hc_reg->hcintmsk |= USB_OTG_HCINTMSK_CHHM;
-		hc_halt(dwcotg, hc_num);
-	}
-	else if (intsts & USB_OTG_HCINT_STALL)
-	{
-		hc->hc_state = HC_STALL;
-		hc_reg->hcint = USB_OTG_HCINT_STALL;
-		hc_reg->hcintmsk |= USB_OTG_HCINTMSK_CHHM;
-		hc_halt(dwcotg, hc_num);
-	}
-	else if (intsts & USB_OTG_HCINT_TXERR)
-	{
-		hc->hc_state = HC_XACTERR;
-		hc_reg->hcint = USB_OTG_HCINT_TXERR;
-		hc_reg->hcintmsk |= USB_OTG_HCINTMSK_CHHM;
-		hc_halt(dwcotg, hc_num);
-	}
-	else if (intsts & USB_OTG_HCINT_DTERR)
-	{
-		hc->hc_state = HC_DATATGLERR;
-		hc_reg->hcint = USB_OTG_HCINT_NAK | USB_OTG_HCINT_DTERR;
-		hc_reg->hcintmsk |= USB_OTG_HCINTMSK_CHHM;
-		hc_halt(dwcotg, hc_num);
-	}
-	else if (intsts & USB_OTG_HCINT_ACK)
+	else if (hc_reg->hcint & USB_OTG_HCINT_ACK)
 	{
 		hc_reg->hcint = USB_OTG_HCINT_ACK;
-
-		if (urb_priv->do_ping)
+		if (hc->do_ping)
 		{
-			hc->hc_state = HC_NYET;
+			hc->do_ping = 0;
+			urb_priv->state = URB_PRIV_STATE_NOTREADY;
 			hc_reg->hcintmsk |= USB_OTG_HCINTMSK_CHHM;
 			hc_halt(dwcotg, hc_num);
-			urb_priv->state = URB_PRIV_STATE_NOTREADY;
 		}
 	}
-
-	if (intsts & USB_OTG_HCINT_XFRC)
+	else if (hc_reg->hcint & USB_OTG_HCINT_NYET)
 	{
-		if (dwcotg->dma_en)
-		{
-			urb_priv->actual_length = hc->transfer_size;
-		}
-
+		hc->hc_state = HC_NYET;
+		hc->do_ping = 1;
+		hc->err_cnt = 0;
+		hc_reg->hcintmsk |= USB_OTG_HCINTMSK_CHHM;
+		hc_halt(dwcotg, hc_num);
+		hc_reg->hcint = USB_OTG_HCINT_NYET;
+	}
+	else if (hc_reg->hcint & USB_OTG_HCINT_FRMOR)
+	{
+		hc_reg->hcintmsk |= USB_OTG_HCINTMSK_CHHM;
+		hc_halt(dwcotg, hc_num);
+		hc_reg->hcint = USB_OTG_HCINT_FRMOR;
+	}
+	else if (hc_reg->hcint & USB_OTG_HCINT_XFRC)
+	{
+		hc->err_cnt = 0;
+		hc->hc_state = HC_XFRC;
 		hc_reg->hcintmsk |= USB_OTG_HCINTMSK_CHHM;
 		hc_halt(dwcotg, hc_num);
 		hc_reg->hcint = USB_OTG_HCINT_XFRC;
-		hc->hc_state = HC_XFRC;
 	}
-	else if (intsts & USB_OTG_HCINT_NAK)
+	else if (hc_reg->hcint & USB_OTG_HCINT_STALL)
 	{
-		hc->hc_state = HC_NAK;
-		hc_reg->hcint = USB_OTG_HCINT_NAK;
+		hc->hc_state = HC_STALL;
 		hc_reg->hcintmsk |= USB_OTG_HCINTMSK_CHHM;
 		hc_halt(dwcotg, hc_num);
+		hc_reg->hcint = USB_OTG_HCINT_STALL;
+	}
+	else if (hc_reg->hcint & USB_OTG_HCINT_NAK)
+	{
+		hc->err_cnt = 0;
+		hc->hc_state = HC_NAK;
+		if (!hc->do_ping  && (hc->speed == USB_SPEED_HIGH))
+			hc->do_ping = 1;
+		hc_reg->hcintmsk |= USB_OTG_HCINTMSK_CHHM;
+		hc_halt(dwcotg, hc_num);
+		hc_reg->hcint = USB_OTG_HCINT_NAK;
+	}
+	else if (hc_reg->hcint & USB_OTG_HCINT_TXERR)
+	{
+		hc->hc_state = HC_XACTERR;
+		hc_reg->hcintmsk |= USB_OTG_HCINTMSK_CHHM;
+		hc_halt(dwcotg, hc_num);
+		hc_reg->hcint = USB_OTG_HCINT_TXERR;
+	}
+	else if (hc_reg->hcint & USB_OTG_HCINT_DTERR)
+	{
+		hc->hc_state = HC_DATATGLERR;
+		hc_reg->hcintmsk |= USB_OTG_HCINTMSK_CHHM;
+		hc_halt(dwcotg, hc_num);
+		hc_reg->hcint = USB_OTG_HCINT_NAK | USB_OTG_HCINT_DTERR;
 	}
 
-	intsts = hc_reg->hcintmsk;
-	intsts &= hc_reg->hcint;
-
-	if (intsts & USB_OTG_HCINT_CHH)
+	if (hc_reg->hcint & USB_OTG_HCINT_CHH)
 	{
 		hc_reg->hcintmsk &= ~USB_OTG_HCINTMSK_CHHM;
-		hc_reg->hcint = USB_OTG_HCINT_CHH;
 
 		if (hc->hc_state == HC_XFRC)
 		{
@@ -557,42 +587,35 @@ static void vsfdwcotg_hc_out_handler(struct dwcotg_t *dwcotg, uint8_t hc_num)
 				// TODO
 				//hc->toggle ^= 1;
 			}
-
 		}
 		else if (hc->hc_state == HC_NAK)
 			urb_priv->state = URB_PRIV_STATE_NOTREADY;
 		else if (hc->hc_state == HC_NYET)
-		{
 			urb_priv->state = URB_PRIV_STATE_NOTREADY;
-			urb_priv->do_ping = 0;
-		}
 		else if (hc->hc_state == HC_STALL)
 			urb_priv->state = URB_PRIV_STATE_STALL;
-		else if ((hc->hc_state == HC_XACTERR) ||
-				(hc->hc_state == HC_DATATGLERR))
+		else if ((hc->hc_state == HC_XACTERR) || (hc->hc_state == HC_DATATGLERR))
 		{
-			if (++hc->err_cnt > 8)
+			if (hc->err_cnt == 3)
 			{
 				hc->err_cnt = 0;
 				urb_priv->state = URB_PRIV_STATE_ERROR;
 			}
 			else
 			{
+				hc->err_cnt++;
 				urb_priv->state = URB_PRIV_STATE_NOTREADY;
 			}
-		}
-		else if (hc->hc_state == HC_NAK)
-		{
-			urb_priv->state = URB_PRIV_STATE_NAK;
+			// Maybe TODO : re-activate the channel
 		}
 		else
-		{
 			urb_priv->state = URB_PRIV_STATE_ERROR;
-		}
 
+		hc_reg->hcint = USB_OTG_HCINT_CHH;
 		vsfdwcotg_hc_done_handler(dwcotg, urb_priv, hc);
 	}
 }
+
 static void vsfdwcotg_interrupt(void *param)
 {
 	struct dwcotg_t *dwcotg = (struct dwcotg_t *)param;
@@ -650,33 +673,40 @@ static void vsfdwcotg_interrupt(void *param)
 		}
 		if (intsts & USB_OTG_GINTSTS_RXFLVL)
 		{
+			uint8_t channelnum;
+			uint32_t pktsts, pktcnt, temp;
+			
 			dwcotg->global_reg->gintmsk &= ~USB_OTG_GINTMSK_RXFLVLM;
 			
-			// TODO used for non-dma mode
-			// HCD_RXQLVL_IRQHandler (hhcd);
+			temp = dwcotg->global_reg->grxstsp;
+			channelnum = temp &  USB_OTG_GRXSTSP_EPNUM;
+			pktsts = (temp & USB_OTG_GRXSTSP_PKTSTS) >> 17;
+			pktcnt = (temp & USB_OTG_GRXSTSP_BCNT) >> 4;
+			if (pktsts == 2)	// GRXSTS_PKTSTS_IN
+			{
+				if (pktcnt > 0)
+				{
+					// TODO
+					//hc_manual_read()
+				}
+			}
 			
 			dwcotg->global_reg->gintmsk |= USB_OTG_GINTMSK_RXFLVLM;
 		}
-		
-		
-		
-#if 0
-	; 
-			USB_OTG_GINTMSK_WUIM;
-#endif
-		
-
 		if (intsts & USB_OTG_GINTSTS_NPTXFE)
 		{
 			// TODO
+			dwcotg->global_reg->gintsts = USB_OTG_GINTSTS_NPTXFE;
 		}
 		if (intsts & USB_OTG_GINTSTS_HPRTINT)
 		{
 			// TODO
+			dwcotg->global_reg->gintsts = USB_OTG_GINTSTS_HPRTINT;
 		}
 		if (intsts & USB_OTG_GINTSTS_PTXFE)
 		{
 			// TODO
+			dwcotg->global_reg->gintsts = USB_OTG_GINTSTS_PTXFE;
 		}
 	}
 	else // device mode
@@ -958,9 +988,8 @@ static vsf_err_t dwcotgh_submit_urb(struct vsfhcd_t *hcd, struct vsfhcd_urb_t *u
 	else
 		urb_priv->phase = URB_PRIV_PHASE_PERIOD_WAIT;
 
-	if ((urb_priv->type == URB_PRIV_TYPE_INT) ||
-		(urb_priv->type == URB_PRIV_TYPE_BULK))
-	{ 
+	if ((urb_priv->type == URB_PRIV_TYPE_INT) || (urb_priv->type == URB_PRIV_TYPE_BULK))
+	{
 		urb_priv->toggle_start = urb->hcddev->toggle[usb_pipein(pipe)] &
 				(0x1ul << usb_pipeendpoint(pipe));
 
@@ -987,9 +1016,7 @@ static vsf_err_t dwcotgh_submit_urb(struct vsfhcd_t *hcd, struct vsfhcd_urb_t *u
 			return VSFERR_NONE;
 	}
 	else
-	{
 		err = VSFERR_NOT_ENOUGH_RESOURCES;
-	}
 
 	urb->status = URB_FAIL;
 	return err;

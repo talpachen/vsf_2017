@@ -64,7 +64,7 @@
 		.ulpi_en = 1,
 		.utmi_en = 0,
 		.vbus_en = 0,
-		.hc_amount = 8,
+		.hc_amount = 11,
 		.rx_fifo_size = 0x200,
 		.non_periodic_tx_fifo_size = 0x100,
 		.periodic_tx_fifo_size = 0xE0,
