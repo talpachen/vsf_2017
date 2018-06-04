@@ -129,7 +129,7 @@ static vsf_err_t hc_submit(struct dwcotg_t *dwcotg, struct hc_t *hc,
 	reg->hcchar = ((hc->dev_addr << 22) & USB_OTG_HCCHAR_DAD) |
 			((hc->ep_num << 11) & USB_OTG_HCCHAR_EPNUM) |
 			(hc->dir_o0_i1 ? USB_OTG_HCCHAR_EPDIR : 0) |
-			((hc->speed == USB_SPEED_LOW) ? USB_OTG_HCCHAR_EPDIR : 0) |
+			((urb_priv->speed == USB_SPEED_LOW) ? USB_OTG_HCCHAR_EPDIR : 0) |
 			(((uint32_t)pipetype_to_dwctype[urb_priv->type] << 18) & USB_OTG_HCCHAR_EPTYP) |
 			(urb_priv->packet_size & USB_OTG_HCCHAR_MPSIZ);
 	if (urb_priv->type == URB_PRIV_TYPE_INT)
@@ -163,7 +163,6 @@ static vsf_err_t hc_submit(struct dwcotg_t *dwcotg, struct hc_t *hc,
 	}
 	else
 		pkt_num = 1;
-	urb_priv->toggle_next = urb_priv->toggle_start ^ (pkt_num & 0x1);
 	if (hc->dir_o0_i1)
 		size = urb_priv->packet_size * pkt_num;
 	hc->transfer_size = size;
@@ -255,7 +254,7 @@ static vsf_err_t submit_priv_urb(struct dwcotg_t *dwcotg,
 			break;
 		case URB_PRIV_TYPE_INT:
 		case URB_PRIV_TYPE_BULK:
-			hc->dpid = urb_priv->toggle_start ? HC_DPID_DATA1 : HC_DPID_DATA0;
+			hc->dpid = urb_priv->toggle ? HC_DPID_DATA1 : HC_DPID_DATA0;
 			break;
 		}
 		return hc_submit(dwcotg, hc, urb_priv->transfer_buffer, urb_priv->transfer_length);
@@ -282,17 +281,11 @@ static void vsfdwcotg_hc_done_handler(struct dwcotg_t *dwcotg,
 		struct urb_priv_t *urb_priv, struct hc_t *hc)
 {
 	struct vsfhcd_urb_t *urb = container_of(urb_priv, struct vsfhcd_urb_t, priv);
-	struct dwcotg_device_t *dev_priv = hc->owner_dev;
-	struct vsfhcd_device_t *hcddev = dev_priv->hcddev;
+	struct vsfhcd_device_t *hcddev = urb->hcddev;
 
-	if ((hcddev == NULL) || (urb_priv->discarded))
+	if (urb_priv->discarded)
 	{
 		free_priv_urb(urb_priv);
-		if (hcddev == NULL)
-		{
-			if (dev_priv->hc_num == 0)
-				vsf_bufmgr_free(dev_priv);
-		}
 		return;
 	}
 
@@ -310,29 +303,20 @@ static void vsfdwcotg_hc_done_handler(struct dwcotg_t *dwcotg,
 		switch (urb_priv->type)
 		{
 		case URB_PRIV_TYPE_INT:
-			urb_priv->toggle_start = urb_priv->toggle_next;
-			if (urb_priv->toggle_next)
-			{
+			if (urb_priv->toggle)
 				hcddev->toggle[hc->dir_o0_i1] |= 0x1ul << hc->ep_num;
-			}
 			else
-			{
 				hcddev->toggle[hc->dir_o0_i1] &= ~(0x1ul << hc->ep_num);
-			}
 		case URB_PRIV_TYPE_ISO:
 			urb->actual_length = urb_priv->actual_length;
 			urb->status = URB_OK;
 			vsfsm_post_evt_pending(urb->notifier_sm, VSFSM_EVT_URB_COMPLETE);
 			break;
 		case URB_PRIV_TYPE_BULK:
-			if (urb_priv->toggle_next)
-			{
+			if (urb_priv->toggle)
 				hcddev->toggle[hc->dir_o0_i1] |= 0x1ul << hc->ep_num;
-			}
 			else
-			{
 				hcddev->toggle[hc->dir_o0_i1] &= ~(0x1ul << hc->ep_num);
-			}
 			urb->actual_length = urb_priv->actual_length;
 			hc_free(&urb_priv->hc);
 			urb->status = URB_OK;
@@ -417,8 +401,9 @@ static void vsfdwcotg_hc_in_handler(struct dwcotg_t *dwcotg, uint8_t hc_num)
 		}
 
 		hc->hc_state = HC_XFRC;
+		hc->err_cnt = 0;
+		urb_priv->toggle ^= 1;
 		hc_reg->hcint = USB_OTG_HCINT_XFRC;
-		hc_reg->hcintmsk |= USB_OTG_HCINT_XFRC;
 
 		if ((urb_priv->type == URB_PRIV_TYPE_CTRL) || (urb_priv->type == URB_PRIV_TYPE_BULK))
 		{
@@ -430,9 +415,8 @@ static void vsfdwcotg_hc_in_handler(struct dwcotg_t *dwcotg, uint8_t hc_num)
 		{
 			hc_reg->hcchar |= USB_OTG_HCCHAR_ODDFRM;
 			urb_priv->state = URB_PRIV_STATE_DONE;
-			// vsfdwcotg_hc_done_handler(dwcotg, urb_priv, hc);
+			//vsfdwcotg_hc_done_handler(dwcotg, urb_priv, hc);
 		}
-		// Maybe TODO : toggle
 	}
 	else if (hc_reg->hcint & USB_OTG_HCINT_CHH)
 	{
@@ -465,15 +449,15 @@ static void vsfdwcotg_hc_in_handler(struct dwcotg_t *dwcotg, uint8_t hc_num)
 			urb_priv->state = URB_PRIV_STATE_ERROR;
 
 		hc_reg->hcint = USB_OTG_HCINT_CHH;
-		vsfdwcotg_hc_done_handler(dwcotg, urb_priv, hc);
-	}	
+		//vsfdwcotg_hc_done_handler(dwcotg, urb_priv, hc);
+	}
 	else if (hc_reg->hcint & USB_OTG_HCINT_TXERR)
 	{
 		hc_reg->hcintmsk |= USB_OTG_HCINTMSK_CHHM;
 		if (hc->err_cnt < 3)
 			hc->err_cnt++;
 		hc->hc_state = HC_XACTERR;
-		hc_halt(dwcotg, hc_num);	
+		hc_halt(dwcotg, hc_num);
 		hc_reg->hcint = USB_OTG_HCINT_TXERR;
 	}
 	else if (hc_reg->hcint & USB_OTG_HCINT_NAK)
@@ -554,7 +538,7 @@ static void vsfdwcotg_hc_out_handler(struct dwcotg_t *dwcotg, uint8_t hc_num)
 	{
 		hc->err_cnt = 0;
 		hc->hc_state = HC_NAK;
-		if (!hc->do_ping  && (hc->speed == USB_SPEED_HIGH))
+		if (!hc->do_ping  && (urb_priv->speed == USB_SPEED_HIGH))
 			hc->do_ping = 1;
 		hc_reg->hcintmsk |= USB_OTG_HCINTMSK_CHHM;
 		hc_halt(dwcotg, hc_num);
@@ -583,10 +567,7 @@ static void vsfdwcotg_hc_out_handler(struct dwcotg_t *dwcotg, uint8_t hc_num)
 		{
 			urb_priv->state = URB_PRIV_STATE_DONE;
 			if (urb_priv->type == URB_PRIV_TYPE_BULK)
-			{
-				// TODO
-				//hc->toggle ^= 1;
-			}
+				urb_priv->toggle ^= 1;
 		}
 		else if (hc->hc_state == HC_NAK)
 			urb_priv->state = URB_PRIV_STATE_NOTREADY;
@@ -612,7 +593,7 @@ static void vsfdwcotg_hc_out_handler(struct dwcotg_t *dwcotg, uint8_t hc_num)
 			urb_priv->state = URB_PRIV_STATE_ERROR;
 
 		hc_reg->hcint = USB_OTG_HCINT_CHH;
-		vsfdwcotg_hc_done_handler(dwcotg, urb_priv, hc);
+		//vsfdwcotg_hc_done_handler(dwcotg, urb_priv, hc);
 	}
 }
 
@@ -988,11 +969,12 @@ static vsf_err_t dwcotgh_submit_urb(struct vsfhcd_t *hcd, struct vsfhcd_urb_t *u
 	else
 		urb_priv->phase = URB_PRIV_PHASE_PERIOD_WAIT;
 
+	urb_priv->speed = usb_pipespeed(pipe);
+	
 	if ((urb_priv->type == URB_PRIV_TYPE_INT) || (urb_priv->type == URB_PRIV_TYPE_BULK))
 	{
-		urb_priv->toggle_start = urb->hcddev->toggle[usb_pipein(pipe)] &
+		urb_priv->toggle = urb->hcddev->toggle[usb_pipein(pipe)] &
 				(0x1ul << usb_pipeendpoint(pipe));
-
 		urb_priv->do_ping = dwcotg->dma_en ? 0 :
 				(usb_pipespeed(pipe) == USB_SPEED_HIGH);
 	}
@@ -1007,7 +989,6 @@ static vsf_err_t dwcotgh_submit_urb(struct vsfhcd_t *hcd, struct vsfhcd_urb_t *u
 	{
 		hc->dev_addr = usb_pipedevice(pipe);
 		hc->ep_num = usb_pipeendpoint(pipe);
-		hc->speed = usb_pipespeed(pipe);
 		hc->owner_priv = urb_priv;
 		urb_priv->hc = hc;
 

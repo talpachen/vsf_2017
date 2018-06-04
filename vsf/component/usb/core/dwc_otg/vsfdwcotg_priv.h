@@ -47,16 +47,13 @@ struct hc_t
 	uint8_t dir_o0_i1 : 1;
 
 	uint8_t ep_num : 4;
-	uint8_t speed : 2;
-	uint8_t err_cnt : 2;
-
 	uint8_t hc_state : 4;
+	uint8_t err_cnt : 2;
 	uint8_t dpid : 2;
 	uint8_t do_ping : 1;
 
 	uint32_t transfer_size;
 
-	struct dwcotg_device_t *owner_dev;
 	struct urb_priv_t *owner_priv;
 };
 
@@ -91,13 +88,14 @@ struct urb_priv_t
 	uint8_t type : 2;
 	uint8_t phase : 3;
 	uint8_t state : 3;
-
-	uint8_t toggle_start : 1;
-	uint8_t toggle_next : 1;
+	
+	uint8_t speed : 2;
+	uint8_t toggle : 1;
+	//uint8_t toggle_out : 1;
 	uint8_t do_ping : 1;
 	uint8_t dir_o0_i1 : 1;
 	uint8_t discarded : 1;
-	uint8_t  : 3;
+	uint8_t  : 2;
 	uint16_t actual_length;
 
 	void *transfer_buffer;
