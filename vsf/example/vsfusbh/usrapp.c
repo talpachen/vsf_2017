@@ -22,8 +22,8 @@
 		.non_periodic_out_packet_size_max = 256,
 		.in_packet_size_max = 128,
 	};
-	#define USBH_HCDDRV		&vsfdwcotgh_drv
-	#define USBH_HCDPARAM	&fs_dwcotg_param
+	#define USBH_HCDDRV		(&vsfdwcotgh_drv)
+	#define USBH_HCDPARAM	(&fs_dwcotg_param)
 #elif defined(SOC_TYPE_CMEM7)
 	#if defined(SOC_TYPE_CMEM7_KEIL)
 	uint8_t heap_buf[1024 * 8];
@@ -51,8 +51,8 @@
 		.non_periodic_out_packet_size_max = 256,
 		.in_packet_size_max = 4096,
 	};
-	#define USBH_HCDDRV		&vsfdwcotgh_drv
-	#define USBH_HCDPARAM	&hs_dwcotg_param
+	#define USBH_HCDDRV		(&vsfdwcotgh_drv)
+	#define USBH_HCDPARAM	(&hs_dwcotg_param)
 #elif defined(BOARD_TYPE_STM32F769I_DISCO)
 	static struct vsfdwcotg_hcd_param_t hs_dwcotg_param = 
 	{
@@ -74,11 +74,10 @@
 		.non_periodic_out_packet_size_max = 256,
 		.in_packet_size_max = 512,
 	};
-	#define USBH_HCDDRV		&vsfdwcotgh_drv
-	#define USBH_HCDPARAM	&hs_dwcotg_param
+	#define USBH_HCDDRV		(&vsfdwcotgh_drv)
+	#define USBH_HCDPARAM	(&hs_dwcotg_param)
 #endif
-
-
+	
 struct usrapp_t usrapp =
 {
 	.usbh = 
@@ -88,26 +87,36 @@ struct usrapp_t usrapp =
 	},
 };
 
-static void *test_uvc_data;
-
-static uint32_t frame_cnt = 0;
-static uint32_t frame_bytes[300];
-
-void uvc_decode_report_recv(void *dev_data, struct vsfusbh_uvc_param_t *param,
-		struct vsfusbh_uvc_payload_t *payload)
+void uvc_decode_report_recv(void *dev, struct vsfusbh_uvc_param_t *param,
+		uint8_t type, uint8_t *data, uint32_t size)
 {
-	if (dev_data == NULL)
+	if (!dev || !param)
 		return;
 	
-	if (test_uvc_data == NULL)
+	if (!data)
 	{
-		struct vsfusbh_uvc_param_t param = {1, 1, 0, 
-				VSFUSBH_UVC_VIDEO_FORMAT_YUY2, 30, 640, 480};
-		test_uvc_data = dev_data;
-		vsfusbh_uvc_set(dev_data, &param);
+		if ((param->vid == 0x041e) || (param->vid == 0x4087))	// ov2710 test camera
+		{
+			param->video_enable = true;
+			param->video_iso_ep = 2;
+			param->video_iso_packet_len = min(USBH_HCDPARAM->in_packet_size_max, 1024);
+			param->video_interface = 1;
+			param->video_interface_altr_setting = 1;
+			
+			param->video_ctrl.bmHint = 1;
+			param->video_ctrl.bFormatIndex = VSFUSBH_UVC_VIDEO_FORMAT_YUY2;
+			param->video_ctrl.bFrameIndex = 5;	// 5: 320x240; 7: 720P; 8: 1080P
+			param->video_ctrl.dwFrameInterval = 10000000 / 5;	// FPS: 5, 10, 15, 20, 25, 30
+			param->video_ctrl.wDelay = 0x0a;
+			param->video_ctrl.dwMaxVideoFrameSize = 320 * 240 * 1 + 64;
+			//param->video_ctrl.dwMaxVideoFrameSize = 1280 * 720 * 1 + 64;	// 720P
+			//param->video_ctrl.dwMaxVideoFrameSize = 1920 * 1080 * 1 + 64;	// 1080P
+			param->video_ctrl.dwMaxPayloadTransferSize = param->video_iso_packet_len;
+		}
 	}
-	else if (payload != NULL)
+	else
 	{
+#if 0
 		if (payload->len > 12)
 		{
 			if (frame_cnt < 300)
@@ -124,10 +133,7 @@ void uvc_decode_report_recv(void *dev_data, struct vsfusbh_uvc_param_t *param,
 				memset(frame_bytes, 0, sizeof(frame_bytes));
 			}
 		}
-	}
-	else
-	{
-		// get current param
+#endif
 	}
 }
 

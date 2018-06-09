@@ -20,42 +20,53 @@
 #ifndef __VSFUSBH_UVC_H_INCLUDED__
 #define __VSFUSBH_UVC_H_INCLUDED__
 
+PACKED_HEAD struct PACKED_MID video_probe_commit_ctrl_t
+{
+	uint16_t bmHint;
+	uint8_t bFormatIndex;
 #define VSFUSBH_UVC_VIDEO_FORMAT_MJPEG	0x1
 #define VSFUSBH_UVC_VIDEO_FORMAT_YUY2	0x2
 #define VSFUSBH_UVC_VIDEO_FORMAT_RGB24	0x3
-
-enum VSFUSBH_UVC_PAYLOAD_TYPE_T
-{
-	VSFUSBH_UVC_PAYLOAD_VIDEO = 0x01,
-	VSFUSBH_UVC_PAYLOAD_AUDIO = 0x02,
-};
-
-struct vsfusbh_uvc_payload_t
-{
-	uint32_t type : 8;
-	uint32_t len : 24;
-	uint8_t *buf;
-};
+	uint8_t bFrameIndex;
+	uint32_t dwFrameInterval;
+	uint16_t wKeyFrameRate;
+	uint16_t wPFrameRate;
+	uint16_t wCompQuality;
+	uint16_t wCompWindowSize;
+	uint16_t wDelay;
+	uint32_t dwMaxVideoFrameSize;
+	uint32_t dwMaxPayloadTransferSize;
+}; PACKED_TAIL
 
 struct vsfusbh_uvc_param_t
 {
-	uint8_t connected : 1;
-	uint8_t video_enable : 1;
-	uint8_t audio_enable : 1;
-	uint8_t video_format : 3;
-	uint8_t : 2;
+	uint16_t vid;
+	uint16_t pid;
+	
+	bool video_enable;
+	bool audio_enable;
+	
+	uint8_t video_iso_ep;
+	uint8_t audio_iso_ep;
+	uint16_t video_iso_packet_len;
+	uint16_t audio_iso_packet_len;
+	
+	uint8_t video_interface;
+	uint8_t video_interface_altr_setting;
+	uint8_t audio_interface;
+	uint8_t audio_interface_altr_setting;
 
-	uint8_t video_fps;
-	uint16_t video_width;
-	uint16_t video_height;
+	struct video_probe_commit_ctrl_t video_ctrl;
 };
 
 #ifndef VSFCFG_EXCLUDE_USBH_UVC
 vsf_err_t vsfusbh_uvc_set(void *dev_data, struct vsfusbh_uvc_param_t *param);
 
-extern void (*vsfusbh_uvc_report)(void *dev_data,
-		struct vsfusbh_uvc_param_t *param,
-		struct vsfusbh_uvc_payload_t *payload);
+
+#define VSFUSBH_UVC_REPORT_TYPE_VIDEO		0x01
+#define VSFUSBH_UVC_REPORT_TYPE_AUDIO		0x02
+extern void (*vsfusbh_uvc_report)(void *dev, struct vsfusbh_uvc_param_t *param,
+		uint8_t type, uint8_t *data, uint32_t size);
 extern const struct vsfusbh_class_drv_t vsfusbh_uvc_drv;
 #endif
 
