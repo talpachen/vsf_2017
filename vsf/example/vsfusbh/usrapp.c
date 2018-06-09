@@ -17,7 +17,6 @@
 		.non_periodic_tx_fifo_size = 0x60,
 		.periodic_tx_fifo_size = 0x40,
 
-		.fifo_size = 0x600,
 		.periodic_out_packet_size_max = 256,
 		.non_periodic_out_packet_size_max = 256,
 		.in_packet_size_max = 128,
@@ -44,9 +43,6 @@
 		.non_periodic_tx_fifo_size = 0x400,
 		.periodic_tx_fifo_size = 0x400,
 		
-		
-		.fifo_size = 0x500,
-		
 		.periodic_out_packet_size_max = 256,
 		.non_periodic_out_packet_size_max = 256,
 		.in_packet_size_max = 4096,
@@ -63,16 +59,15 @@
 		.dma_en = 1,
 		.ulpi_en = 1,
 		.utmi_en = 0,
-		.vbus_en = 0,
+		.vbus_en = 1,
 		.hc_amount = 11,
-		.rx_fifo_size = 0x200,
-		.non_periodic_tx_fifo_size = 0x100,
-		.periodic_tx_fifo_size = 0xE0,
+		.rx_fifo_size = 0x400,
+		.non_periodic_tx_fifo_size = 0x400,
+		.periodic_tx_fifo_size = 0x400,
 
-		.fifo_size = 0x1000,
 		.periodic_out_packet_size_max = 256,
 		.non_periodic_out_packet_size_max = 256,
-		.in_packet_size_max = 512,
+		.in_packet_size_max = 1024,
 	};
 	#define USBH_HCDDRV		(&vsfdwcotgh_drv)
 	#define USBH_HCDPARAM	(&hs_dwcotg_param)

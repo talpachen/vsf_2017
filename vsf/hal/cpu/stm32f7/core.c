@@ -134,7 +134,7 @@ vsf_err_t vsfhal_core_init(void *p)
 		RCC->PLLCFGR = pllcfgr;
 		RCC->CR |= RCC_CR_PLLON;
 		while (!(RCC->CR & RCC_CR_PLLRDY));
-	} 
+	}
 
 	// set pclk and hclk
 	RCC->CFGR &= ~(RCC_CFGR_HPRE | RCC_CFGR_PPRE1 | RCC_CFGR_PPRE2);
@@ -175,7 +175,7 @@ void vsfhal_core_sleep(uint32_t mode)
 {
 	vsf_leave_critical();
 	// TODO
-	__WFI();
+	//__WFI();
 }
 
 static void (*tickclk_callback)(void *param) = NULL;

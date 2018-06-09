@@ -44,8 +44,6 @@ struct vsfdwcotg_hcd_param_t
 	uint16_t periodic_out_packet_size_max;
 	uint16_t non_periodic_out_packet_size_max;
 	uint16_t in_packet_size_max;
-	
-	uint32_t fifo_size;
 };
 
 extern const struct vsfhcd_drv_t vsfdwcotgh_drv;

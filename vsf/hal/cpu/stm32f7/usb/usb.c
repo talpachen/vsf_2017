@@ -91,29 +91,20 @@ vsf_err_t vsfhal_hcd_init(uint32_t index, int32_t int_priority, void (*irq)(void
 	if (index == VSFHAL_USB_HS_INDEX)
 	{		
 		RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN | RCC_AHB1ENR_GPIOBEN |
-				RCC_AHB1ENR_GPIOCEN | RCC_AHB1ENR_GPIOHEN;
+				RCC_AHB1ENR_GPIOCEN | RCC_AHB1ENR_GPIOHEN | RCC_AHB1ENR_GPIOIEN;
 
-		// CLK
-		ulpi_io_config(GPIOA, 5);
-
-		// D0 - D7
-		ulpi_io_config(GPIOA, 3);
-		ulpi_io_config(GPIOB, 0);
-		ulpi_io_config(GPIOB, 1);
-		ulpi_io_config(GPIOB, 5);
-		ulpi_io_config(GPIOB, 10);
-		ulpi_io_config(GPIOB, 11);
-		ulpi_io_config(GPIOB, 12);
-		ulpi_io_config(GPIOB, 13);
-
-		// STP
-		ulpi_io_config(GPIOC, 0);
-
-		// NXT
-		ulpi_io_config(GPIOH, 4);
-
-		// DIR
-		ulpi_io_config(GPIOC, 2);
+		ulpi_io_config(VSFHAL_USBHS_ULPI_CK_GPIO, VSFHAL_USBHS_ULPI_CK_IO);
+		ulpi_io_config(VSFHAL_USBHS_ULPI_D0_GPIO, VSFHAL_USBHS_ULPI_D0_IO);
+		ulpi_io_config(VSFHAL_USBHS_ULPI_D1_GPIO, VSFHAL_USBHS_ULPI_D1_IO);
+		ulpi_io_config(VSFHAL_USBHS_ULPI_D2_GPIO, VSFHAL_USBHS_ULPI_D2_IO);
+		ulpi_io_config(VSFHAL_USBHS_ULPI_D3_GPIO, VSFHAL_USBHS_ULPI_D3_IO);
+		ulpi_io_config(VSFHAL_USBHS_ULPI_D4_GPIO, VSFHAL_USBHS_ULPI_D4_IO);
+		ulpi_io_config(VSFHAL_USBHS_ULPI_D5_GPIO, VSFHAL_USBHS_ULPI_D5_IO);
+		ulpi_io_config(VSFHAL_USBHS_ULPI_D6_GPIO, VSFHAL_USBHS_ULPI_D6_IO);
+		ulpi_io_config(VSFHAL_USBHS_ULPI_D7_GPIO, VSFHAL_USBHS_ULPI_D7_IO);
+		ulpi_io_config(VSFHAL_USBHS_ULPI_STP_GPIO, VSFHAL_USBHS_ULPI_STP_IO);
+		ulpi_io_config(VSFHAL_USBHS_ULPI_NXT_GPIO, VSFHAL_USBHS_ULPI_NXT_IO);
+		ulpi_io_config(VSFHAL_USBHS_ULPI_DIR_GPIO, VSFHAL_USBHS_ULPI_DIR_IO);
 
 		SET_BIT(RCC->AHB1ENR, RCC_AHB1ENR_OTGHSULPIEN);
 		SET_BIT(RCC->AHB1ENR, RCC_AHB1ENR_OTGHSEN);
@@ -149,7 +140,6 @@ vsf_err_t vsfhal_hcd_fini(uint32_t index)
 #endif
 	return VSFERR_NONE;
 }
-
 
 void *vsfhal_hcd_regbase(uint32_t index)
 {
