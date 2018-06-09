@@ -129,7 +129,7 @@ static vsf_err_t hc_submit(struct dwcotg_t *dwcotg, struct hc_t *hc,
 	reg->hcchar = ((hc->dev_addr << 22) & USB_OTG_HCCHAR_DAD) |
 			((hc->ep_num << 11) & USB_OTG_HCCHAR_EPNUM) |
 			(hc->dir_o0_i1 ? USB_OTG_HCCHAR_EPDIR : 0) |
-			((urb_priv->speed == USB_SPEED_LOW) ? USB_OTG_HCCHAR_EPDIR : 0) |
+			((urb_priv->speed == USB_SPEED_LOW) ? USB_OTG_HCCHAR_LSDEV : 0) |
 			(((uint32_t)pipetype_to_dwctype[urb_priv->type] << 18) & USB_OTG_HCCHAR_EPTYP) |
 			(urb_priv->packet_size & USB_OTG_HCCHAR_MPSIZ);
 	if (urb_priv->type == URB_PRIV_TYPE_INT)
@@ -180,10 +180,6 @@ static vsf_err_t hc_submit(struct dwcotg_t *dwcotg, struct hc_t *hc,
 
 	// Set host channel enable
 	tmp = (reg->hcchar & ~USB_OTG_HCCHAR_CHDIS) | USB_OTG_HCCHAR_CHENA;
-	if (hc->dir_o0_i1)
-		tmp |= USB_OTG_HCCHAR_EPDIR;
-	else
-		tmp &= ~USB_OTG_HCCHAR_EPDIR;
 	reg->hcchar = tmp;
 
 	if (!dwcotg->dma_en && (hc->dir_o0_i1 == 0) && (hc->transfer_size))
