@@ -73,11 +73,19 @@ static vsf_err_t uvc_ctrl_thread(struct vsfsm_pt_t *pt, vsfsm_evt_t evt)
 		if (!vsfusbh_alloc_urb_buffer(urb, sizeof(struct video_probe_commit_ctrl_t))) goto ret_fail;
 		memcpy(urb->transfer_buffer, &uvc->set_param.video_ctrl, sizeof(struct video_probe_commit_ctrl_t));
 		urb->pipe = usb_sndctrlpipe(urb->hcddev, 0);
+#if 0
+		err =  vsfusbh_control_msg(uvc->usbh, urb, USB_TYPE_CLASS |USB_RECIP_INTERFACE | USB_DIR_OUT, SET_CUR,
+				0x0100, 0x0001);
+		if (err) goto ret_fail;
+		vsfsm_pt_wfe(pt, VSFSM_EVT_URB_COMPLETE);
+		if (urb->status != URB_OK) goto ret_fail;
+#endif
 		err =  vsfusbh_control_msg(uvc->usbh, urb, USB_TYPE_CLASS |USB_RECIP_INTERFACE | USB_DIR_OUT, SET_CUR,
 				0x0200, 0x0001);
 		if (err) goto ret_fail;
 		vsfsm_pt_wfe(pt, VSFSM_EVT_URB_COMPLETE);
 		if (urb->status != URB_OK) goto ret_fail;
+		
 		vsfusbh_free_urb_buffer(urb);
 		
 		// set interfaces
@@ -128,13 +136,18 @@ static struct vsfsm_state_t *uvc_evt_handler_video(struct vsfsm_t *sm,
 	case UAV_ISO_ENABLE:
 		if (!urb->transfer_buffer)
 		{
-			if (!vsfusbh_alloc_urb_buffer(urb, uvc->set_param.video_iso_packet_len))
+			if (!vsfusbh_alloc_urb_buffer(urb, uvc->set_param.video_iso_packet_len * 3))
 				break;
 			urb->pipe = usb_rcvisocpipe(urb->hcddev, uvc->set_param.video_iso_ep);
 			urb->transfer_flags |= USB_ISO_ASAP;
-			urb->number_of_packets = 1;
+			urb->interval = 1;
+			urb->number_of_packets = 3;
 			urb->iso_frame_desc[0].offset = 0;
 			urb->iso_frame_desc[0].length = uvc->set_param.video_iso_packet_len;
+			urb->iso_frame_desc[1].offset = uvc->set_param.video_iso_packet_len;
+			urb->iso_frame_desc[1].length = uvc->set_param.video_iso_packet_len;
+			urb->iso_frame_desc[2].offset = uvc->set_param.video_iso_packet_len * 2;
+			urb->iso_frame_desc[2].length = uvc->set_param.video_iso_packet_len;
 			err = vsfusbh_submit_urb(uvc->usbh, urb);
 			if (err != VSFERR_NONE)
 				break;
@@ -247,6 +260,11 @@ const struct vsfusbh_device_id_t vsfusbh_uvc_id_table[] =
 		.match_flags = USB_DEVICE_ID_MATCH_VENDOR | USB_DEVICE_ID_MATCH_PRODUCT,
 		.idVendor = 0x041e,
 		.idProduct = 0x4087,
+	},
+	{
+		.match_flags = USB_DEVICE_ID_MATCH_VENDOR | USB_DEVICE_ID_MATCH_PRODUCT,
+		.idVendor = 0x0c45,
+		.idProduct = 0x6341,
 	},
 	{0},
 };

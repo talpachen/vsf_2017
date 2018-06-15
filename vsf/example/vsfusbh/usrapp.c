@@ -108,6 +108,26 @@ void uvc_decode_report_recv(void *dev, struct vsfusbh_uvc_param_t *param,
 			//param->video_ctrl.dwMaxVideoFrameSize = 1920 * 1080 * 1 + 64;	// 1080P
 			param->video_ctrl.dwMaxPayloadTransferSize = param->video_iso_packet_len;
 		}
+		else if ((param->vid == 0x0c45) || (param->vid == 0x6341))	// bainaotong 720p camera
+		{
+			param->video_enable = true;
+			param->video_iso_ep = 1;
+			param->video_iso_packet_len = min(USBH_HCDPARAM->in_packet_size_max, 1024);
+			param->video_interface = 1;
+			param->video_interface_altr_setting = 6;
+			
+			param->video_ctrl.bmHint = 0x455c;
+			param->video_ctrl.bFormatIndex = VSFUSBH_UVC_VIDEO_FORMAT_YUY2;
+			param->video_ctrl.bFrameIndex = 1;
+			param->video_ctrl.dwFrameInterval = 10000000 / 10;
+			param->video_ctrl.wKeyFrameRate = 0x129d;
+			param->video_ctrl.wPFrameRate = 0x33ed;
+			param->video_ctrl.wCompQuality = 0;
+			param->video_ctrl.wCompWindowSize = 0x2a7c;
+			param->video_ctrl.wDelay = 0x8fb0;
+			param->video_ctrl.dwMaxVideoFrameSize = 0x1c2000;
+			param->video_ctrl.dwMaxPayloadTransferSize = param->video_iso_packet_len * 3;
+		}
 	}
 	else
 	{
