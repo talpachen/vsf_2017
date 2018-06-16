@@ -73,7 +73,7 @@ static vsf_err_t uvc_ctrl_thread(struct vsfsm_pt_t *pt, vsfsm_evt_t evt)
 		if (!vsfusbh_alloc_urb_buffer(urb, sizeof(struct video_probe_commit_ctrl_t))) goto ret_fail;
 		memcpy(urb->transfer_buffer, &uvc->set_param.video_ctrl, sizeof(struct video_probe_commit_ctrl_t));
 		urb->pipe = usb_sndctrlpipe(urb->hcddev, 0);
-#if 0
+#if 1
 		err =  vsfusbh_control_msg(uvc->usbh, urb, USB_TYPE_CLASS |USB_RECIP_INTERFACE | USB_DIR_OUT, SET_CUR,
 				0x0100, 0x0001);
 		if (err) goto ret_fail;
@@ -263,6 +263,11 @@ const struct vsfusbh_device_id_t vsfusbh_uvc_id_table[] =
 		.match_flags = USB_DEVICE_ID_MATCH_VENDOR | USB_DEVICE_ID_MATCH_PRODUCT,
 		.idVendor = 0x0c45,
 		.idProduct = 0x6341,
+	},
+	{
+		.match_flags = USB_DEVICE_ID_MATCH_VENDOR | USB_DEVICE_ID_MATCH_PRODUCT,
+		.idVendor = 0x5149,
+		.idProduct = 0x13d3,
 	},
 	{0},
 };

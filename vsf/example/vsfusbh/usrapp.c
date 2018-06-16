@@ -90,41 +90,27 @@ void uvc_decode_report_recv(void *dev, struct vsfusbh_uvc_param_t *param,
 	
 	if (!data)
 	{
-		if ((param->vid == 0x041e) || (param->vid == 0x4087))	// ov2710 test camera
+		if ((param->vid == 0x041e) && (param->pid == 0x4087))	// ov2710 test camera
 		{
 			param->video_enable = true;
 			param->video_iso_ep = 2;
-			param->video_iso_packet_len = min(USBH_HCDPARAM->in_packet_size_max, 1024);
+			param->video_iso_packet_len = min(USBH_HCDPARAM->in_packet_size_max, 960);
 			param->video_interface = 1;
 			param->video_interface_altr_setting = 1;
 			
 			param->video_ctrl.bmHint = 0x0001;
 			param->video_ctrl.bFormatIndex = VSFUSBH_UVC_VIDEO_FORMAT_YUY2;
 			param->video_ctrl.bFrameIndex = 7;	// 5: 320x240; 7: 720P; 8: 1080P
-			param->video_ctrl.dwFrameInterval = 10000000 / 10; // FPS: 5, 10, 15, 20, 25, 30
+			param->video_ctrl.dwFrameInterval = 10000000 / 5; // FPS: 5, 10, 15, 20, 25, 30
 			param->video_ctrl.wKeyFrameRate = 0x0000;
 			param->video_ctrl.wPFrameRate = 0x0000;
 			param->video_ctrl.wCompQuality = 0x0000;
 			param->video_ctrl.wCompWindowSize = 0x0000;
 			param->video_ctrl.wDelay = 0x000a;
-			param->video_ctrl.dwMaxVideoFrameSize = 0x002a3000;
-			//param->video_ctrl.dwMaxPayloadTransferSize = param->video_iso_packet_len * 3;
-			param->video_ctrl.dwMaxPayloadTransferSize = 0x00000b40;
-			
-			
-#if 0
-			param->video_ctrl.bmHint = 1;
-			param->video_ctrl.bFormatIndex = VSFUSBH_UVC_VIDEO_FORMAT_YUY2;
-			param->video_ctrl.bFrameIndex = 7;	// 5: 320x240; 7: 720P; 8: 1080P
-			param->video_ctrl.dwFrameInterval = 10000000 / 10;	// FPS: 5, 10, 15, 20, 25, 30
-			param->video_ctrl.wDelay = 0x0a;
-			//param->video_ctrl.dwMaxVideoFrameSize = 320 * 240 * 1 + 64;
-			param->video_ctrl.dwMaxVideoFrameSize = 1280 * 720 * 1 + 64;	// 720P
-			//param->video_ctrl.dwMaxVideoFrameSize = 1920 * 1080 * 1 + 64;	// 1080P
-			param->video_ctrl.dwMaxPayloadTransferSize = param->video_iso_packet_len;
-#endif
+			param->video_ctrl.dwMaxVideoFrameSize = 0x00025800;
+			param->video_ctrl.dwMaxPayloadTransferSize = param->video_iso_packet_len * 3;
 		}
-		else if ((param->vid == 0x0c45) || (param->vid == 0x6341))	// bainaotong 720p camera
+		else if ((param->vid == 0x0c45) && (param->pid == 0x6341))	// bainaotong 720p camera
 		{
 			param->video_enable = true;
 			param->video_iso_ep = 1;
@@ -142,6 +128,26 @@ void uvc_decode_report_recv(void *dev, struct vsfusbh_uvc_param_t *param,
 			param->video_ctrl.wCompWindowSize = 0x2a7c;
 			param->video_ctrl.wDelay = 0x8fb0;
 			param->video_ctrl.dwMaxVideoFrameSize = 0x1c2000;
+			param->video_ctrl.dwMaxPayloadTransferSize = param->video_iso_packet_len * 3;
+		}
+		else if ((param->vid == 0x5149) && (param->pid == 0x13d3))	// cheap 720p camera
+		{
+			param->video_enable = true;
+			param->video_iso_ep = 1;
+			param->video_iso_packet_len = min(USBH_HCDPARAM->in_packet_size_max, 1024);
+			param->video_interface = 1;
+			param->video_interface_altr_setting = 1;
+			
+			param->video_ctrl.bmHint = 0x0000;
+			param->video_ctrl.bFormatIndex = VSFUSBH_UVC_VIDEO_FORMAT_YUY2;
+			param->video_ctrl.bFrameIndex = 4;
+			param->video_ctrl.dwFrameInterval = 1333333;
+			param->video_ctrl.wKeyFrameRate = 0x0000;
+			param->video_ctrl.wPFrameRate = 0x0000;
+			param->video_ctrl.wCompQuality = 0x0000;
+			param->video_ctrl.wCompWindowSize = 0x0000;
+			param->video_ctrl.wDelay = 0x0032;
+			param->video_ctrl.dwMaxVideoFrameSize = 0x00280000;
 			param->video_ctrl.dwMaxPayloadTransferSize = param->video_iso_packet_len * 3;
 		}
 	}
