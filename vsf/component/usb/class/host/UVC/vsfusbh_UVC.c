@@ -136,18 +136,16 @@ static struct vsfsm_state_t *uvc_evt_handler_video(struct vsfsm_t *sm,
 	case UAV_ISO_ENABLE:
 		if (!urb->transfer_buffer)
 		{
+			if (uvc->dev->ep_mps_in[uvc->set_param.video_iso_ep] > uvc->set_param.video_iso_packet_len)
+				uvc->dev->ep_mps_in[uvc->set_param.video_iso_ep] = uvc->set_param.video_iso_packet_len;			
+			
 			if (!vsfusbh_alloc_urb_buffer(urb, uvc->set_param.video_iso_packet_len * 3))
 				break;
 			urb->pipe = usb_rcvisocpipe(urb->hcddev, uvc->set_param.video_iso_ep);
 			urb->transfer_flags |= USB_ISO_ASAP;
-			urb->interval = 1;
-			urb->number_of_packets = 3;
+			urb->number_of_packets = 1;
 			urb->iso_frame_desc[0].offset = 0;
-			urb->iso_frame_desc[0].length = uvc->set_param.video_iso_packet_len;
-			urb->iso_frame_desc[1].offset = uvc->set_param.video_iso_packet_len;
-			urb->iso_frame_desc[1].length = uvc->set_param.video_iso_packet_len;
-			urb->iso_frame_desc[2].offset = uvc->set_param.video_iso_packet_len * 2;
-			urb->iso_frame_desc[2].length = uvc->set_param.video_iso_packet_len;
+			urb->iso_frame_desc[0].length = uvc->set_param.video_iso_packet_len * 3;
 			err = vsfusbh_submit_urb(uvc->usbh, urb);
 			if (err != VSFERR_NONE)
 				break;

@@ -34,9 +34,10 @@ enum hc_state_t
 enum hc_dpid_t
 {
 	HC_DPID_DATA0 = 0,
-	HC_DPID_DATA2,
-	HC_DPID_DATA1,
-	HC_DPID_SETUP,
+	HC_DPID_DATA2 = 1,
+	HC_DPID_DATA1 = 2,
+	HC_DPID_SETUP = 3,
+	HC_DPID_MDATA = 3,
 };
 struct hc_t
 {

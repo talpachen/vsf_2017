@@ -94,6 +94,22 @@ static vsf_err_t hc_submit(struct dwcotg_t *dwcotg, struct hc_t *hc,
 	struct urb_priv_t *urb_priv = hc->owner_priv;
 	struct dwcotg_hc_regs_t *reg = &dwcotg->hc_regs[hc->hc_num];
 
+	// transfer size
+	if (size > 0)
+	{
+		pkt_num = (size + urb_priv->packet_size - 1) / urb_priv->packet_size;
+		if (pkt_num > 256)
+		{
+			pkt_num = 256;
+			size = urb_priv->packet_size * 256;
+		}
+	}
+	else
+		pkt_num = 1;
+	if (hc->dir_o0_i1)
+		size = urb_priv->packet_size * pkt_num;
+	hc->transfer_size = size;
+
 	reg->hcint = 0xffffffff;
 	
 	switch (urb_priv->type)
@@ -115,6 +131,21 @@ static vsf_err_t hc_submit(struct dwcotg_t *dwcotg, struct hc_t *hc,
 				USB_OTG_HCINTMSK_FRMORM;
 		break;
 	case URB_PRIV_TYPE_ISO:
+		if (urb_priv->speed == USB_SPEED_HIGH)
+		{
+			if (hc->dir_o0_i1)
+			{
+				if (pkt_num == 2)
+					hc->dpid = HC_DPID_DATA1;
+				else if (pkt_num == 3)
+					hc->dpid = HC_DPID_DATA2;
+			}
+			else
+			{
+				if (pkt_num > 1)
+					hc->dpid = HC_DPID_MDATA;
+			}
+		}
 		reg->hcintmsk = USB_OTG_HCINTMSK_XFRCM | USB_OTG_HCINTMSK_ACKM |
 				USB_OTG_HCINTMSK_AHBERR | USB_OTG_HCINTMSK_FRMORM ;
 		if (hc->dir_o0_i1)
@@ -135,7 +166,7 @@ static vsf_err_t hc_submit(struct dwcotg_t *dwcotg, struct hc_t *hc,
 	if (urb_priv->type == URB_PRIV_TYPE_INT)
 		reg->hcchar |= USB_OTG_HCCHAR_ODDFRM;
 	else if (urb_priv->type == URB_PRIV_TYPE_ISO)
-		reg->hcchar |= USB_OTG_HCCHAR_MC;
+		reg->hcchar |= (pkt_num << 20) & USB_OTG_HCCHAR_MC;
 
 #if 0
 	if (hc->speed == USB_SPEED_HIGH)
@@ -153,25 +184,6 @@ static vsf_err_t hc_submit(struct dwcotg_t *dwcotg, struct hc_t *hc,
 	}
 #endif
 
-	// transfer size
-	if (size > 0)
-	{
-		pkt_num = (size + urb_priv->packet_size - 1) / urb_priv->packet_size;
-		if (pkt_num > 256)
-		{
-			pkt_num = 256;
-			size = urb_priv->packet_size * 256;
-		}
-	}
-	else
-		pkt_num = 1;
-	if (hc->dir_o0_i1)
-		size = urb_priv->packet_size * pkt_num;
-	hc->transfer_size = size;
-
-	if (urb_priv->type == URB_PRIV_TYPE_ISO)
-		pkt_num = 3;
-	
 	reg->hctsiz = ((pkt_num << 19) & USB_OTG_HCTSIZ_PKTCNT) |
 			(((uint32_t)hc->dpid << 29) & USB_OTG_HCTSIZ_DPID) |
 			(size & USB_OTG_HCTSIZ_XFRSIZ);
@@ -247,8 +259,7 @@ static vsf_err_t submit_priv_urb(struct dwcotg_t *dwcotg,
 		switch (urb_priv->type)
 		{
 		case URB_PRIV_TYPE_ISO:
-			//hc->dpid = HC_DPID_DATA0;
-			hc->dpid = HC_DPID_DATA2;
+			hc->dpid = HC_DPID_DATA0;
 			break;
 		// TODO
 		case URB_PRIV_TYPE_CTRL:
@@ -973,7 +984,7 @@ static vsf_err_t dwcotgh_submit_urb(struct vsfhcd_t *hcd, struct vsfhcd_urb_t *u
 	else
 		urb_priv->phase = URB_PRIV_PHASE_PERIOD_WAIT;
 
-	urb_priv->speed = usb_pipespeed(pipe);
+	urb_priv->speed = urb->hcddev->speed;
 	
 	if ((urb_priv->type == URB_PRIV_TYPE_INT) || (urb_priv->type == URB_PRIV_TYPE_BULK))
 	{

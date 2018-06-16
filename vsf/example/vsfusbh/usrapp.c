@@ -98,15 +98,31 @@ void uvc_decode_report_recv(void *dev, struct vsfusbh_uvc_param_t *param,
 			param->video_interface = 1;
 			param->video_interface_altr_setting = 1;
 			
+			param->video_ctrl.bmHint = 0x0001;
+			param->video_ctrl.bFormatIndex = VSFUSBH_UVC_VIDEO_FORMAT_YUY2;
+			param->video_ctrl.bFrameIndex = 7;	// 5: 320x240; 7: 720P; 8: 1080P
+			param->video_ctrl.dwFrameInterval = 10000000 / 10; // FPS: 5, 10, 15, 20, 25, 30
+			param->video_ctrl.wKeyFrameRate = 0x0000;
+			param->video_ctrl.wPFrameRate = 0x0000;
+			param->video_ctrl.wCompQuality = 0x0000;
+			param->video_ctrl.wCompWindowSize = 0x0000;
+			param->video_ctrl.wDelay = 0x000a;
+			param->video_ctrl.dwMaxVideoFrameSize = 0x002a3000;
+			//param->video_ctrl.dwMaxPayloadTransferSize = param->video_iso_packet_len * 3;
+			param->video_ctrl.dwMaxPayloadTransferSize = 0x00000b40;
+			
+			
+#if 0
 			param->video_ctrl.bmHint = 1;
 			param->video_ctrl.bFormatIndex = VSFUSBH_UVC_VIDEO_FORMAT_YUY2;
-			param->video_ctrl.bFrameIndex = 5;	// 5: 320x240; 7: 720P; 8: 1080P
-			param->video_ctrl.dwFrameInterval = 10000000 / 5;	// FPS: 5, 10, 15, 20, 25, 30
+			param->video_ctrl.bFrameIndex = 7;	// 5: 320x240; 7: 720P; 8: 1080P
+			param->video_ctrl.dwFrameInterval = 10000000 / 10;	// FPS: 5, 10, 15, 20, 25, 30
 			param->video_ctrl.wDelay = 0x0a;
-			param->video_ctrl.dwMaxVideoFrameSize = 320 * 240 * 1 + 64;
-			//param->video_ctrl.dwMaxVideoFrameSize = 1280 * 720 * 1 + 64;	// 720P
+			//param->video_ctrl.dwMaxVideoFrameSize = 320 * 240 * 1 + 64;
+			param->video_ctrl.dwMaxVideoFrameSize = 1280 * 720 * 1 + 64;	// 720P
 			//param->video_ctrl.dwMaxVideoFrameSize = 1920 * 1080 * 1 + 64;	// 1080P
 			param->video_ctrl.dwMaxPayloadTransferSize = param->video_iso_packet_len;
+#endif
 		}
 		else if ((param->vid == 0x0c45) || (param->vid == 0x6341))	// bainaotong 720p camera
 		{
@@ -131,24 +147,26 @@ void uvc_decode_report_recv(void *dev, struct vsfusbh_uvc_param_t *param,
 	}
 	else
 	{
-#if 0
-		if (payload->len > 12)
+		static uint32_t tick[100], frame_bytes[100], frame_cnt = 0;
+
+		if (size > 12)
 		{
-			if (frame_cnt < 300)
+			if (frame_cnt < 100)
 			{
-				frame_bytes[frame_cnt] += payload->len - 12;
-				if (payload->buf[1] & 0x2)
+				if (!frame_bytes[frame_cnt])
+					tick[frame_cnt] = vsfhal_tickclk_get_ms();
+					
+				
+				frame_bytes[frame_cnt] += size - 12;
+				if (data[1] & 0x2)
 				{
 					frame_cnt++;
+					if (frame_cnt >= 100)
+						frame_cnt = 0;
+					frame_bytes[frame_cnt] = 0;
 				}
 			}
-			else
-			{
-				frame_cnt = 0;
-				memset(frame_bytes, 0, sizeof(frame_bytes));
-			}
 		}
-#endif
 	}
 }
 
