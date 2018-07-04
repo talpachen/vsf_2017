@@ -1,6 +1,6 @@
 #include "vsf.h"
 
-#if VSFHAL_USB_EN
+#if VSFHAL_USBH_EN
 
 struct
 {

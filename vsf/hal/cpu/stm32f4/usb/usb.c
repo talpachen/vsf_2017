@@ -1,6 +1,6 @@
 #include "vsf.h"
 
-#if VSFHAL_USB_EN
+#if VSFHAL_USBD_EN
 
 struct
 {
@@ -121,5 +121,5 @@ void *vsfhal_hcd_regbase(uint32_t index)
 	}
 }
 
-#endif // VSFHAL_USB_EN
+#endif // VSFHAL_USBD_EN
 
