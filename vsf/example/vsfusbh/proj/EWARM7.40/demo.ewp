@@ -3916,6 +3916,9 @@
       <name>component</name>
       <group>
         <name>crypto</name>
+        <excluded>
+          <configuration>CME-M7_Debug</configuration>
+        </excluded>
         <group>
           <name>crc</name>
           <excluded>
@@ -3933,6 +3936,9 @@
       </group>
       <group>
         <name>debug</name>
+        <excluded>
+          <configuration>CME-M7_Debug</configuration>
+        </excluded>
         <file>
           <name>$PROJ_DIR$\..\..\..\..\component\debug\vsfdbg.c</name>
         </file>
@@ -3943,6 +3949,7 @@
       <group>
         <name>file</name>
         <excluded>
+          <configuration>CME-M7_Debug</configuration>
           <configuration>CME-M7_Release</configuration>
         </excluded>
         <group>
@@ -4027,6 +4034,7 @@
       <group>
         <name>mal</name>
         <excluded>
+          <configuration>CME-M7_Debug</configuration>
           <configuration>CME-M7_Release</configuration>
         </excluded>
         <group>
@@ -4062,6 +4070,9 @@
       </group>
       <group>
         <name>shell</name>
+        <excluded>
+          <configuration>CME-M7_Debug</configuration>
+        </excluded>
         <file>
           <name>$PROJ_DIR$\..\..\..\..\component\shell\vsfshell.c</name>
         </file>
@@ -4071,6 +4082,9 @@
       </group>
       <group>
         <name>stream</name>
+        <excluded>
+          <configuration>CME-M7_Debug</configuration>
+        </excluded>
         <group>
           <name>usart_stream</name>
           <file>

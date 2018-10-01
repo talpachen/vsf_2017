@@ -22,11 +22,22 @@
 
 #include <string.h>
 
-#define __VSF_FUNCNAME__				__func__
-
 #define ROOTFUNC	
 #define PACKED_HEAD	
 #define PACKED_MID	__attribute__ ((packed))
 #define PACKED_TAIL	
+#define WEAKFUNC        // TODO
+
+#define vsf_gint_t						int// TODO
+#define vsf_set_gint(gint)				// TODO
+#define vsf_get_gint()					0// TODO
+#define vsf_enter_critical()			// TODO
+#define vsf_leave_critical()			// TODO
+
+#define compiler_get_heap()             NULL    // TODO
+#define compiler_get_heap_size()        1024    // TODO
+
+#define compiler_set_pc(reg)			// TODO
+#define compiler_get_lr(reg)			// TODO
 
 #endif	// __COMPILER_H_INCLUDED__
