@@ -141,7 +141,7 @@ static void vsfapp_init(struct vsfapp_t *app)
 #endif
 
 #ifdef APPCFG_BUFMGR_SIZE
-	vsf_bufmgr_init(APPCFG_BUFMGR_ADDR, APPCFG_BUFMGR_SIZE);
+	vsf_bufmgr_init(compiler_get_heap(), APPCFG_BUFMGR_SIZE);
 #endif
 
 #ifdef APPCFG_SRT_QUEUE_LEN
@@ -179,15 +179,8 @@ static void app_pendsv_activate(struct vsfsm_evtq_t *q)
 }
 #endif
 
-#ifdef APPCFG_ARGU_EN
-int main(int argc, char* argv[])
+inline int vsfmain(void)
 {
-	app.usrapp->argc = argc;
-	app.usrapp->argv = argv;
-#else
-int main(void)
-{
-#endif
 	vsf_enter_critical();
 
 	usrapp_initial_init(app.usrapp);

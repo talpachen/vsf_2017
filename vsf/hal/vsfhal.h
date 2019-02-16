@@ -80,7 +80,7 @@ vsf_err_t vsfhal_flash_fini(uint8_t index);
 vsf_err_t vsfhal_flash_capacity(uint8_t index, uint32_t *pagesize, uint32_t *pagenum);
 uint32_t vsfhal_flash_baseaddr(uint8_t index);
 uint32_t vsfhal_flash_blocksize(uint8_t index, uint32_t addr, uint32_t size, int op);
-vsf_err_t vsfhal_flash_config_cb(uint8_t index, uint32_t int_priority, void *param, void (*onfinish)(void*, vsf_err_t));
+vsf_err_t vsfhal_flash_config_cb(uint8_t index, int32_t int_priority, void *param, void (*onfinish)(void*, vsf_err_t));
 vsf_err_t vsfhal_flash_erase(uint8_t index, uint32_t addr);
 vsf_err_t vsfhal_flash_read(uint8_t index, uint32_t addr, uint8_t *buff);
 vsf_err_t vsfhal_flash_write(uint8_t index, uint32_t addr, uint8_t *buff);
@@ -91,7 +91,7 @@ USART
 vsf_err_t vsfhal_usart_init(uint8_t index);
 vsf_err_t vsfhal_usart_fini(uint8_t index);
 vsf_err_t vsfhal_usart_config(uint8_t index, uint32_t baudrate, uint32_t mode);
-vsf_err_t vsfhal_usart_config_cb(uint8_t index, uint32_t int_priority, void *p, void (*ontx)(void *), void (*onrx)(void *, uint16_t));
+vsf_err_t vsfhal_usart_config_cb(uint8_t index, int32_t int_priority, void *p, void (*ontx)(void *), void (*onrx)(void *, uint16_t));
 uint16_t vsfhal_usart_tx_bytes(uint8_t index, uint8_t *data, uint16_t size);
 uint16_t vsfhal_usart_tx_get_free_size(uint8_t index);
 uint16_t vsfhal_usart_rx_bytes(uint8_t index, uint8_t *data, uint16_t size);
@@ -126,8 +126,8 @@ struct vsfhal_i2c_msg_t
 vsf_err_t vsfhal_i2c_init(uint8_t index);
 vsf_err_t vsfhal_i2c_fini(uint8_t index);
 vsf_err_t vsfhal_i2c_config(uint8_t index, uint16_t kHz);
-vsf_err_t vsfhal_i2c_config_cb(uint8_t index, void *param,
-		void (*cb)(void*, vsf_err_t));
+vsf_err_t vsfhal_i2c_config_cb(uint8_t index, int32_t int_priority,
+		void *param, void (*cb)(void*, vsf_err_t));
 vsf_err_t vsfhal_i2c_xfer(uint8_t index, uint16_t addr,
 		struct vsfhal_i2c_msg_t *msg, uint8_t msg_len);
 
@@ -137,7 +137,7 @@ SPI
 vsf_err_t vsfhal_spi_init(uint8_t index);
 vsf_err_t vsfhal_spi_fini(uint8_t index);
 vsf_err_t vsfhal_spi_config(uint8_t index, uint32_t kHz, uint32_t mode);
-vsf_err_t vsfhal_spi_config_cb(uint8_t index, uint32_t int_priority,
+vsf_err_t vsfhal_spi_config_cb(uint8_t index, int32_t int_priority,
 		void *p, void (*callback)(void *));
 vsf_err_t vsfhal_spi_start(uint8_t index, uint8_t *out, uint8_t *in,
 		uint32_t len);
@@ -292,16 +292,18 @@ vsf_err_t vsfhal_usbd_ep_toggle_OUT_toggle(uint8_t idx);
 uint16_t vsfhal_usbd_ep_get_OUT_count(uint8_t idx);
 vsf_err_t vsfhal_usbd_ep_read_OUT_buffer(uint8_t idx, uint8_t *buffer, uint16_t size);
 vsf_err_t vsfhal_usbd_ep_enable_OUT(uint8_t idx);
+#if VSFHAL_USBD_EN
 extern const uint8_t vsfhal_usbd_ep_num;
 extern struct vsfhal_usbd_callback_t vsfhal_usbd_callback;
 extern const struct vsfhal_usbd_t vsfhal_usbd;
+#endif
 
 /*******************************************************************************
 HCD(OHCI...)
 *******************************************************************************/
 vsf_err_t vsfhal_hcd_init(uint32_t index, int32_t int_priority, void (*irq)(void *), void *param);
 vsf_err_t vsfhal_hcd_fini(uint32_t index);
-void *vsfhal_hcd_regbase(uint32_t index);
+void* vsfhal_hcd_regbase(uint32_t index);
 
 #endif	// __VSFHAL_H_INCLUDED__
 

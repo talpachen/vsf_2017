@@ -24,7 +24,7 @@ struct usart_stream_info_t
 {
 	uint8_t index;
 	uint8_t mode;
-	uint16_t int_priority;
+	int16_t int_priority;
 	uint32_t baudrate;
 
 	struct vsf_stream_t *stream_tx;

@@ -367,12 +367,10 @@ buffer_stream_write(struct vsf_stream_t *stream, struct vsf_buffer_t *buffer)
 	{
 		uint32_t avail_len = buffer_stream_get_avail_length(stream);
 		wsize = min(avail_len, buffer->size);
-		if (buffer->buffer && wsize)
-		{
+		if (buffer->buffer)
 			memcpy(bufstream->mem.buffer.buffer + bufstream->mem.pos,
 					buffer->buffer, wsize);
-			bufstream->mem.pos += wsize;
-		}
+		bufstream->mem.pos += wsize;
 	}
 	return wsize;
 }
@@ -387,12 +385,10 @@ buffer_stream_read(struct vsf_stream_t *stream, struct vsf_buffer_t *buffer)
 	{
 		uint32_t data_len = buffer_stream_get_data_length(stream);
 		rsize = min(data_len, buffer->size);
-		if (buffer->buffer && rsize)
-		{
+		if (buffer->buffer)
 			memcpy(buffer->buffer,
 					bufstream->mem.buffer.buffer + bufstream->mem.pos, rsize);
-			bufstream->mem.pos += rsize;
-		}
+		bufstream->mem.pos += rsize;
 	}
 	else
 	{

@@ -20,7 +20,7 @@
 #include "vsf.h"
 #include "usart_stream.h"
 
-#define USART_BUF_SIZE	16
+#define USART_BUF_SIZE	64
 
 static void uart_rx_int(void *p, uint16_t data)
 {

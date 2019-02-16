@@ -61,6 +61,8 @@
 #include "component/usb/core/hcd/vsfhcd.h"
 #include "component/usb/core/dwc_otg/vsfdwcotg.h"
 #include "component/usb/class/host/HUB/vsfusbh_HUB.h"
-#include "component/usb/class/host/UVC/vsfusbh_UVC.h"
+#include "component/usb/class/host/HID/vsfusbh_HID.h"
+
+int vsfmain(void);
 
 #endif		// __VSF_H_INCLUDED__
