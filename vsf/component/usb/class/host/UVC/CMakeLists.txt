@@ -1,5 +1,5 @@
 vsf_include_directories(.)
 
 vsf_sources(
-    bittool.c
+    vsfusbh_UVC.c
 )

@@ -1,2 +1,5 @@
 vsf_include_directories(.)
-vsf_sources(vsf_dynpool.c)
+
+vsf_sources(
+    vsf_dynpool.c
+)

@@ -1,0 +1,4 @@
+add_subdirectory_ifdef(VSFCOMPO_USBD_CDC CDC)
+add_subdirectory_ifdef(VSFCOMPO_USBD_HID HID)
+add_subdirectory_ifdef(VSFCOMPO_USBD_MSC MSC)
+add_subdirectory_ifdef(VSFCOMPO_USBD_VLLINK VLLINK)

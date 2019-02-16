@@ -1,0 +1,2 @@
+add_subdirectory_ifdef(VSFCOMPO_USBH_HUB HUB)
+add_subdirectory_ifdef(VSFCOMPO_USBH_UVC UVC)

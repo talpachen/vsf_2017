@@ -27,3 +27,7 @@ void usrapp_nrt_init(struct usrapp_t *app)
 
 }
 
+int main(void)
+{
+	return vsfmain();
+}

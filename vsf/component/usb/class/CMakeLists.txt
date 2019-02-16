@@ -1,0 +1,3 @@
+add_subdirectory(common)
+add_subdirectory_ifdef(VSFCOMPO_USBD device)
+add_subdirectory_ifdef(VSFCOMPO_USBH host)

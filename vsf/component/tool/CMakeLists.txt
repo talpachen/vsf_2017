@@ -1,3 +1,3 @@
-add_subdirectory(dynarr)
-add_subdirectory(dynpool)
-add_subdirectory(dynstack)
+add_subdirectory_ifdef(VSFCOMPO_DYNARR dynarr)
+add_subdirectory_ifdef(VSFCOMPO_DYNPOOL dynpool)
+add_subdirectory_ifdef(VSFCOMPO_DYNSTACK dynstack)

@@ -1,2 +1,5 @@
 vsf_include_directories(.)
-vsf_sources(stream.c)
+
+vsf_sources(
+    stream.c
+)

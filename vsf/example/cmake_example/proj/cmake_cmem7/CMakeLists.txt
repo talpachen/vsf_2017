@@ -1,13 +1,15 @@
-cmake_minimum_required(VERSION 3.8.2)
+# Project Name
+project(cmake_example_cmem7)
 
+# Configure
 set(VSFHAL_ARCH arm)
 set(VSFHAL_CPU cmem7)
 set(VSFHAL_CPU_SERIES cortex-m3)
 
 set(CONFIG_DEBUG_OPTIMIZATIONS 1)
 
+# Common Include
 include(../../../../vsf.cmake NO_POLICY_SCOPE)
-project(NONE)
 
 
 vsf_compile_definitions(
@@ -15,7 +17,5 @@ vsf_compile_definitions(
     BOARD_TYPE_TEST_CMEM7
 )
 
-vsf_include_directories(../../config)
-vsf_include_directories(../../source)
-
-target_sources(app PRIVATE ../../source/usrapp.c)
+add_subdirectory(../../)
+add_subdirectory(../../../../)

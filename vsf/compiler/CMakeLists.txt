@@ -1,1 +1,1 @@
-add_subdirectory(arm)
+add_subdirectory(${VSFHAL_ARCH})

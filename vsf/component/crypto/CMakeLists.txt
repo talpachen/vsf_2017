@@ -1,0 +1,1 @@
+add_subdirectory_ifdef(VSFCOMPO_CRC crc)

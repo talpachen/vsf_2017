@@ -1,4 +1,4 @@
-add_subdirectory(bittool)
-add_subdirectory(buffer)
-add_subdirectory(list)
-add_subdirectory(stream)
+add_subdirectory_ifdef(VSFCOMPO_BITTOOL bittool)
+add_subdirectory_ifdef(VSFCOMPO_BUFFER buffer)
+add_subdirectory_ifdef(VSFCOMPO_LIST list)
+add_subdirectory_ifdef(VSFCOMPO_STREAM stream)
