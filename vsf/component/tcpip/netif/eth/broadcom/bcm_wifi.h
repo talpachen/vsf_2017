@@ -58,7 +58,7 @@ vsf_err_t bcm_wifi_leave(struct vsfsm_pt_t *pt, vsfsm_evt_t evt);
 // ......
 
 // WIFI structures
-PACKED_HEAD struct PACKED_MID bcm_wifi_bss_info_t
+struct bcm_wifi_bss_info_t
 {
 	uint32_t version;
 	uint32_t length;
@@ -89,14 +89,14 @@ PACKED_HEAD struct PACKED_MID bcm_wifi_bss_info_t
 	uint16_t ie_offset;
 	uint32_t ie_length;
 	int16_t snr;
-}; PACKED_TAIL
-PACKED_HEAD struct PACKED_MID bcm_wifi_escan_result_t
+}; PACKED
+struct bcm_wifi_escan_result_t
 {
 	uint32_t buflen;
 	uint32_t version;
 	uint16_t syncid;
 	uint16_t bss_count;
 	struct bcm_wifi_bss_info_t bss_info[1];
-}; PACKED_TAIL
+}; PACKED
 
 #endif		// __BCM_WIFI_H_INCLUDED__

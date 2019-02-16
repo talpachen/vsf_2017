@@ -23,7 +23,7 @@ struct vsfhal_pendsv_t
 	void *param;
 } static vsfhal_pendsv;
 
-ROOTFUNC void PendSV_Handler(void)
+ROOT void PendSV_Handler(void)
 {
 	if (vsfhal_pendsv.on_pendsv != NULL)
 	{
@@ -45,7 +45,7 @@ vsf_err_t vsfhal_core_pendsv_trigger(void)
 	return VSFERR_NONE;
 }
 
-WEAKFUNC void HardFault_Handler(void)
+WEAK void HardFault_Handler(void)
 {
 	while (1);
 }
@@ -173,7 +173,7 @@ uint8_t vsfhal_core_set_intlevel(uint8_t level)
 // 		and __WFI, wfi will not make the core sleep
 void vsfhal_core_sleep(uint32_t mode)
 {
-	vsf_leave_critical();
+	ENABLE_GLOBAL_INTERRUPT();
 	// TODO
 	//__WFI();
 }
@@ -206,7 +206,7 @@ uint32_t vsfhal_tickclk_get_us(void)
 	return tickcnt * 1000 + val / load;
 }
 
-ROOTFUNC void SysTick_Handler(void)
+ROOT void SysTick_Handler(void)
 {
 	tickcnt++;
 	if (tickclk_callback != NULL)

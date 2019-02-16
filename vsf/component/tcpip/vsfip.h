@@ -144,7 +144,7 @@ struct vsfip_ippcb_t
 
 // headers
 // IPv4
-PACKED_HEAD struct PACKED_MID vsfip_ip4head_t
+struct vsfip_ip4head_t
 {
 	uint8_t ver_hl;
 	uint8_t tos;
@@ -160,24 +160,24 @@ PACKED_HEAD struct PACKED_MID vsfip_ip4head_t
 	uint16_t checksum;
 	uint32_t ipsrc;
 	uint32_t ipdest;
-}; PACKED_TAIL
+}; PACKED
 #define VSFIP_IP4H_V(h)			(h->ver_hl >> 4)
 #define VSFIP_IP4H_HLEN(h)		(h->ver_hl & 0x0F)
 // PROTO PORT
-PACKED_HEAD struct PACKED_MID vsfip_protoport_t
+struct vsfip_protoport_t
 {
 	uint16_t src;
 	uint16_t dst;
-}; PACKED_TAIL
+}; PACKED
 // UDP
-PACKED_HEAD struct PACKED_MID vsfip_udphead_t
+struct vsfip_udphead_t
 {
 	struct vsfip_protoport_t port;
 	uint16_t len;
 	uint16_t checksum;
-}; PACKED_TAIL
+}; PACKED
 // TCP
-PACKED_HEAD struct PACKED_MID vsfip_tcphead_t
+struct vsfip_tcphead_t
 {
 	struct vsfip_protoport_t port;
 	uint32_t seq;
@@ -187,9 +187,9 @@ PACKED_HEAD struct PACKED_MID vsfip_tcphead_t
 	uint16_t window_size;
 	uint16_t checksum;
 	uint16_t urgent_ptr;
-}; PACKED_TAIL
+}; PACKED
 // ICMP
-PACKED_HEAD struct PACKED_MID vsfip_icmphead_t
+struct vsfip_icmphead_t
 {
 	uint8_t type;
 	uint8_t code;
@@ -202,7 +202,7 @@ PACKED_HEAD struct PACKED_MID vsfip_icmphead_t
 			uint16_t seqnum;
 		} echo;
 	} body;
-}; PACKED_TAIL
+}; PACKED
 
 struct vsfip_socket_t;
 enum vsfip_tcp_stat_t

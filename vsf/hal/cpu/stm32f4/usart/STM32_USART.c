@@ -810,7 +810,7 @@ uint16_t stm32_usart_rx(uint8_t index)
 }
 
 #if USART0_INT_EN && (USART00_ENABLE || USART10_ENABLE)
-ROOTFUNC void USART1_IRQHandler(void)
+ROOT void USART1_IRQHandler(void)
 {
 	if ((stm32_usart_onrx[0] != NULL) && (USART1->SR & STM32_USART_SR_RXNE))
 	{
@@ -825,7 +825,7 @@ ROOTFUNC void USART1_IRQHandler(void)
 #endif
 
 #if USART1_INT_EN && (USART01_ENABLE || USART11_ENABLE)
-ROOTFUNC void USART2_IRQHandler(void)
+ROOT void USART2_IRQHandler(void)
 {
 	if ((stm32_usart_onrx[1] != NULL) && (USART2->SR & STM32_USART_SR_RXNE))
 	{
@@ -840,7 +840,7 @@ ROOTFUNC void USART2_IRQHandler(void)
 #endif
 
 #if USART2_INT_EN && (USART02_ENABLE || USART12_ENABLE || USART32_ENABLE)
-ROOTFUNC void USART3_IRQHandler(void)
+ROOT void USART3_IRQHandler(void)
 {
 	if ((stm32_usart_onrx[2] != NULL) && (USART3->SR & STM32_USART_SR_RXNE))
 	{

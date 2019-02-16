@@ -26,7 +26,7 @@
 			(VSFILE_ATTR_READONLY | VSFILE_ATTR_HIDDEN |\
 			VSFILE_ATTR_SYSTEM | VSFILE_ATTR_VOLUMID)
 
-PACKED_HEAD struct PACKED_MID fatfs_bpb_t
+struct fatfs_bpb_t
 {
 	uint16_t BytsPerSec;
 	uint8_t SecPerClus;
@@ -40,9 +40,9 @@ PACKED_HEAD struct PACKED_MID fatfs_bpb_t
 	uint16_t NumHeads;
 	uint32_t HiddSec;
 	uint32_t TotSec32;
-}; PACKED_TAIL
+}; PACKED
 
-PACKED_HEAD struct PACKED_MID fatfs_ebpb_t
+struct fatfs_ebpb_t
 {
 	uint8_t DrvNo;
 	uint8_t Reserved;
@@ -50,9 +50,9 @@ PACKED_HEAD struct PACKED_MID fatfs_ebpb_t
 	uint32_t VolID;
 	uint8_t VolLab[11];
 	uint8_t FilSysType[8];
-}; PACKED_TAIL
+}; PACKED
 
-PACKED_HEAD struct PACKED_MID fatfs_dbr_t
+struct fatfs_dbr_t
 {
 	uint8_t jmp[3];
 	uint8_t OEM[8];
@@ -62,7 +62,7 @@ PACKED_HEAD struct PACKED_MID fatfs_dbr_t
 	{
 		struct
 		{
-			PACKED_HEAD struct PACKED_MID
+			struct
 			{
 				uint32_t FATSz32;
 				uint16_t ExtFlags;
@@ -71,7 +71,7 @@ PACKED_HEAD struct PACKED_MID fatfs_dbr_t
 				uint16_t FSInfo;
 				uint16_t BkBootSec;
 				uint8_t Reserved[12];
-			} bpb; PACKED_TAIL
+			} bpb; PACKED
 			struct fatfs_ebpb_t ebpb;
 			uint8_t Bootstrap[420];
 		} fat32;
@@ -83,7 +83,7 @@ PACKED_HEAD struct PACKED_MID fatfs_dbr_t
 		struct
 		{
 			uint8_t Reserved_All0[28];
-			PACKED_HEAD struct PACKED_MID
+			struct
 			{
 				uint64_t SecStart;
 				uint64_t SecCount;
@@ -93,11 +93,11 @@ PACKED_HEAD struct PACKED_MID fatfs_dbr_t
 				uint32_t ClusSecCount;
 				uint32_t RootClus;
 				uint32_t VolSerial;
-				PACKED_HEAD struct PACKED_MID
+				struct
 				{
 					uint8_t Minor;
 					uint8_t Major;
-				} Ver; PACKED_TAIL
+				} Ver; PACKED
 				uint16_t VolState;
 				uint8_t SecBits;
 				uint8_t SPCBits;
@@ -105,17 +105,17 @@ PACKED_HEAD struct PACKED_MID fatfs_dbr_t
 				uint8_t DrvNo;
 				uint8_t AllocPercnet;
 				uint8_t Reserved_All0[397];
-			} bpb; PACKED_TAIL
+			} bpb; PACKED
 		} exfat;
 	};
 	uint16_t Magic;
-}; PACKED_TAIL
+}; PACKED
 
-PACKED_HEAD struct PACKED_MID fatfs_dentry_t
+struct fatfs_dentry_t
 {
 	union
 	{
-		PACKED_HEAD struct PACKED_MID
+		struct
 		{
 			char Name[8];
 			char Ext[3];
@@ -131,11 +131,11 @@ PACKED_HEAD struct PACKED_MID fatfs_dentry_t
 			uint16_t FstClusLO;
 			uint32_t FileSize;
 		} fat;
-		PACKED_HEAD struct PACKED_MID
+		struct
 		{
 			union
 			{
-				PACKED_HEAD struct PACKED_MID
+				struct
 				{
 					uint8_t Type;
 					uint8_t NumExt;
@@ -153,13 +153,13 @@ PACKED_HEAD struct PACKED_MID fatfs_dentry_t
 					uint8_t AccTimeMs;
 					uint8_t Reserved2[9];
 				} file;
-				PACKED_HEAD struct PACKED_MID
+				struct
 				{
 					uint8_t Type;
 					uint8_t Flag;
 					uint16_t Uni[15];
 				} fname;
-				PACKED_HEAD struct PACKED_MID
+				struct
 				{
 					uint8_t Type;
 					uint8_t Reserved1[3];
@@ -168,7 +168,7 @@ PACKED_HEAD struct PACKED_MID fatfs_dentry_t
 					uint32_t FstClu;
 					uint64_t Size;
 				} casetbl;
-				PACKED_HEAD struct PACKED_MID
+				struct
 				{
 					uint8_t Order;
 					uint16_t Uni0[5];
@@ -179,7 +179,7 @@ PACKED_HEAD struct PACKED_MID fatfs_dentry_t
 					uint16_t FstClus;
 					uint16_t Uni11[2];
 				} edir;
-				PACKED_HEAD struct PACKED_MID
+				struct
 				{
 					uint8_t Type;
 					uint8_t Flag;
@@ -192,7 +192,7 @@ PACKED_HEAD struct PACKED_MID fatfs_dentry_t
 					uint32_t FstClus;
 					uint64_t Size;
 				} stream;
-				PACKED_HEAD struct PACKED_MID
+				struct
 				{
 					uint8_t Type;
 					uint8_t Flag;
@@ -200,7 +200,7 @@ PACKED_HEAD struct PACKED_MID fatfs_dentry_t
 					uint32_t FstClus;
 					uint64_t Size;
 				} bmap;
-				PACKED_HEAD struct PACKED_MID
+				struct
 				{
 					uint8_t Type;
 					uint8_t LblLen;
@@ -210,7 +210,7 @@ PACKED_HEAD struct PACKED_MID fatfs_dentry_t
 			};
 		} exfat;
 	};
-}; PACKED_TAIL
+}; PACKED
 
 static const uint8_t vsffat_FAT_bitsize[] = {0, 12, 16, 32, 32};
 

@@ -40,14 +40,14 @@ enum vsfip_netif_ARP_op_t
 };
 
 // ARP
-PACKED_HEAD struct PACKED_MID vsfip_arphead_t
+struct vsfip_arphead_t
 {
 	uint16_t hwtype;
 	uint16_t prototype;
 	uint8_t hwlen;
 	uint8_t protolen;
 	uint16_t op;
-}; PACKED_TAIL
+}; PACKED
 
 static vsf_err_t vsfip_netif_arp_client_thread(struct vsfsm_pt_t *pt,
 												vsfsm_evt_t evt);

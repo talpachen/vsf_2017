@@ -35,7 +35,7 @@ struct fakefat32_file_t
 
 	struct fakefat32_cb_t cb;
 	uint32_t first_cluster;
-	PACKED_HEAD struct PACKED_MID
+	struct
 	{
 		uint8_t CrtTimeTenth;
 		uint16_t CrtTime;
@@ -45,7 +45,7 @@ struct fakefat32_file_t
 		uint16_t WrtTime;
 		uint16_t WrtData;
 		uint16_t FstClusLO;
-	} record; PACKED_TAIL
+	} record; PACKED
 };
 
 struct fakefat32_param_t

@@ -20,7 +20,7 @@
 #ifndef __VSFUSBH_UVC_H_INCLUDED__
 #define __VSFUSBH_UVC_H_INCLUDED__
 
-PACKED_HEAD struct PACKED_MID video_probe_commit_ctrl_t
+struct video_probe_commit_ctrl_t
 {
 	uint16_t bmHint;
 	uint8_t bFormatIndex;
@@ -36,7 +36,7 @@ PACKED_HEAD struct PACKED_MID video_probe_commit_ctrl_t
 	uint16_t wDelay;
 	uint32_t dwMaxVideoFrameSize;
 	uint32_t dwMaxPayloadTransferSize;
-}; PACKED_TAIL
+}; PACKED
 
 struct vsfusbh_uvc_param_t
 {

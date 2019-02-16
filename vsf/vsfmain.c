@@ -107,6 +107,10 @@ const struct vsftimer_mem_op_t vsftimer_memop =
 	.free			= vsftimer_memop_free,
 };
 
+#ifdef APPCFG_BUFMGR_SIZE
+static uint8_t bufmgr_buff[APPCFG_BUFMGR_SIZE];
+#endif
+
 // tickclk interrupt, simply call vsftimer_callback_int
 static void app_tickclk_callback_int(void *param)
 {
@@ -141,7 +145,7 @@ static void vsfapp_init(struct vsfapp_t *app)
 #endif
 
 #ifdef APPCFG_BUFMGR_SIZE
-	vsf_bufmgr_init(compiler_get_heap(), APPCFG_BUFMGR_SIZE);
+	vsf_bufmgr_init(bufmgr_buff, APPCFG_BUFMGR_SIZE);
 #endif
 
 #ifdef APPCFG_SRT_QUEUE_LEN
@@ -181,7 +185,7 @@ static void app_pendsv_activate(struct vsfsm_evtq_t *q)
 
 inline int vsfmain(void)
 {
-	vsf_enter_critical();
+	DISABLE_GLOBAL_INTERRUPT();
 
 	usrapp_initial_init(app.usrapp);
 
@@ -194,7 +198,7 @@ inline int vsfmain(void)
 #endif
 
 	vsfapp_init(&app);
-	vsf_leave_critical();
+	ENABLE_GLOBAL_INTERRUPT();
 
 	while (1)
 	{
@@ -209,7 +213,7 @@ inline int vsfmain(void)
 #ifdef APPCFG_USR_POLL
 		usrapp_nrt_poll(app.usrapp);
 #endif
-		vsf_enter_critical();
+		DISABLE_GLOBAL_INTERRUPT();
 		if (!vsfsm_get_event_pending()
 #ifdef APPCFG_USR_CANSLEEP
 			&& usrapp_cansleep(app.usrapp)
@@ -219,7 +223,7 @@ inline int vsfmain(void)
 			vsfhal_core_sleep(VSFHAL_SLEEP_WFI);	// will enable interrupt
 		}
 		else
-			vsf_leave_critical();
+			ENABLE_GLOBAL_INTERRUPT();
 #else
 		vsfhal_core_sleep(VSFHAL_SLEEP_WFI);
 #endif

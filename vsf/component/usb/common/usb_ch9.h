@@ -133,14 +133,14 @@
 #define USB_DEV_STAT_LTM_ENABLED		4	/* Latency tolerance messages */
 
 /**
- * PACKED_HEAD struct PACKED_MID usb_ctrlrequest - SETUP data for a USB device control request
+ * struct usb_ctrlrequest - SETUP data for a USB device control request
  * @bRequestType: matches the USB bmRequestType field
  * @bRequest: matches the USB bRequest field
  * @wValue: matches the USB wValue field (le16 byte order)
  * @wIndex: matches the USB wIndex field (le16 byte order)
  * @wLength: matches the USB wLength field (le16 byte order)
  *
- * This PACKED_HEAD struct PACKED_MIDure is used to send control requests to a USB device.  It matches
+ * This struct PACKED_MIDure is used to send control requests to a USB device.  It matches
  * the different fields of the USB 2.0 Spec section 9.3, table 9-2.  See the
  * USB spec for a fuller description of the different fields, and what they are
  * used for.
@@ -149,13 +149,13 @@
  * For most devices, interfaces don't coordinate with each other, so
  * such requests may be made at any time.
  */
-PACKED_HEAD struct PACKED_MID usb_ctrlrequest_t {
+struct usb_ctrlrequest_t {
 	__u8 bRequestType;
 	__u8 bRequest;
 	__le16 wValue;
 	__le16 wIndex;
 	__le16 wLength;
-}; PACKED_TAIL
+}; PACKED
 
 /*-------------------------------------------------------------------------*/
 
@@ -211,16 +211,16 @@ PACKED_HEAD struct PACKED_MID usb_ctrlrequest_t {
 #define USB_DT_CS_ENDPOINT				(USB_TYPE_CLASS | USB_DT_ENDPOINT)
 
 /* All standard descriptors have these 2 fields at the beginning */
-PACKED_HEAD struct PACKED_MID usb_descriptor_header_t {
+struct usb_descriptor_header_t {
 	__u8  bLength;
 	__u8  bDescriptorType;
-}; PACKED_TAIL
+}; PACKED
 
 
 /*-------------------------------------------------------------------------*/
 
 /* USB_DT_DEVICE: Device descriptor */
-PACKED_HEAD struct PACKED_MID usb_device_descriptor_t {
+struct usb_device_descriptor_t {
 	__u8  bLength;
 	__u8  bDescriptorType;
 
@@ -236,7 +236,7 @@ PACKED_HEAD struct PACKED_MID usb_device_descriptor_t {
 	__u8  iProduct;
 	__u8  iSerialNumber;
 	__u8  bNumConfigurations;
-}; PACKED_TAIL
+}; PACKED
 
 #define USB_DT_DEVICE_SIZE				18
 
@@ -276,7 +276,7 @@ PACKED_HEAD struct PACKED_MID usb_device_descriptor_t {
  * devices with a USB_DT_DEVICE_QUALIFIER have any OTHER_SPEED_CONFIG
  * descriptors.
  */
-PACKED_HEAD struct PACKED_MID usb_config_descriptor_t {
+struct usb_config_descriptor_t {
 	__u8  bLength;
 	__u8  bDescriptorType;
 
@@ -286,7 +286,7 @@ PACKED_HEAD struct PACKED_MID usb_config_descriptor_t {
 	__u8  iConfiguration;
 	__u8  bmAttributes;
 	__u8  bMaxPower;
-}; PACKED_TAIL
+}; PACKED
 
 #define USB_DT_CONFIG_SIZE				9
 
@@ -299,12 +299,12 @@ PACKED_HEAD struct PACKED_MID usb_config_descriptor_t {
 /*-------------------------------------------------------------------------*/
 
 /* USB_DT_STRING: String descriptor */
-PACKED_HEAD struct PACKED_MID usb_string_descriptor_t {
+struct usb_string_descriptor_t {
 	__u8  bLength;
 	__u8  bDescriptorType;
 
 	__le16 wData[1];		/* UTF-16LE encoded */
-}; PACKED_TAIL
+}; PACKED
 
 /* note that "string" zero is special, it holds language codes that
  * the device supports, not Unicode characters.
@@ -313,7 +313,7 @@ PACKED_HEAD struct PACKED_MID usb_string_descriptor_t {
 /*-------------------------------------------------------------------------*/
 
 /* USB_DT_INTERFACE: Interface descriptor */
-PACKED_HEAD struct PACKED_MID usb_interface_descriptor_t {
+struct usb_interface_descriptor_t {
 	__u8  bLength;
 	__u8  bDescriptorType;
 
@@ -324,20 +324,20 @@ PACKED_HEAD struct PACKED_MID usb_interface_descriptor_t {
 	__u8  bInterfaceSubClass;
 	__u8  bInterfaceProtocol;
 	__u8  iInterface;
-}; PACKED_TAIL
+}; PACKED
 
 #define USB_DT_INTERFACE_SIZE			9
 
-PACKED_HEAD struct PACKED_MID usb_class_interface_descriptor_t {
+struct usb_class_interface_descriptor_t {
 	__u8  bLength;
 	__u8  bDescriptorType;
 	__u8  bDescriptorSubType;
-}; PACKED_TAIL
+}; PACKED
 
 /*-------------------------------------------------------------------------*/
 
 /* USB_DT_ENDPOINT: Endpoint descriptor */
-PACKED_HEAD struct PACKED_MID usb_endpoint_descriptor_t {
+struct usb_endpoint_descriptor_t {
 	__u8  bLength;
 	__u8  bDescriptorType;
 
@@ -350,7 +350,7 @@ PACKED_HEAD struct PACKED_MID usb_endpoint_descriptor_t {
 	/* use USB_DT_ENDPOINT*_SIZE in bLength, not sizeof. */
 	__u8  bRefresh;
 	__u8  bSynchAddress;
-}; PACKED_TAIL
+}; PACKED
 
 #define USB_DT_ENDPOINT_SIZE			7
 #define USB_DT_ENDPOINT_AUDIO_SIZE		9	/* Audio extension */
@@ -591,14 +591,14 @@ static inline int usb_endpoint_interrupt_type(
 /*-------------------------------------------------------------------------*/
 
 /* USB_DT_SS_ENDPOINT_COMP: SuperSpeed Endpoint Companion descriptor */
-PACKED_HEAD struct PACKED_MID usb_ss_ep_comp_descriptor_t {
+struct usb_ss_ep_comp_descriptor_t {
 	__u8  bLength;
 	__u8  bDescriptorType;
 
 	__u8  bMaxBurst;
 	__u8  bmAttributes;
 	__u16 wBytesPerInterval;
-}; PACKED_TAIL
+}; PACKED
 
 #define USB_DT_SS_EP_COMP_SIZE			6
 
@@ -627,7 +627,7 @@ usb_ss_max_streams(const struct usb_ss_ep_comp_descriptor_t *comp)
 /*-------------------------------------------------------------------------*/
 
 /* USB_DT_DEVICE_QUALIFIER: Device Qualifier descriptor */
-PACKED_HEAD struct PACKED_MID usb_qualifier_descriptor_t {
+struct usb_qualifier_descriptor_t {
 	__u8  bLength;
 	__u8  bDescriptorType;
 
@@ -638,18 +638,18 @@ PACKED_HEAD struct PACKED_MID usb_qualifier_descriptor_t {
 	__u8  bMaxPacketSize0;
 	__u8  bNumConfigurations;
 	__u8  bRESERVED;
-}; PACKED_TAIL
+}; PACKED
 
 
 /*-------------------------------------------------------------------------*/
 
 /* USB_DT_OTG (from OTG 1.0a supplement) */
-PACKED_HEAD struct PACKED_MID usb_otg_descriptor_t {
+struct usb_otg_descriptor_t {
 	__u8  bLength;
 	__u8  bDescriptorType;
 
 	__u8  bmAttributes;	/* support for HNP, SRP, etc */
-}; PACKED_TAIL
+}; PACKED
 
 /* from usb_otg_descriptor_t.bmAttributes */
 #define USB_OTG_SRP						(1 << 0)
@@ -658,19 +658,19 @@ PACKED_HEAD struct PACKED_MID usb_otg_descriptor_t {
 /*-------------------------------------------------------------------------*/
 
 /* USB_DT_DEBUG:  for special highspeed devices, replacing serial console */
-PACKED_HEAD struct PACKED_MID usb_debug_descriptor_t {
+struct usb_debug_descriptor_t {
 	__u8  bLength;
 	__u8  bDescriptorType;
 
 	/* bulk endpoints with 8 byte maxpacket */
 	__u8  bDebugInEndpoint;
 	__u8  bDebugOutEndpoint;
-}; PACKED_TAIL
+}; PACKED
 
 /*-------------------------------------------------------------------------*/
 
 /* USB_DT_INTERFACE_ASSOCIATION: groups interfaces */
-PACKED_HEAD struct PACKED_MID usb_interface_assoc_descriptor_t {
+struct usb_interface_assoc_descriptor_t {
 	__u8  bLength;
 	__u8  bDescriptorType;
 
@@ -680,7 +680,7 @@ PACKED_HEAD struct PACKED_MID usb_interface_assoc_descriptor_t {
 	__u8  bFunctionSubClass;
 	__u8  bFunctionProtocol;
 	__u8  iFunction;
-}; PACKED_TAIL
+}; PACKED
 
 #define USB_DT_INTERFACE_ASSOCIATION_SIZE	8
 
@@ -689,32 +689,32 @@ PACKED_HEAD struct PACKED_MID usb_interface_assoc_descriptor_t {
 /* USB_DT_SECURITY:  group of wireless security descriptors, including
  * encryption types available for setting up a CC/association.
  */
-PACKED_HEAD struct PACKED_MID usb_security_descriptor_t {
+struct usb_security_descriptor_t {
 	__u8  bLength;
 	__u8  bDescriptorType;
 
 	__le16 wTotalLength;
 	__u8  bNumEncryptionTypes;
-}; PACKED_TAIL
+}; PACKED
 
 /*-------------------------------------------------------------------------*/
 
 /* USB_DT_KEY:  used with {GET,SET}_SECURITY_DATA; only public keys
  * may be retrieved.
  */
-//PACKED_HEAD struct PACKED_MID usb_key_descriptor_t {
+//struct usb_key_descriptor_t {
 //	__u8  bLength;
 //	__u8  bDescriptorType;
 
 //	__u8  tTKID[3];
 //	__u8  bReserved;
 //	__u8  bKeyData[0];
-//}; PACKED_TAIL
+//}; PACKED
 
 /*-------------------------------------------------------------------------*/
 
 /* USB_DT_ENCRYPTION_TYPE:  bundled in DT_SECURITY groups */
-PACKED_HEAD struct PACKED_MID usb_encryption_descriptor_t {
+struct usb_encryption_descriptor_t {
 	__u8  bLength;
 	__u8  bDescriptorType;
 
@@ -725,34 +725,34 @@ PACKED_HEAD struct PACKED_MID usb_encryption_descriptor_t {
 #define	USB_ENC_TYPE_RSA_1				3	/* rsa3072/sha1 auth */
 	__u8  bEncryptionValue;					/* use in SET_ENCRYPTION */
 	__u8  bAuthKeyIndex;
-}; PACKED_TAIL
+}; PACKED
 
 
 /*-------------------------------------------------------------------------*/
 
 /* USB_DT_BOS:  group of device-level capabilities */
-PACKED_HEAD struct PACKED_MID usb_bos_descriptor_t {
+struct usb_bos_descriptor_t {
 	__u8  bLength;
 	__u8  bDescriptorType;
 
 	__le16 wTotalLength;
 	__u8  bNumDeviceCaps;
-}; PACKED_TAIL
+}; PACKED
 
 #define USB_DT_BOS_SIZE					5
 
 /*-------------------------------------------------------------------------*/
 
 /* USB_DT_DEVICE_CAPABILITY:  grouped with BOS */
-PACKED_HEAD struct PACKED_MID usb_dev_cap_header_t {
+struct usb_dev_cap_header_t {
 	__u8  bLength;
 	__u8  bDescriptorType;
 	__u8  bDevCapabilityType;
-}; PACKED_TAIL
+}; PACKED
 
 #define	USB_CAP_TYPE_WIRELESS_USB		1
 
-PACKED_HEAD struct PACKED_MID usb_wireless_cap_descriptor_t {	/* Ultra Wide Band */
+struct usb_wireless_cap_descriptor_t {	/* Ultra Wide Band */
 	__u8  bLength;
 	__u8  bDescriptorType;
 	__u8  bDevCapabilityType;
@@ -776,12 +776,12 @@ PACKED_HEAD struct PACKED_MID usb_wireless_cap_descriptor_t {	/* Ultra Wide Band
 	__u8  bmFFITXPowerInfo;	/* FFI power levels */
 	__le16 bmBandGroup;
 	__u8  bReserved;
-}; PACKED_TAIL
+}; PACKED
 
 /* USB 2.0 Extension descriptor */
 #define	USB_CAP_TYPE_EXT				2
 
-PACKED_HEAD struct PACKED_MID usb_ext_cap_descriptor_t {		/* Link Power Management */
+struct usb_ext_cap_descriptor_t {		/* Link Power Management */
 	__u8  bLength;
 	__u8  bDescriptorType;
 	__u8  bDevCapabilityType;
@@ -792,7 +792,7 @@ PACKED_HEAD struct PACKED_MID usb_ext_cap_descriptor_t {		/* Link Power Manageme
 #define USB_BESL_DEEP_VALID				(1 << 4)	/* Deep BESL valid */
 #define USB_GET_BESL_BASELINE(p)		(((p) & (0xf << 8)) >> 8)
 #define USB_GET_BESL_DEEP(p)			(((p) & (0xf << 12)) >> 12)
-}; PACKED_TAIL
+}; PACKED
 
 #define USB_DT_USB_EXT_CAP_SIZE			7
 
@@ -801,7 +801,7 @@ PACKED_HEAD struct PACKED_MID usb_ext_cap_descriptor_t {		/* Link Power Manageme
  * specific device level capabilities
  */
 #define USB_SS_CAP_TYPE					3
-PACKED_HEAD struct PACKED_MID usb_ss_cap_descriptor_t {		/* Link Power Management */
+struct usb_ss_cap_descriptor_t {		/* Link Power Management */
 	__u8  bLength;
 	__u8  bDescriptorType;
 	__u8  bDevCapabilityType;
@@ -815,7 +815,7 @@ PACKED_HEAD struct PACKED_MID usb_ss_cap_descriptor_t {		/* Link Power Managemen
 	__u8  bFunctionalitySupport;
 	__u8  bU1devExitLat;
 	__le16 bU2DevExitLat;
-}; PACKED_TAIL
+}; PACKED
 
 #define USB_DT_USB_SS_CAP_SIZE			10
 
@@ -824,13 +824,13 @@ PACKED_HEAD struct PACKED_MID usb_ss_cap_descriptor_t {		/* Link Power Managemen
  * identify the instance across all operating modes
  */
 #define	CONTAINER_ID_TYPE				4
-PACKED_HEAD struct PACKED_MID usb_ss_container_id_descriptor_t {
+struct usb_ss_container_id_descriptor_t {
 	__u8  bLength;
 	__u8  bDescriptorType;
 	__u8  bDevCapabilityType;
 	__u8  bReserved;
 	__u8  ContainerID[16]; /* 128-bit number */
-}; PACKED_TAIL
+}; PACKED
 
 #define USB_DT_USB_SS_CONTN_ID_SIZE		20
 
@@ -839,7 +839,7 @@ PACKED_HEAD struct PACKED_MID usb_ss_container_id_descriptor_t {
 /* USB_DT_WIRELESS_ENDPOINT_COMP:  companion descriptor associated with
  * each endpoint descriptor for a wireless device
  */
-PACKED_HEAD struct PACKED_MID usb_wireless_ep_comp_descriptor_t {
+struct usb_wireless_ep_comp_descriptor_t {
 	__u8  bLength;
 	__u8  bDescriptorType;
 
@@ -853,7 +853,7 @@ PACKED_HEAD struct PACKED_MID usb_wireless_ep_comp_descriptor_t {
 #define USB_ENDPOINT_SWITCH_NO			0
 #define USB_ENDPOINT_SWITCH_SWITCH		1
 #define USB_ENDPOINT_SWITCH_SCALE		2
-}; PACKED_TAIL
+}; PACKED
 
 /*-------------------------------------------------------------------------*/
 
@@ -861,7 +861,7 @@ PACKED_HEAD struct PACKED_MID usb_wireless_ep_comp_descriptor_t {
  * host and a device for connection set up, mutual authentication, and
  * exchanging short lived session keys.  The handshake depends on a CC.
  */
-PACKED_HEAD struct PACKED_MID usb_handshake_t {
+struct usb_handshake_t {
 	__u8 bMessageNumber;
 	__u8 bStatus;
 	__u8 tTKID[3];
@@ -869,7 +869,7 @@ PACKED_HEAD struct PACKED_MID usb_handshake_t {
 	__u8 CDID[16];
 	__u8 nonce[16];
 	__u8 MIC[8];
-}; PACKED_TAIL
+}; PACKED
 
 /*-------------------------------------------------------------------------*/
 
@@ -877,11 +877,11 @@ PACKED_HEAD struct PACKED_MID usb_handshake_t {
  * A CC may also be set up using non-wireless secure channels (including
  * wired USB!), and some devices may support CCs with multiple hosts.
  */
-PACKED_HEAD struct PACKED_MID usb_connection_context_t {
+struct usb_connection_context_t {
 	__u8 CHID[16];		/* persistent host id */
 	__u8 CDID[16];		/* device id (unique w/in host context) */
 	__u8 CK[16];		/* connection key */
-}; PACKED_TAIL
+}; PACKED
 
 /*-------------------------------------------------------------------------*/
 
@@ -950,12 +950,12 @@ enum usb3_link_state {
 #define USB3_LPM_U2_MAX_TIMEOUT			0xFE
 #define USB3_LPM_DEVICE_INITIATED		0xFF
 
-PACKED_HEAD struct PACKED_MID usb_set_sel_req_t {
+struct usb_set_sel_req_t {
 	__u8	u1_sel;
 	__u8	u1_pel;
 	__le16	u2_sel;
 	__le16	u2_pel;
-}; PACKED_TAIL
+}; PACKED
 
 /*
  * The Set System Exit Latency control transfer provides one byte each for

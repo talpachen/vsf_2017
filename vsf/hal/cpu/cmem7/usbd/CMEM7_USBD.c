@@ -233,7 +233,7 @@ void USB_Istr(void)
 }
 
 
-ROOTFUNC void USB_IRQHandler(void)
+ROOT void USB_IRQHandler(void)
 {
 	USB_Istr();
 }

@@ -43,20 +43,20 @@ uint32_t vsfsm_get_event_pending(void)
 static vsf_err_t vsfsm_evtq_post(struct vsfsm_t *sm, vsfsm_evt_t evt)
 {
 	struct vsfsm_evtq_t *evtq = sm->evtq;
-	vsf_gint_t gint = vsf_get_gint();
+	istate_t gint = GET_GLOBAL_INTERRUPT_STATE();
 
-	vsf_enter_critical();
+	DISABLE_GLOBAL_INTERRUPT();
 
 	if (evtq->evt_count >= evtq->size)
 	{
-		vsf_set_gint(gint);
+		SET_GLOBAL_INTERRUPT_STATE(gint);
 		return VSFERR_NOT_ENOUGH_RESOURCES;
 	}
 	else if (evt == VSFSM_EVT_TIMER)
 	{
 		if (evtq->tick_evt_count)
 		{
-			vsf_set_gint(gint);
+			SET_GLOBAL_INTERRUPT_STATE(gint);
 			return VSFERR_NONE;
 		}
 		else
@@ -70,7 +70,7 @@ static vsf_err_t vsfsm_evtq_post(struct vsfsm_t *sm, vsfsm_evt_t evt)
 	sm->evt_count++;
 	evtq->evt_count++;
 
-	vsf_set_gint(gint);
+	SET_GLOBAL_INTERRUPT_STATE(gint);
 
 	if (evtq->activate != NULL)
 	{
@@ -363,7 +363,7 @@ vsf_err_t vsfsm_poll(void)
 		tmp = *vsfsm_cur_evtq->head;
 		(vsfsm_cur_evtq->head == &vsfsm_cur_evtq->queue[vsfsm_cur_evtq->size - 1]) ?
 			vsfsm_cur_evtq->head = &vsfsm_cur_evtq->queue[0] : vsfsm_cur_evtq->head++;
-		vsf_enter_critical();
+		DISABLE_GLOBAL_INTERRUPT();
 		if (tmp.sm != NULL)
 		{
 			tmp.sm->evt_count--;
@@ -373,7 +373,7 @@ vsf_err_t vsfsm_poll(void)
 		{
 			vsfsm_cur_evtq->tick_evt_count--;
 		}
-		vsf_leave_critical();
+		ENABLE_GLOBAL_INTERRUPT();
 		// sm will be NULL after vsfsm_fini
 		if (tmp.sm != NULL)
 		{

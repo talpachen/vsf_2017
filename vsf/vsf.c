@@ -22,11 +22,11 @@
 
 static void vsfsm_enter_critical_internal(void)
 {
-	vsf_enter_critical();
+	DISABLE_GLOBAL_INTERRUPT();
 }
 static void vsfsm_leave_critical_internal(void)
 {
-	vsf_leave_critical();
+	ENABLE_GLOBAL_INTERRUPT();
 }
 
 #ifdef VSFCFG_MODULE
@@ -149,7 +149,7 @@ fail:
 #endif		// VSFCFG_MODULE
 
 // reserve 512 bytes for vector table
-ROOTFUNC const struct vsf_t vsf @ VSFCFG_API_ADDR =
+ROOT const struct vsf_t vsf @ VSFCFG_API_ADDR =
 {
 	.ver = VSF_API_VERSION,
 

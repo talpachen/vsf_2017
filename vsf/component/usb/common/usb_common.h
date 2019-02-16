@@ -102,7 +102,7 @@
 #define HS_USECS_ISO(bytes)	NS_TO_US(HS_NSECS_ISO(bytes))
 
 /* Endpoint descriptor */
-PACKED_HEAD struct PACKED_MID usb_endpoint_desc_t
+struct usb_endpoint_desc_t
 {
 	unsigned char	bLength;
 	unsigned char	bDescriptorType;
@@ -113,10 +113,10 @@ PACKED_HEAD struct PACKED_MID usb_endpoint_desc_t
 	unsigned char	bInterval;
 	unsigned char	bRefresh;
 	unsigned char	bSynchAddress;
-}; PACKED_TAIL
+}; PACKED
 
 /* Interface descriptor */
-PACKED_HEAD struct PACKED_MID usb_interface_desc_t
+struct usb_interface_desc_t
 {
 	unsigned char	bLength;
 	unsigned char	bDescriptorType;
@@ -127,9 +127,9 @@ PACKED_HEAD struct PACKED_MID usb_interface_desc_t
 	unsigned char	bInterfaceSubClass;
 	unsigned char	bInterfaceProtocol;
 	unsigned char	iInterface;
-}; PACKED_TAIL
+}; PACKED
 
-PACKED_HEAD struct PACKED_MID usb_config_desc_t
+struct usb_config_desc_t
 {
 	unsigned char	bLength;
 	unsigned char	bDescriptorType;
@@ -142,7 +142,7 @@ PACKED_HEAD struct PACKED_MID usb_config_desc_t
 	unsigned char	MaxPower;
 };
 
-PACKED_HEAD struct PACKED_MID usb_device_desc_t
+struct usb_device_desc_t
 {
 	unsigned char	bLength;
 	unsigned char	bDescriptorType;

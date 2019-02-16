@@ -58,21 +58,21 @@ vsf_err_t bcm_sdpcm_ioctrl(struct vsfsm_pt_t *pt, vsfsm_evt_t evt,
 				struct vsfip_buffer_t *buf, struct vsfip_buffer_t **reply);
 
 // async event struct
-PACKED_HEAD struct PACKED_MID bcm_ethhead_t
+struct bcm_ethhead_t
 {
     uint8_t destaddr[6];
 	uint8_t srcaddr[6];
 	uint16_t ethertype;
-}; PACKED_TAIL
-PACKED_HEAD struct PACKED_MID bcm_sdpcm_ethhead_t
+}; PACKED
+struct bcm_sdpcm_ethhead_t
 {
 	uint16_t subtype;
 	uint16_t len;
 	uint8_t version;
 	uint8_t oui[3];
 	uint16_t usr_subtype;
-}; PACKED_TAIL
-PACKED_HEAD struct PACKED_MID bcm_sdpcm_evthead_t
+}; PACKED
+struct bcm_sdpcm_evthead_t
 {
 	uint16_t version;
 	uint16_t flags;
@@ -85,12 +85,12 @@ PACKED_HEAD struct PACKED_MID bcm_sdpcm_evthead_t
 	char ifname[16];
 	uint8_t ifidx;
 	uint8_t bss_cfg_idx;
-}; PACKED_TAIL
-PACKED_HEAD struct PACKED_MID bcm_sdpcm_evtpkg_t
+}; PACKED
+struct bcm_sdpcm_evtpkg_t
 {
 	struct bcm_ethhead_t ethhead;
 	struct bcm_sdpcm_ethhead_t sdpcm_ethhead;
 	struct bcm_sdpcm_evthead_t evthead;
-}; PACKED_TAIL
+}; PACKED
 
 #endif		// __SDPCM_H_INCLUDED__

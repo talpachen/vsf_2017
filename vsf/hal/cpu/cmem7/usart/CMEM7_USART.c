@@ -236,17 +236,17 @@ static void cmem7_common_irqhandler(UART_Type *uart, uint8_t index)
 	}
 }
 
-ROOTFUNC void UART0_IRQHandler(void)
+ROOT void UART0_IRQHandler(void)
 {
 	cmem7_common_irqhandler(UART0, 0);
 }
 
-ROOTFUNC void UART1_IRQHandler(void)
+ROOT void UART1_IRQHandler(void)
 {
 	cmem7_common_irqhandler(UART1, 1);
 }
 
-ROOTFUNC void UART2_IRQHandler(void)
+ROOT void UART2_IRQHandler(void)
 {
 	cmem7_common_irqhandler(UART2, 2);
 }

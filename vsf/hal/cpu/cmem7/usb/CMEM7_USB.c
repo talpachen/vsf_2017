@@ -9,7 +9,7 @@ struct
 } static vsfhal_usb_irq[VSFHAL_USB_NUM];
 
 #ifdef VSFHAL_USB_HS_INDEX
-ROOTFUNC void USB_IRQHandler(void)
+ROOT void USB_IRQHandler(void)
 {
 	if (vsfhal_usb_irq[VSFHAL_USB_HS_INDEX].irq != NULL)
 	{

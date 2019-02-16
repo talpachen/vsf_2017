@@ -9,7 +9,7 @@ struct
 } static vsfhal_usb_irq[VSFHAL_USB_NUM];
 
 #ifdef VSFHAL_USB_FS_INDEX
-ROOTFUNC void OTG_FS_IRQHandler(void)
+ROOT void OTG_FS_IRQHandler(void)
 {
 	if (vsfhal_usb_irq[VSFHAL_USB_FS_INDEX].irq != NULL)
 	{
@@ -18,7 +18,7 @@ ROOTFUNC void OTG_FS_IRQHandler(void)
 }
 #endif
 #ifdef VSFHAL_USB_HS_INDEX
-ROOTFUNC void OTG_HS_IRQHandler(void)
+ROOT void OTG_HS_IRQHandler(void)
 {
 	if (vsfhal_usb_irq[VSFHAL_USB_HS_INDEX].irq != NULL)
 	{

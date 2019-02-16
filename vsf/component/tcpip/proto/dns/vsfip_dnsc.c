@@ -21,7 +21,7 @@
 #define VSFIP_DNS_CLIENT_PORT	53
 #define VSFIP_DNS_TRY_CNT		3
 
-PACKED_HEAD struct PACKED_MID vsfip_dns_head_t
+struct vsfip_dns_head_t
 {
 	uint16_t id;
 	uint16_t flag;
@@ -29,7 +29,7 @@ PACKED_HEAD struct PACKED_MID vsfip_dns_head_t
 	uint16_t answ;
 	uint16_t auth;
 	uint16_t addrrs;
-}; PACKED_TAIL
+}; PACKED
 
 #define VSFIP_DNS_QTYPE_A		1			// A - IP
 #define VSFIP_DNS_QTYPE_NS		2			// NS - NameServer
@@ -41,19 +41,19 @@ PACKED_HEAD struct PACKED_MID vsfip_dns_head_t
 #define VSFIP_DNS_QTYPE_MX		15			// MX - Mail
 #define VSFIP_DNS_QTYPE_AAAA	28			// IPV6
 
-PACKED_HEAD struct PACKED_MID vsfip_dns_query_type_t
+struct vsfip_dns_query_type_t
 {
 	uint16_t type;
 	uint16_t classtype;
-}; PACKED_TAIL
+}; PACKED
 
-PACKED_HEAD struct PACKED_MID vsfip_dns_response_t
+struct vsfip_dns_response_t
 {
 	uint16_t type;
 	uint16_t classtype;
 	uint32_t ttl;
 	uint16_t len;
-}; PACKED_TAIL
+}; PACKED
 
 static struct vsfip_dnsc_local_t vsfip_dnsc;
 

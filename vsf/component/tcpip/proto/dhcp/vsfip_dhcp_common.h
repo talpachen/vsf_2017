@@ -64,7 +64,7 @@ enum dhcp_msg_t
 	DHCPOP_INFORM					= 8,
 };
 
-PACKED_HEAD struct PACKED_MID vsfip_dhcphead_t
+struct vsfip_dhcphead_t
 {
 	uint8_t op;
 	uint8_t htype;
@@ -82,7 +82,7 @@ PACKED_HEAD struct PACKED_MID vsfip_dhcphead_t
 	char file[128];
 	uint32_t magic;
 	uint8_t options[DHCPOPT_MINLEN];	// min option size
-}; PACKED_TAIL
+}; PACKED
 
 void vsfip_dhcp_append_opt(struct vsfip_buffer_t *buf, uint32_t *optlen,
 						uint8_t option, uint8_t len, uint8_t *data);

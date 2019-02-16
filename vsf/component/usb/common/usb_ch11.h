@@ -93,10 +93,10 @@
  * Hub Status and Hub Change results
  * See USB 2.0 spec Table 11-19 and Table 11-20
  */
-PACKED_HEAD struct PACKED_MID usb_port_status_t {
+struct usb_port_status_t {
 	__le16 wPortStatus;
 	__le16 wPortChange;
-}; PACKED_TAIL
+}; PACKED
 
 /*
  * wPortStatus bit field
@@ -186,10 +186,10 @@ PACKED_HEAD struct PACKED_MID usb_port_status_t {
 #define HUB_CHAR_TTTT		0x0060 /* TT Think Time mask */
 #define HUB_CHAR_PORTIND	0x0080 /* per-port indicators (LEDs) */
 
-PACKED_HEAD struct PACKED_MID usb_hub_status_t {
+struct usb_hub_status_t {
 	__le16 wHubStatus;
 	__le16 wHubChange;
-}; PACKED_TAIL
+}; PACKED
 
 /*
  * Hub Status & Hub Change bit masks
@@ -224,7 +224,7 @@ PACKED_HEAD struct PACKED_MID usb_hub_status_t {
 #define USB_HUB_PR_HS_MULTI_TT	2 /* Hi-speed hub with multiple TT */
 #define USB_HUB_PR_SS		3 /* Super speed hub */
 
-PACKED_HEAD struct PACKED_MID usb_hub_descriptor_t {
+struct usb_hub_descriptor_t {
 	__u8  bDescLength;
 	__u8  bDescriptorType;
 	__u8  bNbrPorts;
@@ -233,20 +233,20 @@ PACKED_HEAD struct PACKED_MID usb_hub_descriptor_t {
 	__u8  bHubContrCurrent;
 
 	/* 2.0 and 3.0 hubs differ here */
-	union PACKED_MID {
-		PACKED_HEAD struct PACKED_MID {
+	union {
+		struct {
 			/* add 1 bit for hub status change; round to bytes */
 			__u8  DeviceRemovable[(USB_MAXCHILDREN + 1 + 7) / 8];
 			__u8  PortPwrCtrlMask[(USB_MAXCHILDREN + 1 + 7) / 8];
-		} hs; PACKED_TAIL
+		} hs; PACKED
 
-		PACKED_HEAD struct PACKED_MID {
+		struct {
 			__u8 bHubHdrDecLat;
 			__le16 wHubDelay;
 			__le16 DeviceRemovable;
-		} ss; PACKED_TAIL
+		} ss; PACKED
 	} u;
-}; PACKED_TAIL
+}; PACKED
 
 /* port indicator status selectors, tables 11-7 and 11-25 */
 #define HUB_LED_AUTO	0

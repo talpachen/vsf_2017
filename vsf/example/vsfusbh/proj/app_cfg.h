@@ -1,11 +1,5 @@
 #define APPCFG_VSFTIMER_NUM				32
-#if defined(SOC_TYPE_CMEM7_KEIL)
-#define APPCFG_BUFMGR_ADDR				heap_buf
-#define APPCFG_BUFMGR_SIZE				sizeof(heap_buf)
-#else
-#define APPCFG_BUFMGR_ADDR				compiler_get_heap()
-#define APPCFG_BUFMGR_SIZE				compiler_get_heap_size()
-#endif
+#define APPCFG_BUFMGR_SIZE				(8 * 1024)
 
 // The 3 MACROs below define the Hard/Soft/Non-RealTime event queue
 // undefine to indicate that the corresponding event queue is not supported
