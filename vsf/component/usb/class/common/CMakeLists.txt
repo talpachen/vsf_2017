@@ -1,3 +1,3 @@
 add_subdirectory(CDC)
 add_subdirectory(MSC)
-add_subdirectory(UAV)
+add_subdirectory(UAC)

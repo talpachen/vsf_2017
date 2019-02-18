@@ -544,7 +544,7 @@ if(VSF_TOOLCHAIN_VARIANT STREQUAL "gnuarmemb")
     set(GNUARMEMB_TOOLCHAIN_PATH $ENV{GNUARMEMB_TOOLCHAIN_PATH})
   else()
     if(WIN32)
-      set(GNUARMEMB_TOOLCHAIN_PATH "%ProgramFiles(x86)%/GNU Tools Arm Embedded/7 2018-q2-update")
+      message(FATAL_ERROR "GNUARMEMB_TOOLCHAIN_PATH not setted")
     elseif(UNIX)
       #TODO
     elseif(APPLE)

@@ -8,7 +8,7 @@ struct usrapp_t usrapp =
 
 static void usrapp_pendsv_do(void *p)
 {
-	struct usrapp_t *app = p;
+	//struct usrapp_t *app = p;
 }
 
 void usrapp_initial_init(struct usrapp_t *app)

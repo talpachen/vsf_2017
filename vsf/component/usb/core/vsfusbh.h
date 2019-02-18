@@ -14,7 +14,6 @@
 
 #include "component/usb/common/usb_common.h"
 #include "component/usb/common/usb_ch11.h"
-#include "hcd/vsfhcd.h"
 
 #define VSFSM_EVT_URB_COMPLETE	(VSFSM_EVT_USER_LOCAL + 1)
 #define VSFSM_EVT_NEW_DEVICE	(VSFSM_EVT_USER_LOCAL + 2)

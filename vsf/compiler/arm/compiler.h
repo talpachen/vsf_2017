@@ -1,13 +1,13 @@
-#ifndef __ARM_COMPILER_H_INCLUDED__
-#define __ARM_COMPILER_H_INCLUDED__
+#ifndef __COMPILER_H_INCLUDED__
+#define __COMPILER_H_INCLUDED__
 
 #include <stdint.h>
-#include <stdbool.h>
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
-#include <cmsis_compiler.h>
 
+#include "cmsis_compiler.h"
+#include "arm_math.h"
 
 #if defined(__IS_COMPILER_IAR__) || defined(__IAR_SYSTEMS_ICC__)
 #   define ROOT                 __root
@@ -67,4 +67,4 @@ static ALWAYS_INLINE inline unsigned int compiler_get_lr(void)
     return reg;
 }
 
-#endif	// __ARM_COMPILER_H_INCLUDED__
+#endif	// __COMPILER_H_INCLUDED__

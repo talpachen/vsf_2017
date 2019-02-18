@@ -23,8 +23,9 @@ vsf_include_directories(
 
 if(LIBC_INCLUDE_DIR)
   vsf_include_directories(${LIBC_INCLUDE_DIR})
-  # FIXME
-  vsf_include_directories(${LIBC_INCLUDE_DIR}/../../lib/gcc/arm-none-eabi/7.3.1/include)
+  EXECUTE_PROCESS(COMMAND ${CMAKE_C_COMPILER} -dumpversion OUTPUT_VARIABLE GCC_VERSION)
+  string(REGEX REPLACE "\n$" "" GCC_VERSION "${GCC_VERSION}")
+  vsf_include_directories(${LIBC_INCLUDE_DIR}/../../lib/gcc/arm-none-eabi/${GCC_VERSION}/include)
 endif()
 
 vsf_sources(vsfmain.c)
