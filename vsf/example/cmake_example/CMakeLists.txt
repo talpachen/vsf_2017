@@ -10,6 +10,8 @@ set(VSFCOMPO_DYNPOOL 1)
 
 set(CONFIG_DEBUG_OPTIMIZATIONS 1)
 
+set(CONFIG_HAVE_CUSTOM_LINKER_SCRIPT cmem7.ld)
+
 # Common Include
 include(../../vsf.cmake NO_POLICY_SCOPE)
 

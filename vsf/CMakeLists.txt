@@ -30,14 +30,14 @@ endif()
 
 vsf_sources(vsfmain.c)
 
-#vsf_compile_definitions()
+#vsf_compile_definitions(
+#)
 
 if(NOT CONFIG_NO_OPTIMIZATIONS)
 vsf_compile_definitions(
   _FORTIFY_SOURCE=2
 )
 endif()
-
 
 set_ifndef(OPTIMIZE_FOR_NO_OPTIMIZATIONS_FLAG "-O0")
 set_ifndef(OPTIMIZE_FOR_DEBUG_FLAG            "-Og")
@@ -202,10 +202,8 @@ if(CONFIG_OVERRIDE_FRAME_POINTER_DEFAULT)
   endif()
 endif()
 
-vsf_cc_option(
-  -Wno-unused-but-set-variable
-  -fno-reorder-functions
-)
+separate_arguments(CONFIG_COMPILER_OPT_AS_LIST UNIX_COMMAND ${CONFIG_COMPILER_OPT})
+vsf_compile_options(${CONFIG_COMPILER_OPT_AS_LIST})
 
 if(CMAKE_C_COMPILER_ID STREQUAL "Clang")
   vsf_cc_option(
@@ -263,16 +261,46 @@ vsf_ld_options(
   ${LINKERFLAGPREFIX},--build-id=none
 )
 
-message(STATUS ${CMAKE_BINARY_DIR})
-message(STATUS ${CMAKE_CACHEFILE_DIR})
-message(STATUS ${CMAKE_HOME_DIRECTORY})
-message(STATUS ${CMAKE_SOURCE_DIR})
-message(STATUS ${PROJECT_SOURCE_DIR})
 
+if(CONFIG_HAVE_CUSTOM_LINKER_SCRIPT)
+  set(LINKER_SCRIPT ${APPLICATION_SOURCE_DIR}/${CONFIG_CUSTOM_LINKER_SCRIPT})
+  if(NOT EXISTS ${LINKER_SCRIPT})
+    set(LINKER_SCRIPT ${CONFIG_CUSTOM_LINKER_SCRIPT})
+    assert_exists(CONFIG_CUSTOM_LINKER_SCRIPT)
+  endif()
+endif()
 
-set(LINKER_SCRIPT ${APPLICATION_SOURCE_DIR}/${CONFIG_CUSTOM_LINKER_SCRIPT})
+if(NOT EXISTS ${LINKER_SCRIPT})
+  message(FATAL_ERROR "Could not find linker script: '${LINKER_SCRIPT}'. Corrupted configuration?")
+endif()
+
+# Custom section support in linker scripts requires that the application source
+# directory is in the preprocessor search path, in order to find the custom
+# linker script fragments.
+if(CONFIG_CUSTOM_RODATA_LD OR CONFIG_CUSTOM_RWDATA_LD OR CONFIG_CUSTOM_SECTIONS_LD)
+  vsf_include_directories(${APPLICATION_SOURCE_DIR})
+endif()
+
 
 add_subdirectory(compiler)
 add_subdirectory(hal)
 add_subdirectory(framework)
 add_subdirectory(component)
+
+
+get_property(OUTPUT_FORMAT          GLOBAL PROPERTY PROPERTY_OUTPUT_FORMAT)
+get_property(LINKER_SCRIPT_DEFINES  GLOBAL PROPERTY PROPERTY_LINKER_SCRIPT_DEFINES)
+
+# Read global variables into local variables
+get_property(GKOF GLOBAL PROPERTY GENERATED_KERNEL_OBJECT_FILES)
+get_property(GKSF GLOBAL PROPERTY GENERATED_KERNEL_SOURCE_FILES)
+
+get_property(TOPT GLOBAL PROPERTY TOPT)
+set_ifndef(  TOPT -T)
+
+get_property(CSTD GLOBAL PROPERTY CSTD)
+set_ifndef(CSTD c99)
+
+vsf_compile_options(
+  $<$<COMPILE_LANGUAGE:C>:-std=${CSTD}>
+)
