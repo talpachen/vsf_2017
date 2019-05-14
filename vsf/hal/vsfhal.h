@@ -34,8 +34,9 @@ uint32_t vsfhal_core_get_stack(void);
 vsf_err_t vsfhal_core_set_stack(uint32_t sp);
 uint8_t vsfhal_core_set_intlevel(uint8_t level);
 void vsfhal_core_sleep(uint32_t mode);
-vsf_err_t vsfhal_core_pendsv_config(void (*on_pendsv)(void *), void *param);
-vsf_err_t vsfhal_core_pendsv_trigger(void);
+vsf_err_t vsfhal_swi_init(uint8_t index, int32_t int_priority,
+		void (*handler)(void *), void *param);
+void vsfhal_swi_trigger(uint8_t index);
 
 /*******************************************************************************
 UID
@@ -91,7 +92,7 @@ USART
 vsf_err_t vsfhal_usart_init(uint8_t index);
 vsf_err_t vsfhal_usart_fini(uint8_t index);
 vsf_err_t vsfhal_usart_config(uint8_t index, uint32_t baudrate, uint32_t mode);
-vsf_err_t vsfhal_usart_config_cb(uint8_t index, int32_t int_priority, void *p, void (*ontx)(void *), void (*onrx)(void *, uint16_t));
+vsf_err_t vsfhal_usart_config_cb(uint8_t index, int32_t int_priority, void *p, void (*ontx)(void *), void (*onrx)(void *));
 uint16_t vsfhal_usart_tx_bytes(uint8_t index, uint8_t *data, uint16_t size);
 uint16_t vsfhal_usart_tx_get_free_size(uint8_t index);
 uint16_t vsfhal_usart_rx_bytes(uint8_t index, uint8_t *data, uint16_t size);
@@ -111,7 +112,6 @@ vsf_err_t vsfhal_gpio_fini(uint8_t index);
 vsf_err_t vsfhal_gpio_config(uint8_t index, uint8_t pin_idx, uint32_t mode);
 vsf_err_t vsfhal_gpio_set(uint8_t index, uint32_t pin_mask);
 vsf_err_t vsfhal_gpio_clear(uint8_t index, uint32_t pin_mask);
-vsf_err_t vsfhal_gpio_out(uint8_t index, uint32_t pin_mask, uint32_t value);
 uint32_t vsfhal_gpio_get(uint8_t index, uint32_t pin_mask);
 
 /*******************************************************************************
@@ -148,8 +148,8 @@ PWM
 *******************************************************************************/
 vsf_err_t vsfhal_pwm_init(uint32_t index);
 vsf_err_t vsfhal_pwm_fini(uint32_t index);
-vsf_err_t vsfhal_pwm_config_mode(uint32_t index, uint8_t mode);
-vsf_err_t vsfhal_pwm_config_freq(uint32_t index, uint16_t kHz);
+vsf_err_t vsfhal_pwm_config_mode(uint32_t index, uint32_t mode);
+vsf_err_t vsfhal_pwm_config_freq(uint32_t index, uint32_t Hz);
 vsf_err_t vsfhal_pwm_out(uint32_t index, uint16_t rate);
 
 /*******************************************************************************
@@ -157,10 +157,11 @@ ADC
 *******************************************************************************/
 vsf_err_t vsfhal_adc_init(uint8_t index);
 vsf_err_t vsfhal_adc_fini(uint8_t index);
-vsf_err_t vsfhal_adc_config(uint8_t index, uint8_t channel, uint32_t kSPS,
-		void (*callback)(void *, uint32_t), void *param, int32_t int_priority);
-int32_t vsfhal_adc_start(uint8_t index);
-vsf_err_t vsfhal_adc_stop(uint8_t index);
+vsf_err_t vsfhal_adc_config(uint8_t index, uint32_t SPS);
+vsf_err_t vsfhal_adc_config_cb(uint8_t index, int32_t int_priority,
+		void *p, void (*callback)(void *, int32_t));
+int32_t vsfhal_adc_start(uint8_t index, uint8_t channel);
+vsf_err_t vsfhal_adc_stop(uint8_t index, uint8_t channel);
 
 /*******************************************************************************
 USBD
@@ -172,6 +173,23 @@ enum vsfhal_usbd_eptype_t
 	USB_EP_TYPE_BULK,
 	USB_EP_TYPE_ISO
 };
+enum vsfhal_usbd_evt_t
+{
+	VSFHAL_USBD_ON_ATTACH = 0,
+	VSFHAL_USBD_ON_DETACH,
+	VSFHAL_USBD_ON_RESET,
+	VSFHAL_USBD_ON_SETUP,
+	VSFHAL_USBD_ON_ERROR,
+	VSFHAL_USBD_ON_SUSPEND,
+	VSFHAL_USBD_ON_RESUME,
+	VSFHAL_USBD_ON_SOF,
+	VSFHAL_USBD_ON_IN,
+	VSFHAL_USBD_ON_NAK,
+	VSFHAL_USBD_ON_OUT,
+	VSFHAL_USBD_ON_UNDERFLOW,
+	VSFHAL_USBD_ON_OVERFLOW,
+	VSFHAL_USBD_ON_USER,
+};
 enum vsfhal_usbd_error_t
 {
 	USBERR_ERROR,
@@ -181,129 +199,10 @@ enum vsfhal_usbd_error_t
 struct vsfhal_usbd_callback_t
 {
 	void *param;
-	vsf_err_t (*on_attach)(void*);
-	vsf_err_t (*on_detach)(void*);
-	vsf_err_t (*on_reset)(void*);
-	vsf_err_t (*on_setup)(void*);
-	vsf_err_t (*on_error)(void*, enum vsfhal_usbd_error_t error);
-	vsf_err_t (*on_wakeup)(void*);
-	vsf_err_t (*on_suspend)(void*);
-	vsf_err_t (*on_sof)(void*);
-	vsf_err_t (*on_underflow)(void*, uint8_t);
-	vsf_err_t (*on_overflow)(void*, uint8_t);
-	vsf_err_t (*on_in)(void*, uint8_t);
-	vsf_err_t (*on_out)(void*, uint8_t);
+	void (*on_event)(void*, enum vsfhal_usbd_evt_t, uint32_t);
 };
-struct vsfhal_usbd_t
-{
-	vsf_err_t (*init)(int32_t int_priority);
-	vsf_err_t (*fini)(void);
-	vsf_err_t (*poll)(void);
-	vsf_err_t (*reset)(void);
 
-	vsf_err_t (*connect)(void);
-	vsf_err_t (*disconnect)(void);
-
-	vsf_err_t (*set_address)(uint8_t addr);
-	uint8_t (*get_address)(void);
-
-	vsf_err_t (*suspend)(void);
-	vsf_err_t (*resume)(void);
-	vsf_err_t (*lowpower)(uint8_t level);
-
-	uint32_t (*get_frame_number)(void);
-
-	vsf_err_t (*get_setup)(uint8_t *buffer);
-	vsf_err_t (*prepare_buffer)(void);
-	struct usbd_endpoint_t
-	{
-		const uint8_t *num_of_ep;
-
-		vsf_err_t (*reset)(uint8_t idx);
-		vsf_err_t (*set_type)(uint8_t idx, enum vsfhal_usbd_eptype_t type);
-
-		vsf_err_t (*set_IN_dbuffer)(uint8_t idx);
-		bool (*is_IN_dbuffer)(uint8_t idx);
-		vsf_err_t (*switch_IN_buffer)(uint8_t idx);
-		vsf_err_t (*set_IN_epsize)(uint8_t idx, uint16_t size);
-		uint16_t (*get_IN_epsize)(uint8_t idx);
-		vsf_err_t (*set_IN_stall)(uint8_t idx);
-		vsf_err_t (*clear_IN_stall)(uint8_t idx);
-		bool (*is_IN_stall)(uint8_t idx);
-		vsf_err_t (*reset_IN_toggle)(uint8_t idx);
-		vsf_err_t (*toggle_IN_toggle)(uint8_t idx);
-		vsf_err_t (*set_IN_count)(uint8_t idx, uint16_t size);
-		vsf_err_t (*write_IN_buffer)(uint8_t idx, uint8_t *buffer, uint16_t size);
-
-		vsf_err_t (*set_OUT_dbuffer)(uint8_t idx);
-		bool (*is_OUT_dbuffer)(uint8_t idx);
-		vsf_err_t (*switch_OUT_buffer)(uint8_t idx);
-		vsf_err_t (*set_OUT_epsize)(uint8_t idx, uint16_t size);
-		uint16_t (*get_OUT_epsize)(uint8_t idx);
-		vsf_err_t (*set_OUT_stall)(uint8_t idx);
-		vsf_err_t (*clear_OUT_stall)(uint8_t idx);
-		bool (*is_OUT_stall)(uint8_t idx);
-		vsf_err_t (*reset_OUT_toggle)(uint8_t idx);
-		vsf_err_t (*toggle_OUT_toggle)(uint8_t idx);
-		uint16_t (*get_OUT_count)(uint8_t idx);
-		vsf_err_t (*read_OUT_buffer)(uint8_t idx, uint8_t *buffer, uint16_t size);
-		vsf_err_t (*enable_OUT)(uint8_t idx);
-	} ep;
-	struct vsfhal_usbd_callback_t *callback;
-};
-vsf_err_t vsfhal_usbd_init(int32_t int_priority);
-vsf_err_t vsfhal_usbd_fini(void);
-vsf_err_t vsfhal_usbd_poll(void);
-vsf_err_t vsfhal_usbd_reset(void);
-vsf_err_t vsfhal_usbd_connect(void);
-vsf_err_t vsfhal_usbd_disconnect(void);
-vsf_err_t vsfhal_usbd_set_address(uint8_t addr);
-uint8_t vsfhal_usbd_get_address(void);
-vsf_err_t vsfhal_usbd_suspend(void);
-vsf_err_t vsfhal_usbd_resume(void);
-vsf_err_t vsfhal_usbd_lowpower(uint8_t level);
-uint32_t vsfhal_usbd_get_frame_number(void);
-vsf_err_t vsfhal_usbd_get_setup(uint8_t *buffer);
-vsf_err_t vsfhal_usbd_prepare_buffer(void);
-vsf_err_t vsfhal_usbd_ep_reset(uint8_t idx);
-vsf_err_t vsfhal_usbd_ep_set_type(uint8_t idx, enum vsfhal_usbd_eptype_t type);
-vsf_err_t vsfhal_usbd_ep_set_IN_dbuffer(uint8_t idx);
-bool vsfhal_usbd_ep_is_IN_dbuffer(uint8_t idx);
-vsf_err_t vsfhal_usbd_ep_switch_IN_buffer(uint8_t idx);
-vsf_err_t vsfhal_usbd_ep_set_IN_epsize(uint8_t idx, uint16_t size);
-uint16_t vsfhal_usbd_ep_get_IN_epsize(uint8_t idx);
-vsf_err_t vsfhal_usbd_ep_set_IN_stall(uint8_t idx);
-vsf_err_t vsfhal_usbd_ep_clear_IN_stall(uint8_t idx);
-bool vsfhal_usbd_ep_is_IN_stall(uint8_t idx);
-vsf_err_t vsfhal_usbd_ep_reset_IN_toggle(uint8_t idx);
-vsf_err_t vsfhal_usbd_ep_toggle_IN_toggle(uint8_t idx);
-vsf_err_t vsfhal_usbd_ep_set_IN_count(uint8_t idx, uint16_t size);
-vsf_err_t vsfhal_usbd_ep_write_IN_buffer(uint8_t idx, uint8_t *buffer, uint16_t size);
-vsf_err_t vsfhal_usbd_ep_set_OUT_dbuffer(uint8_t idx);
-bool vsfhal_usbd_ep_is_OUT_dbuffer(uint8_t idx);
-vsf_err_t vsfhal_usbd_ep_switch_OUT_buffer(uint8_t idx);
-vsf_err_t vsfhal_usbd_ep_set_OUT_epsize(uint8_t idx, uint16_t size);
-uint16_t vsfhal_usbd_ep_get_OUT_epsize(uint8_t idx);
-vsf_err_t vsfhal_usbd_ep_set_OUT_stall(uint8_t idx);
-vsf_err_t vsfhal_usbd_ep_clear_OUT_stall(uint8_t idx);
-bool vsfhal_usbd_ep_is_OUT_stall(uint8_t idx);
-vsf_err_t vsfhal_usbd_ep_reset_OUT_toggle(uint8_t idx);
-vsf_err_t vsfhal_usbd_ep_toggle_OUT_toggle(uint8_t idx);
-uint16_t vsfhal_usbd_ep_get_OUT_count(uint8_t idx);
-vsf_err_t vsfhal_usbd_ep_read_OUT_buffer(uint8_t idx, uint8_t *buffer, uint16_t size);
-vsf_err_t vsfhal_usbd_ep_enable_OUT(uint8_t idx);
-#if VSFHAL_USBD_EN
-extern const uint8_t vsfhal_usbd_ep_num;
-extern struct vsfhal_usbd_callback_t vsfhal_usbd_callback;
-extern const struct vsfhal_usbd_t vsfhal_usbd;
-#endif
-
-/*******************************************************************************
-HCD(OHCI...)
-*******************************************************************************/
-vsf_err_t vsfhal_hcd_init(uint32_t index, int32_t int_priority, void (*irq)(void *), void *param);
-vsf_err_t vsfhal_hcd_fini(uint32_t index);
-void* vsfhal_hcd_regbase(uint32_t index);
+#include "vsfhal_usb.h"
 
 #endif	// __VSFHAL_H_INCLUDED__
 

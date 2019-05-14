@@ -1,7 +1,6 @@
 #ifndef __USB_CH11_H__
 #define __USB_CH11_H__
 
-#include "compiler.h"
 #include "usb_type.h"
 
 /* This is arbitrary.
@@ -96,7 +95,7 @@
 struct usb_port_status_t {
 	__le16 wPortStatus;
 	__le16 wPortChange;
-}; PACKED
+} PACKED;
 
 /*
  * wPortStatus bit field
@@ -189,7 +188,7 @@ struct usb_port_status_t {
 struct usb_hub_status_t {
 	__le16 wHubStatus;
 	__le16 wHubChange;
-}; PACKED
+} PACKED;
 
 /*
  * Hub Status & Hub Change bit masks
@@ -233,20 +232,20 @@ struct usb_hub_descriptor_t {
 	__u8  bHubContrCurrent;
 
 	/* 2.0 and 3.0 hubs differ here */
-	union {
+	union PACKED_MID {
 		struct {
 			/* add 1 bit for hub status change; round to bytes */
 			__u8  DeviceRemovable[(USB_MAXCHILDREN + 1 + 7) / 8];
 			__u8  PortPwrCtrlMask[(USB_MAXCHILDREN + 1 + 7) / 8];
-		} hs; PACKED
+		} PACKED hs;
 
 		struct {
 			__u8 bHubHdrDecLat;
 			__le16 wHubDelay;
 			__le16 DeviceRemovable;
-		} ss; PACKED
+		} PACKED ss;
 	} u;
-}; PACKED
+} PACKED;
 
 /* port indicator status selectors, tables 11-7 and 11-25 */
 #define HUB_LED_AUTO	0

@@ -19,9 +19,11 @@
 #include "vsf.h"
 #include "vsfusbh_UVC.h"
 
+#define UVC_PROBE_CRTL_DATA_SIZE 36
+
 enum uav_evt_t
 {
-	UAV_RESET_STREAM_PARAM = VSFSM_EVT_USER_LOCAL + 100,
+	UAV_RESET_STREAM_PARAM = VSFSM_EVT_USER_LOCAL + 1,
 	UAV_ISO_ENABLE,
 	UAV_ISO_DISABLE,
 };
@@ -44,124 +46,82 @@ struct vsfusbh_uvc_t
 	struct vsfusbh_t *usbh;
 	struct vsfusbh_device_t *dev;
 
+	struct vsfsm_t init_sm;
+	struct vsfsm_pt_t init_pt;
 	struct vsfsm_t ctrl_sm;
 	struct vsfsm_pt_t ctrl_pt;
 	struct vsfsm_t video_sm;
 	//struct vsfsm_t audio_sm;
 
-	struct vsfhcd_urb_t *ctrl_urb;
-	struct vsfhcd_urb_t *video_urb;
-	//struct vsfhcd_urb_t *audio_urb;
-		
+	struct vsfusbh_urb_t ctrl_urb;
+	struct vsfusbh_urb_t video_urb;
+	//struct vsfusbh_urb_t audio_urb;
+
+	uint8_t *ctrl_urb_buf;
+	uint8_t *video_urb_buf;
+	//uint8_t *audio_urb_buf;
+
+	struct vsfusbh_uvc_payload_t video_payload;
+	//struct vsfusbh_uvc_payload_t audio_payload;
+
 	struct vsfusbh_uvc_param_t set_param;
+	struct vsfusbh_uvc_param_t cur_param;
+
+	uint16_t video_iso_packet_len;
+	//uint16_t audio_iso_packet_len;
+	uint8_t video_iso_ep;
+	//uint8_t audio_iso_ep;
+
 };
 
-void (*vsfusbh_uvc_report)(void *dev, struct vsfusbh_uvc_param_t *param,
-		uint8_t type, uint8_t *data, uint32_t size) = NULL;
+void (*vsfusbh_uvc_report)(void *dev_data, struct vsfusbh_uvc_param_t *param,
+		struct vsfusbh_uvc_payload_t *payload) = NULL;
 
-static vsf_err_t uvc_ctrl_thread(struct vsfsm_pt_t *pt, vsfsm_evt_t evt)
+static vsf_err_t uvc_init_thread(struct vsfsm_pt_t *pt, vsfsm_evt_t evt)
 {
 	vsf_err_t err;
-	struct vsfusbh_uvc_t *uvc = pt->user_data;
-	struct vsfhcd_urb_t *urb = uvc->ctrl_urb;
+	struct vsfusbh_uvc_t *hdata = (struct vsfusbh_uvc_t *)pt->user_data;
+	struct vsfusbh_urb_t *vsfurb = &hdata->ctrl_urb;
 
 	vsfsm_pt_begin(pt);
 
-	if (uvc->set_param.video_enable)
-	{
-		// commit param
-		if (!vsfusbh_alloc_urb_buffer(urb, sizeof(struct video_probe_commit_ctrl_t))) goto ret_fail;
-		memcpy(urb->transfer_buffer, &uvc->set_param.video_ctrl, sizeof(struct video_probe_commit_ctrl_t));
-		urb->pipe = usb_sndctrlpipe(urb->hcddev, 0);
-#if 1
-		err =  vsfusbh_control_msg(uvc->usbh, urb, USB_TYPE_CLASS |USB_RECIP_INTERFACE | USB_DIR_OUT, SET_CUR,
-				0x0100, 0x0001);
-		if (err) goto ret_fail;
-		vsfsm_pt_wfe(pt, VSFSM_EVT_URB_COMPLETE);
-		if (urb->status != URB_OK) goto ret_fail;
-#endif
-		err =  vsfusbh_control_msg(uvc->usbh, urb, USB_TYPE_CLASS |USB_RECIP_INTERFACE | USB_DIR_OUT, SET_CUR,
-				0x0200, 0x0001);
-		if (err) goto ret_fail;
-		vsfsm_pt_wfe(pt, VSFSM_EVT_URB_COMPLETE);
-		if (urb->status != URB_OK) goto ret_fail;
-		
-		vsfusbh_free_urb_buffer(urb);
-		
-		// set interfaces
-		urb->transfer_buffer = NULL;
-		urb->transfer_length = 0;
-		err = vsfusbh_set_interface(uvc->usbh, urb, uvc->set_param.video_interface,
-				uvc->set_param.video_interface_altr_setting);
-		if (err != VSFERR_NONE)
-			return err;
-		vsfsm_pt_wfe(pt, VSFSM_EVT_URB_COMPLETE);
-		if (urb->status != URB_OK)
-			return VSFERR_FAIL;
+	// reset interfaces 1 (video)
+	vsfurb->transfer_buffer = NULL;
+	vsfurb->transfer_length = 0;
+	err = vsfusbh_set_interface(hdata->usbh, vsfurb, 1, 0);
+	if (err != VSFERR_NONE)
+		return err;
+	vsfsm_pt_wfe(pt, VSFSM_EVT_URB_COMPLETE);
+	if (vsfurb->status != URB_OK)
+		return VSFERR_FAIL;
 
-		// enable video
-		vsfsm_post_evt_pending(&uvc->video_sm, UAV_ISO_ENABLE);
-	}
-	else
-	{
-		urb->transfer_buffer = NULL;
-		urb->transfer_length = 0;
-		err = vsfusbh_set_interface(uvc->usbh, urb, uvc->set_param.video_interface, 0);
-		if (err != VSFERR_NONE)
-			return err;
-		vsfsm_pt_wfe(pt, VSFSM_EVT_URB_COMPLETE);
-		if (urb->status != URB_OK)
-			return VSFERR_FAIL;
-	}
 	vsfsm_pt_end(pt);
 
 	return VSFERR_NONE;
-
-ret_fail:
-	vsfusbh_free_urb_buffer(urb);
-	return VSFERR_FAIL;
 }
 
-static struct vsfsm_state_t *uvc_evt_handler_video(struct vsfsm_t *sm,
+static struct vsfsm_state_t *uvc_evt_handler_init(struct vsfsm_t *sm,
 		vsfsm_evt_t evt)
 {
 	vsf_err_t err;
-	struct vsfusbh_uvc_t *uvc = sm->user_data;
-	struct vsfhcd_urb_t *urb = uvc->video_urb;
+	struct vsfusbh_uvc_t *hdata = (struct vsfusbh_uvc_t *)sm->user_data;
 
 	switch (evt)
 	{
 	case VSFSM_EVT_INIT:
-		break;
-	case UAV_ISO_ENABLE:
-		if (!urb->transfer_buffer)
-		{
-			if (uvc->dev->ep_mps_in[uvc->set_param.video_iso_ep] > uvc->set_param.video_iso_packet_len)
-				uvc->dev->ep_mps_in[uvc->set_param.video_iso_ep] = uvc->set_param.video_iso_packet_len;			
-			
-			if (!vsfusbh_alloc_urb_buffer(urb, uvc->set_param.video_iso_packet_len * 3))
-				break;
-			urb->pipe = usb_rcvisocpipe(urb->hcddev, uvc->set_param.video_iso_ep);
-			urb->transfer_flags |= USB_ISO_ASAP;
-			urb->number_of_packets = 1;
-			urb->iso_frame_desc[0].offset = 0;
-			urb->iso_frame_desc[0].length = uvc->set_param.video_iso_packet_len * 3;
-			err = vsfusbh_submit_urb(uvc->usbh, urb);
-			if (err != VSFERR_NONE)
-				break;
-		}
-		else
-			vsfsm_post_evt_pending(sm, VSFSM_EVT_URB_COMPLETE);
-		break;
 	case VSFSM_EVT_URB_COMPLETE:
-		if (uvc->set_param.video_enable)
+	case VSFSM_EVT_DELAY_DONE:
+		err = hdata->init_pt.thread(&hdata->init_pt, evt);
+		if (err < 0)
 		{
-			if (urb->status == URB_OK)
-				vsfusbh_uvc_report(uvc, &uvc->set_param, VSFUSBH_UVC_REPORT_TYPE_VIDEO,
-						urb->transfer_buffer, urb->actual_length);
-			err = vsfusbh_relink_urb(uvc->usbh, urb);
-			if (err != VSFERR_NONE)
-				break;
+			// TODO
+		}
+		else if (err == 0)
+		{
+			hdata->ctrl_urb.sm = &hdata->ctrl_sm;
+
+			if (vsfusbh_uvc_report)
+				vsfusbh_uvc_report(hdata, &hdata->cur_param, NULL);
 		}
 		break;
 	default:
@@ -170,113 +130,271 @@ static struct vsfsm_state_t *uvc_evt_handler_video(struct vsfsm_t *sm,
 	return NULL;
 }
 
-static void *vsfusbh_uvc_probe(struct vsfusbh_t *usbh,
-		struct vsfusbh_device_t *dev, struct vsfusbh_ifs_t *ifs, 
-		const struct vsfusbh_device_id_t *id)
+static const uint8_t negotiate_temp[26] =
 {
-	struct usb_interface_desc_t *ifs_desc = ifs->alt[ifs->cur_alt].ifs_desc;
-	struct vsfusbh_uvc_t *uvc;
+	0x00, 0x00, 0x01, 0x03, 0x15, 0x16, 0x05, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00
+};
 
-	// only probe interface 0
-	if ((ifs_desc->bInterfaceNumber != 0) || !vsfusbh_uvc_report)
-		return NULL;
-	
-	uvc = vsf_bufmgr_malloc(sizeof(struct vsfusbh_uvc_t));
-	if (!uvc)
-		return NULL;
-	memset(uvc, 0, sizeof(struct vsfusbh_uvc_t));
+static vsf_err_t uvc_ctrl_thread(struct vsfsm_pt_t *pt, vsfsm_evt_t evt)
+{
+	vsf_err_t err;
+	struct vsfusbh_uvc_t *hdata = (struct vsfusbh_uvc_t *)pt->user_data;
+	struct vsfusbh_urb_t *vsfurb = &hdata->ctrl_urb;
 
-	uvc->ctrl_urb = vsfusbh_alloc_urb(usbh);
-	uvc->video_urb = vsfusbh_alloc_urb(usbh);
-	//uvc->audio_urb = vsfusbh_alloc_urb(usbh);
-	if (!uvc->ctrl_urb || !uvc->video_urb)
-		goto free_and_fail;
+	vsfsm_pt_begin(pt);
 
-	uvc->set_param.vid = dev->device_desc->idVendor;
-	uvc->set_param.pid = dev->device_desc->idProduct;
-	vsfusbh_uvc_report(uvc, &uvc->set_param, 0, NULL, 0);
+	if (hdata->set_param.video_enable)
+	{
+		// negotiate
+		hdata->video_iso_packet_len = 1024;
+		hdata->video_iso_ep = 1;
 
-	uvc->usbh = usbh;
-	uvc->dev = dev;
-	
-	uvc->ctrl_urb->hcddev = &dev->hcddev;
-	uvc->ctrl_urb->notifier_sm = &uvc->ctrl_sm;
-	uvc->ctrl_urb->timeout = 200;
-	
-	uvc->video_urb->hcddev = &dev->hcddev;
-	uvc->video_urb->timeout = 200;
-	uvc->video_urb->notifier_sm = &uvc->video_sm;
+		// commit param
+		vsfurb->transfer_buffer = hdata->ctrl_urb_buf;
+		memcpy(vsfurb->transfer_buffer, negotiate_temp, 26);
+		vsfurb->transfer_length = 26;
+		vsfurb->pipe = usb_sndctrlpipe(vsfurb->vsfdev, 0);
+		err =  vsfusbh_control_msg(hdata->usbh, vsfurb,
+				USB_TYPE_CLASS |USB_RECIP_INTERFACE | USB_DIR_OUT, SET_CUR,
+				0x0200, 0x0001);
+		if (err != VSFERR_NONE)
+			return err;
+		vsfsm_pt_wfe(pt, VSFSM_EVT_URB_COMPLETE);
+		if (vsfurb->status != URB_OK)
+			return VSFERR_FAIL;
 
-	uvc->ctrl_pt.thread = uvc_ctrl_thread;
-	uvc->ctrl_pt.user_data = uvc;
-	uvc->ctrl_pt.sm = &uvc->ctrl_sm;
-	uvc->ctrl_pt.state = 0;
+		// set interfaces
+		vsfurb->transfer_buffer = NULL;
+		vsfurb->transfer_length = 0;
+		err = vsfusbh_set_interface(hdata->usbh, vsfurb, 1, 4);
+		if (err != VSFERR_NONE)
+			return err;
+		vsfsm_pt_wfe(pt, VSFSM_EVT_URB_COMPLETE);
+		if (vsfurb->status != URB_OK)
+			return VSFERR_FAIL;
 
-	uvc->video_sm.init_state.evt_handler = uvc_evt_handler_video;
-	uvc->video_sm.user_data = uvc;
+		// enable video
+		vsfsm_post_evt_pending(&hdata->video_sm, UAV_ISO_ENABLE);
+	}
+	else
+	{
+		vsfurb->transfer_buffer = NULL;
+		vsfurb->transfer_length = 0;
+		err = vsfusbh_set_interface(hdata->usbh, vsfurb, 1, 0);
+		if (err != VSFERR_NONE)
+			return err;
+		vsfsm_pt_wfe(pt, VSFSM_EVT_URB_COMPLETE);
+		if (vsfurb->status != URB_OK)
+			return VSFERR_FAIL;
+	}
 
-	vsfsm_pt_init(&uvc->ctrl_sm, &uvc->ctrl_pt);
-	vsfsm_init(&uvc->video_sm);
-	return uvc;
-	
-free_and_fail:
-	if (uvc->ctrl_urb != NULL)
-		vsfusbh_free_urb(usbh, &uvc->ctrl_urb);
-	if (uvc->video_urb != NULL)
-		vsfusbh_free_urb(usbh, &uvc->video_urb);
-	vsf_bufmgr_free(uvc);
+	vsf_bufmgr_free(hdata->ctrl_urb_buf);
+	hdata->ctrl_urb_buf = NULL;
+
+	memcpy(&hdata->cur_param, &hdata->set_param,
+			sizeof(struct vsfusbh_uvc_param_t));
+	vsfusbh_uvc_report(hdata, &hdata->cur_param, NULL);
+
+	vsfsm_pt_end(pt);
+
+	return VSFERR_NONE;
+}
+
+static struct vsfsm_state_t *uvc_evt_handler_ctrl(struct vsfsm_t *sm,
+		vsfsm_evt_t evt)
+{
+	vsf_err_t err;
+	struct vsfusbh_uvc_t *hdata = (struct vsfusbh_uvc_t *)sm->user_data;
+
+	switch (evt)
+	{
+	case VSFSM_EVT_INIT:
+		break;
+	case UAV_RESET_STREAM_PARAM:
+		hdata->ctrl_pt.state = 0;
+		if (hdata->ctrl_urb_buf == NULL)
+		{
+			hdata->ctrl_urb_buf = vsf_bufmgr_malloc(UVC_PROBE_CRTL_DATA_SIZE);
+			if (hdata->ctrl_urb_buf == NULL)
+				return NULL;
+		}
+	case VSFSM_EVT_URB_COMPLETE:
+	case VSFSM_EVT_DELAY_DONE:
+		err = hdata->ctrl_pt.thread(&hdata->ctrl_pt, evt);
+		if (err < 0)
+		{
+			// TODO
+
+			vsf_bufmgr_free(hdata->ctrl_urb_buf);
+			hdata->ctrl_urb_buf = NULL;
+		}
+		else if (err == 0)
+		{
+			vsf_bufmgr_free(hdata->ctrl_urb_buf);
+			hdata->ctrl_urb_buf = NULL;
+		}
+		break;
+	default:
+		break;
+	}
 	return NULL;
 }
 
-static void vsfusbh_uvc_disconnect(struct vsfusbh_t *usbh,
-		struct vsfusbh_device_t *dev, void *priv)
+static struct vsfsm_state_t *uvc_evt_handler_video(struct vsfsm_t *sm,
+		vsfsm_evt_t evt)
 {
-	struct vsfusbh_uvc_t *uvc = priv;
+	vsf_err_t err;
+	struct vsfusbh_uvc_t *hdata = (struct vsfusbh_uvc_t *)sm->user_data;
+	struct vsfusbh_t *usbh = hdata->usbh;
+	struct vsfusbh_urb_t *vsfurb = &hdata->video_urb;
 
-	if (uvc->ctrl_urb)
-		vsfusbh_free_urb(usbh, &uvc->ctrl_urb);
-	if (uvc->video_urb)
-		vsfusbh_free_urb(usbh, &uvc->video_urb);
+	switch (evt)
+	{
+	case VSFSM_EVT_INIT:
+		break;
+	case UAV_ISO_ENABLE:
+		if (hdata->video_urb_buf == NULL)
+		{
+			vsfurb->vsfdev->epmaxpacketin[hdata->video_iso_ep] = hdata->video_iso_packet_len;
+			hdata->video_urb_buf = vsf_bufmgr_malloc(hdata->video_iso_packet_len);
+			if (hdata->video_urb_buf == NULL)
+				return NULL;
+			vsfurb->transfer_buffer = hdata->video_urb_buf;
+			vsfurb->transfer_length = hdata->video_iso_packet_len;
+			vsfurb->pipe = usb_rcvisocpipe(vsfurb->vsfdev, hdata->video_iso_ep);
+			vsfurb->transfer_flags |= USB_ISO_ASAP;
+			vsfurb->number_of_packets = 1;
+			vsfurb->iso_frame_desc[0].offset = 0;
+			vsfurb->iso_frame_desc[0].length = hdata->video_iso_packet_len;
+			err = vsfusbh_submit_urb(usbh, vsfurb);
+			if (err != VSFERR_NONE)
+				goto error;
+		}
+		break;
+	case UAV_ISO_DISABLE:
+		// TODO
+		break;
+	case VSFSM_EVT_URB_COMPLETE:
+		if (vsfurb->status == URB_OK)
+		{
+			hdata->video_payload.len = vsfurb->actual_length;
+			vsfusbh_uvc_report(hdata, &hdata->cur_param, &hdata->video_payload);
+		}
+		else
+		{
+			goto error;
+		}
+		err = vsfusbh_relink_urb(usbh, vsfurb);
+		if (err != VSFERR_NONE)
+			goto error;
+		break;
+	default:
+		break;
+	}
+	return NULL;
 
-	vsfsm_fini(&uvc->ctrl_sm);
-	vsfsm_fini(&uvc->video_sm);
-	vsf_bufmgr_free(uvc);
+error:
+	vsf_bufmgr_free(hdata->video_urb_buf);
+	hdata->video_urb_buf = NULL;
+	return NULL;
+}
+
+static void *vsfusbh_uvc_init(struct vsfusbh_t *usbh, struct vsfusbh_device_t *dev)
+{
+	struct vsfusbh_class_data_t *cdata;
+	struct vsfusbh_uvc_t *hdata;
+
+	cdata = vsf_bufmgr_malloc(sizeof(struct vsfusbh_class_data_t));
+	if (NULL == cdata)
+		return NULL;
+
+	hdata = vsf_bufmgr_malloc(sizeof(struct vsfusbh_uvc_t));
+	if (NULL == hdata)
+	{
+		vsf_bufmgr_free(cdata);
+		return NULL;
+	}
+	memset(cdata, 0, sizeof(struct vsfusbh_class_data_t));
+	memset(hdata, 0, sizeof(struct vsfusbh_uvc_t));
+
+	cdata->dev = dev;
+	hdata->dev = dev;
+	hdata->usbh = usbh;
+	cdata->param = hdata;
+
+	hdata->video_payload.type = VSFUSBH_UVC_PAYLOAD_VIDEO;
+	hdata->video_payload.buf = hdata->video_urb_buf;
+
+	hdata->init_sm.init_state.evt_handler = uvc_evt_handler_init;
+	hdata->init_sm.user_data = (void*)hdata;
+	hdata->init_pt.thread = uvc_init_thread;
+	hdata->init_pt.user_data = hdata;
+	hdata->init_pt.sm = &hdata->init_sm;
+	hdata->init_pt.state = 0;
+
+	hdata->ctrl_sm.init_state.evt_handler = uvc_evt_handler_ctrl;
+	hdata->ctrl_sm.user_data = (void*)hdata;
+	hdata->ctrl_pt.thread = uvc_ctrl_thread;
+	hdata->ctrl_pt.user_data = hdata;
+	hdata->ctrl_pt.sm = &hdata->ctrl_sm;
+	hdata->ctrl_pt.state = 0;
+
+	hdata->ctrl_urb.vsfdev = dev;
+	hdata->ctrl_urb.timeout = 200;
+	hdata->ctrl_urb.sm = &hdata->init_sm;
+
+	hdata->video_sm.init_state.evt_handler = uvc_evt_handler_video;
+	hdata->video_sm.user_data = (void*)hdata;
+	hdata->video_urb.vsfdev = dev;
+	hdata->video_urb.timeout = 200;
+	hdata->video_urb.sm = &hdata->video_sm;
+
+	vsfsm_init(&hdata->init_sm);
+	vsfsm_init(&hdata->ctrl_sm);
+	vsfsm_init(&hdata->video_sm);
+
+	return cdata;
+}
+
+static vsf_err_t vsfusbh_uvc_match(struct vsfusbh_device_t *dev)
+{
+	if ((dev->descriptor.idVendor == 0x04f2) &&
+			(dev->descriptor.idProduct == 0xb130))
+	{
+		return VSFERR_NONE;
+	}
+
+	return VSFERR_FAIL;
+}
+
+static void vsfusbh_uvc_free(struct vsfusbh_device_t *dev)
+{
+	struct vsfusbh_class_data_t *cdata = (struct vsfusbh_class_data_t *)(dev->priv);
+	struct vsfusbh_uvc_t *hdata = (struct vsfusbh_uvc_t *)cdata->param;
+
+	// TODO
+	// free urb
+
+	vsf_bufmgr_free(hdata);
+	vsf_bufmgr_free(cdata);
 }
 
 vsf_err_t vsfusbh_uvc_set(void *dev_data, struct vsfusbh_uvc_param_t *param)
 {
-	//struct vsfusbh_uvc_t *uvc = (struct vsfusbh_uvc_t *)dev_data;
+	struct vsfusbh_uvc_t *hdata = (struct vsfusbh_uvc_t *)dev_data;
 
-	//uvc->set_param = *param;
-	//vsfsm_post_evt_pending(&uvc->ctrl_sm, UAV_RESET_STREAM_PARAM);
+	hdata->set_param = *param;
+	vsfsm_post_evt_pending(&hdata->ctrl_sm, UAV_RESET_STREAM_PARAM);
 	return VSFERR_NONE;
 }
 
-const struct vsfusbh_device_id_t vsfusbh_uvc_id_table[] =
-{
-	{
-		.match_flags = USB_DEVICE_ID_MATCH_VENDOR | USB_DEVICE_ID_MATCH_PRODUCT,
-		.idVendor = 0x041e,
-		.idProduct = 0x4087,
-	},
-	{
-		.match_flags = USB_DEVICE_ID_MATCH_VENDOR | USB_DEVICE_ID_MATCH_PRODUCT,
-		.idVendor = 0x0c45,
-		.idProduct = 0x6341,
-	},
-	{
-		.match_flags = USB_DEVICE_ID_MATCH_VENDOR | USB_DEVICE_ID_MATCH_PRODUCT,
-		.idVendor = 0x5149,
-		.idProduct = 0x13d3,
-	},
-	{0},
-};
-
 const struct vsfusbh_class_drv_t vsfusbh_uvc_drv =
 {
-	.name = "uvc",
-	.id_table = vsfusbh_uvc_id_table,
-	.probe = vsfusbh_uvc_probe,
-	.disconnect = vsfusbh_uvc_disconnect,
+	vsfusbh_uvc_init,
+	vsfusbh_uvc_free,
+	vsfusbh_uvc_match,
 };
 

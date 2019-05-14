@@ -22,7 +22,7 @@
 
 #define USART_BUF_SIZE	64
 
-static void uart_rx_int(void *p, uint16_t data)
+static void uart_rx_int(void *p)
 {
 	uint8_t buf[USART_BUF_SIZE];
 	struct vsf_buffer_t buffer;
@@ -32,15 +32,13 @@ static void uart_rx_int(void *p, uint16_t data)
 		return;
 	
 	buffer.buffer = buf;
-	buf[0] = data & 0xff;
-	buffer.size = vsfhal_usart_rx_get_data_size(param->index);
+	buffer.size = min(vsfhal_usart_rx_get_data_size(param->index), USART_BUF_SIZE);
 	if (buffer.size)
 	{
-		buffer.size = min(buffer.size, USART_BUF_SIZE - 1);
-		buffer.size = vsfhal_usart_rx_bytes(param->index, &buf[1], buffer.size);
+		buffer.size = vsfhal_usart_rx_bytes(param->index, buf, buffer.size);
+		if (buffer.size)
+			stream_write(param->stream_rx, &buffer);
 	}
-	buffer.size++;
-	stream_write(param->stream_rx, &buffer);
 }
 
 static void uart_on_tx(void *p)

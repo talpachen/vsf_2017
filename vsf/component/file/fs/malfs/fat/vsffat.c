@@ -40,7 +40,7 @@ struct fatfs_bpb_t
 	uint16_t NumHeads;
 	uint32_t HiddSec;
 	uint32_t TotSec32;
-}; PACKED
+} PACKED;
 
 struct fatfs_ebpb_t
 {
@@ -50,7 +50,7 @@ struct fatfs_ebpb_t
 	uint32_t VolID;
 	uint8_t VolLab[11];
 	uint8_t FilSysType[8];
-}; PACKED
+} PACKED;
 
 struct fatfs_dbr_t
 {
@@ -71,7 +71,7 @@ struct fatfs_dbr_t
 				uint16_t FSInfo;
 				uint16_t BkBootSec;
 				uint8_t Reserved[12];
-			} bpb; PACKED
+			} PACKED bpb;
 			struct fatfs_ebpb_t ebpb;
 			uint8_t Bootstrap[420];
 		} fat32;
@@ -97,7 +97,7 @@ struct fatfs_dbr_t
 				{
 					uint8_t Minor;
 					uint8_t Major;
-				} Ver; PACKED
+				} PACKED Ver;
 				uint16_t VolState;
 				uint8_t SecBits;
 				uint8_t SPCBits;
@@ -105,11 +105,11 @@ struct fatfs_dbr_t
 				uint8_t DrvNo;
 				uint8_t AllocPercnet;
 				uint8_t Reserved_All0[397];
-			} bpb; PACKED
+			} PACKED bpb;
 		} exfat;
 	};
 	uint16_t Magic;
-}; PACKED
+} PACKED;
 
 struct fatfs_dentry_t
 {
@@ -210,7 +210,7 @@ struct fatfs_dentry_t
 			};
 		} exfat;
 	};
-}; PACKED
+} PACKED;
 
 static const uint8_t vsffat_FAT_bitsize[] = {0, 12, 16, 32, 32};
 

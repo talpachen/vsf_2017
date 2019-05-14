@@ -17,8 +17,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "compiler.h"
-#include "vsf_type.h"
+#include "vsf.h"
 
 uint8_t BIT_REVERSE_U8(uint8_t v8)
 {

@@ -36,4 +36,6 @@ struct crc_t
 uint32_t crc_calc(struct crc_t *crc, void *buff, uint32_t num);
 #endif
 
+uint32_t crc32_get(uint32_t crc, uint8_t *p, uint32_t len);
+
 #endif	// __CRC_H_INCLUDED__

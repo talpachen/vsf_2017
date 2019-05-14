@@ -381,8 +381,8 @@ static vsf_err_t vsfusbd_RNDIS_on_encapsulated_command(
 		uint8_t notify_buf[] = {0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
 		param->encapsulated_response.size = replylen;
-		drv->ep.write_IN_buffer(ep_notify, notify_buf, sizeof(notify_buf));
-		drv->ep.set_IN_count(ep_notify, sizeof(notify_buf));
+		vsfhal_usbd_ep_write_IN_buffer(ep_notify, notify_buf, sizeof(notify_buf));
+		vsfhal_usbd_ep_set_IN_count(ep_notify, sizeof(notify_buf));
 	}
 	return VSFERR_NONE;
 }

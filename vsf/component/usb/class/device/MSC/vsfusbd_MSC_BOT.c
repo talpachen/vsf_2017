@@ -135,7 +135,7 @@ static void vsfusbd_MSCBOT_on_data_finish(void *p)
 		}
 		else if ((CBW->dCBWDataTransferLength > scsi_transact->data_size) &&
 			!((param->transact_size - transact->data_size) &
-				(param->device->drv->ep.get_IN_epsize(param->ep_in) - 1)))
+				(vsfhal_usbd_ep_get_IN_epsize(param->ep_in) - 1)))
 		{
 			transact->data_size = 0;
 			goto send_remain;
@@ -258,7 +258,6 @@ static vsf_err_t vsfusbd_MSCBOT_class_init(uint8_t iface,
 
 static vsf_err_t vsfusbd_MSCBOT_request_prepare(struct vsfusbd_device_t *device)
 {
-	struct vsfhal_usbd_t *drv = device->drv;
 	struct vsfusbd_ctrl_handler_t *ctrl_handler = &device->ctrl_handler;
 	struct vsf_buffer_t *buffer = &ctrl_handler->bufstream.mem.buffer;
 	struct usb_ctrlrequest_t *request = &ctrl_handler->request;
@@ -279,8 +278,8 @@ static vsf_err_t vsfusbd_MSCBOT_request_prepare(struct vsfusbd_device_t *device)
 		break;
 	case USB_MSCBOTREQ_RESET:
 		if ((request->wLength != 0) || (request->wValue != 0) ||
-			drv->ep.reset_IN_toggle(param->ep_in) ||
-			drv->ep.reset_OUT_toggle(param->ep_out) ||
+			vsfhal_usbd_ep_reset_IN_toggle(param->ep_in) ||
+			vsfhal_usbd_ep_reset_OUT_toggle(param->ep_out) ||
 			vsfusbd_MSCBOT_class_init(iface, device))
 		{
 			return VSFERR_FAIL;

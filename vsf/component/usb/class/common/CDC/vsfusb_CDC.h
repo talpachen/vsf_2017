@@ -37,7 +37,7 @@ struct usb_cdc_union_descriptor_t
 
 	uint8_t bControlInterface;
 	uint8_t bSubordinateInterface[1];
-}; PACKED
+} PACKED;
 
 struct usb_cdc_ecm_descriptor_t
 {
@@ -50,6 +50,6 @@ struct usb_cdc_ecm_descriptor_t
 	uint8_t wMaxSegmentSize[2];
 	uint8_t wNumberMCFilters[2];
 	uint8_t bNumberPowerFilters;
-}; PACKED
+} PACKED;
 
 #endif	// __VSFUSB_CDC_H_INCLUDED__

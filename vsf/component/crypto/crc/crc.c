@@ -58,3 +58,15 @@ uint32_t crc_calc(struct crc_t *crc, void *buff, uint32_t num)
 	return result;
 }
 
+uint32_t crc32_get(uint32_t crc, uint8_t *p, uint32_t len)
+{
+	int32_t i;
+	while (len--)
+	{
+		crc ^= *p++;
+		for (i = 0; i < 8; i++)
+			crc = (crc >> 1) ^ ((crc & 1) ? 0xedb88320 : 0);
+	}
+	return crc ^ 0xffffffff;
+}
+

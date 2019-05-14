@@ -37,7 +37,7 @@ struct USBMSC_CBW_t
 	uint8_t bCBWLUN;
 	uint8_t bCBWCBLength;
 	uint8_t CBWCB[16];
-}; PACKED
+} PACKED;
 
 #define USBMSC_CSW_SIZE					13
 struct USBMSC_CSW_t
@@ -46,7 +46,7 @@ struct USBMSC_CSW_t
 	uint32_t dCSWTag;
 	uint32_t dCSWDataResidue;
 	uint8_t dCSWStatus;
-}; PACKED
+} PACKED;
 
 enum usb_MSCBOT_req_t
 {

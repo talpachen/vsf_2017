@@ -28,15 +28,6 @@
 #ifndef VSFUSBD_CFG_EPMAXNO
 #define VSFUSBD_CFG_EPMAXNO				15
 #endif
-#ifndef VSFUSBD_CFG_DBUFFER_EN
-#define VSFUSBD_CFG_DBUFFER_EN			1
-#endif
-#ifndef VSFUSBD_CFG_EPISO_EN
-#define VSFUSBD_CFG_EPISO_EN			0
-#endif
-#ifndef VSFUSBD_CFG_LP_EN
-#define VSFUSBD_CFG_LP_EN				0
-#endif
 #if !defined(VSFUSBD_CFG_HIGHSPEED) && !defined(VSFUSBD_CFG_FULLSPEED) &&\
 	!defined(VSFUSBD_CFG_LOWSPEED)
 #define VSFUSBD_CFG_FULLSPEED
@@ -136,6 +127,22 @@ struct vsfusbd_config_t
 	int8_t ep_IN_iface_map[VSFUSBD_CFG_EPMAXNO + 1];
 };
 
+enum vsfusbd_usr_evt_t
+{
+	VSFUSBD_USREVT_INIT = 0,
+	VSFUSBD_USREVT_FINI,
+	VSFUSBD_USREVT_ATTACH,
+	VSFUSBD_USREVT_DETACH,
+	VSFUSBD_USREVT_ERROR,
+	VSFUSBD_USREVT_RESET,
+	VSFUSBD_USREVT_SETUP,
+	VSFUSBD_USREVT_SOF,
+	VSFUSBD_USREVT_SUSPEND,
+	VSFUSBD_USREVT_RESUME,
+	VSFUSBD_USREVT_IN,
+	VSFUSBD_USREVT_OUT,
+};
+
 struct vsfusbd_device_t
 {
 	// public
@@ -145,32 +152,8 @@ struct vsfusbd_device_t
 	uint8_t device_class_iface;
 	struct vsfhal_usbd_t *drv;
 	int32_t int_priority;
-
-	struct vsfusbd_user_callback_t
-	{
-		vsf_err_t (*init)(struct vsfusbd_device_t *device);
-		vsf_err_t (*fini)(struct vsfusbd_device_t *device);
-
-		void (*on_ATTACH)(struct vsfusbd_device_t *device);
-		void (*on_DETACH)(struct vsfusbd_device_t *device);
-		void (*on_RESET)(struct vsfusbd_device_t *device);
-		void (*on_SETUP)(struct vsfusbd_device_t *device);
-		void (*on_SOF)(struct vsfusbd_device_t *device);
-		void (*on_ERROR)(struct vsfusbd_device_t *device,
-							enum vsfhal_usbd_error_t type);
-#if VSFUSBD_CFG_LP_EN
-		void (*on_WAKEUP)(struct vsfusbd_device_t *device);
-		void (*on_SUSPEND)(struct vsfusbd_device_t *device);
-		void (*on_RESUME)(struct vsfusbd_device_t *device);
-#endif
-
-		void (*on_IN)(struct vsfusbd_device_t *device, uint8_t ep);
-		void (*on_OUT)(struct vsfusbd_device_t *device, uint8_t ep);
-#if VSFUSBD_EP_ISO_EN
-		void (*on_SYNC_UNDERFLOW)(struct vsfusbd_device_t *device, uint8_t ep);
-		void (*on_SYNC_OVERFLOW)(struct vsfusbd_device_t *device, uint8_t ep);
-#endif
-	} callback;
+	void (*on_EVENT)(struct vsfusbd_device_t *device,
+			enum vsfusbd_usr_evt_t evt, void *param);
 
 	// private
 	struct vsfsm_t sm;
@@ -206,6 +189,10 @@ vsf_err_t vsfusbd_device_get_descriptor(struct vsfusbd_device_t *device,
 
 vsf_err_t vsfusbd_device_init(struct vsfusbd_device_t *device);
 vsf_err_t vsfusbd_device_fini(struct vsfusbd_device_t *device);
+vsf_err_t vsfusbd_connect(struct vsfusbd_device_t *device);
+vsf_err_t vsfusbd_disconnect(struct vsfusbd_device_t *device);
+vsf_err_t vsfusbd_wakeup(struct vsfusbd_device_t *device);
+
 vsf_err_t vsfusbd_ep_recv(struct vsfusbd_device_t *device,
 								struct vsfusbd_transact_t *transact);
 void vsfusbd_ep_cancel_recv(struct vsfusbd_device_t *device,

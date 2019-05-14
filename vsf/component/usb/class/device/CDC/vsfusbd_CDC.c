@@ -115,13 +115,13 @@ static vsf_err_t vsfusbd_CDCData_OUT_hanlder(struct vsfusbd_device_t *device,
 		return VSFERR_FAIL;
 	}
 
-	ep_size = device->drv->ep.get_OUT_epsize(ep);
-	pkg_size = device->drv->ep.get_OUT_count(ep);
+	ep_size = vsfhal_usbd_ep_get_OUT_epsize(ep);
+	pkg_size = vsfhal_usbd_ep_get_OUT_count(ep);
 	if (pkg_size > ep_size)
 	{
 		return VSFERR_FAIL;
 	}
-	device->drv->ep.read_OUT_buffer(ep, buffer, pkg_size);
+	vsfhal_usbd_ep_read_OUT_buffer(ep, buffer, pkg_size);
 
 	rx_buffer.buffer = buffer;
 	rx_buffer.size = pkg_size;
@@ -133,7 +133,7 @@ static vsf_err_t vsfusbd_CDCData_OUT_hanlder(struct vsfusbd_device_t *device,
 	}
 	else
 	{
-		device->drv->ep.enable_OUT(ep);
+		vsfhal_usbd_ep_enable_OUT(ep);
 	}
 
 	return VSFERR_NONE;
@@ -160,14 +160,14 @@ static vsf_err_t vsfusbd_CDCData_IN_hanlder(struct vsfusbd_device_t *device,
 		return VSFERR_FAIL;
 	}
 
-	pkg_size = device->drv->ep.get_IN_epsize(ep);
+	pkg_size = vsfhal_usbd_ep_get_IN_epsize(ep);
 	tx_buffer.buffer = buffer;
 	tx_buffer.size = pkg_size;
 	tx_data_length = stream_read(param->stream_tx, &tx_buffer);
 	if (tx_data_length)
 	{
-		device->drv->ep.write_IN_buffer(ep, buffer, tx_data_length);
-		device->drv->ep.set_IN_count(ep, tx_data_length);
+		vsfhal_usbd_ep_write_IN_buffer(ep, buffer, tx_data_length);
+		vsfhal_usbd_ep_set_IN_count(ep, tx_data_length);
 	}
 	else
 	{
@@ -248,10 +248,10 @@ vsfusbd_CDCData_evt_handler(struct vsfsm_t *sm, vsfsm_evt_t evt)
 	case VSFUSBD_CDC_EVT_STREAMRX_ONOUT:
 		if (!param->out_enable &&
 			(stream_get_free_size(param->stream_rx) >=
-					device->drv->ep.get_OUT_epsize(param->ep_out)))
+					vsfhal_usbd_ep_get_OUT_epsize(param->ep_out)))
 		{
 			param->out_enable = true;
-			device->drv->ep.enable_OUT(param->ep_out);
+			vsfhal_usbd_ep_enable_OUT(param->ep_out);
 		}
 		break;
 	}

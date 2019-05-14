@@ -1,7 +1,6 @@
 #ifndef __USB_COMMON_H__
 #define __USB_COMMON_H__
 
-#include "compiler.h"
 #include "usb_type.h"
 
 #include "usb_ch9.h"
@@ -113,7 +112,7 @@ struct usb_endpoint_desc_t
 	unsigned char	bInterval;
 	unsigned char	bRefresh;
 	unsigned char	bSynchAddress;
-}; PACKED
+} PACKED;
 
 /* Interface descriptor */
 struct usb_interface_desc_t
@@ -127,7 +126,7 @@ struct usb_interface_desc_t
 	unsigned char	bInterfaceSubClass;
 	unsigned char	bInterfaceProtocol;
 	unsigned char	iInterface;
-}; PACKED
+} PACKED;
 
 struct usb_config_desc_t
 {

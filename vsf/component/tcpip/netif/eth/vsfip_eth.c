@@ -18,12 +18,12 @@
  ***************************************************************************/
 #include "vsf.h"
 
-struct vsfip_ethhead_t
+PACKED_HEAD struct PACKED_MID vsfip_ethhead_t
 {
 	uint8_t dst_addr[6];
 	uint8_t src_addr[6];
 	uint16_t type;
-}; PACKED
+}; PACKED_TAIL
 
 #define VSFIP_ETH_TYPE_IP			0x0800
 #define VSFIP_ETH_TYPE_IP6			0x86DD

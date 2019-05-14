@@ -51,7 +51,6 @@ static struct vsfusbd_HID_report_t* vsfusbd_HID_find_report(
 static vsf_err_t vsfusbd_HID_OUT_hanlder(struct vsfusbd_device_t *device,
 											uint8_t ep)
 {
-	struct vsfhal_usbd_t *drv = device->drv;
 	struct vsfusbd_config_t *config = &device->config[device->configuration];
 	int8_t iface = config->ep_OUT_iface_map[ep];
 	struct vsfusbd_HID_param_t *param;
@@ -75,13 +74,13 @@ static vsf_err_t vsfusbd_HID_OUT_hanlder(struct vsfusbd_device_t *device,
 		return VSFERR_FAIL;
 	}
 
-	ep_size = drv->ep.get_OUT_epsize(ep);
-	pkg_size = drv->ep.get_OUT_count(ep);
+	ep_size = vsfhal_usbd_ep_get_OUT_epsize(ep);
+	pkg_size = vsfhal_usbd_ep_get_OUT_count(ep);
 	if (pkg_size > ep_size)
 	{
 		return VSFERR_FAIL;
 	}
-	drv->ep.read_OUT_buffer(ep, buffer, pkg_size);
+	vsfhal_usbd_ep_read_OUT_buffer(ep, buffer, pkg_size);
 
 	switch (param->output_state)
 	{
@@ -131,7 +130,7 @@ static vsf_err_t vsfusbd_HID_OUT_hanlder(struct vsfusbd_device_t *device,
 	default:
 		return VSFERR_NONE;
 	}
-	return drv->ep.enable_OUT(param->ep_out);
+	return vsfhal_usbd_ep_enable_OUT(param->ep_out);
 }
 
 static void vsfusbd_HID_INREPORT_callback(void *param)
@@ -175,7 +174,7 @@ vsfusbd_HID_evt_handler(struct vsfsm_t *sm, vsfsm_evt_t evt)
 		{
 			vsfusbd_set_OUT_handler(device, param->ep_out,
 										vsfusbd_HID_OUT_hanlder);
-			device->drv->ep.enable_OUT(param->ep_out);
+			vsfhal_usbd_ep_enable_OUT(param->ep_out);
 		}
 
 		param->bufstream.mem.read = true;

@@ -45,7 +45,7 @@ struct fakefat32_file_t
 		uint16_t WrtTime;
 		uint16_t WrtData;
 		uint16_t FstClusLO;
-	} record; PACKED
+	} PACKED record;
 };
 
 struct fakefat32_param_t
