@@ -1052,8 +1052,6 @@ vsfusbd_evt_handler(struct vsfsm_t *sm, vsfsm_evt_t evt)
 			struct usb_ctrlrequest_t *request = &ctrl_handler->request;
 			struct vsfusbd_transact_t *transact;
 
-			vsfusbd_usr_cb(device, VSFUSBD_USREVT_SETUP, request);
-
 			if (vsfhal_usbd_get_setup((uint8_t *)request) ||
 				vsfusbd_ctrl_prepare(device))
 			{
@@ -1061,6 +1059,8 @@ vsfusbd_evt_handler(struct vsfsm_t *sm, vsfsm_evt_t evt)
 				err = VSFERR_FAIL;
 				goto setup_exit;
 			}
+			
+			vsfusbd_usr_cb(device, VSFUSBD_USREVT_SETUP, request);
 
 			if (ctrl_handler->data_size > request->wLength)
 			{

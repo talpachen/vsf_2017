@@ -29,7 +29,7 @@ CORE
 *******************************************************************************/
 vsf_err_t vsfhal_core_init(void *p);
 vsf_err_t vsfhal_core_fini(void *p);
-vsf_err_t vsfhal_core_reset(void *p);
+void vsfhal_core_reset(void *p);
 uint32_t vsfhal_core_get_stack(void);
 vsf_err_t vsfhal_core_set_stack(uint32_t sp);
 uint8_t vsfhal_core_set_intlevel(uint8_t level);
@@ -37,6 +37,7 @@ void vsfhal_core_sleep(uint32_t mode);
 vsf_err_t vsfhal_swi_init(uint8_t index, int32_t int_priority,
 		void (*handler)(void *), void *param);
 void vsfhal_swi_trigger(uint8_t index);
+vsf_err_t vsfhal_swi_config_priority(uint8_t index, int32_t int_priority);
 
 /*******************************************************************************
 UID
@@ -95,6 +96,7 @@ vsf_err_t vsfhal_usart_config(uint8_t index, uint32_t baudrate, uint32_t mode);
 vsf_err_t vsfhal_usart_config_cb(uint8_t index, int32_t int_priority, void *p, void (*ontx)(void *), void (*onrx)(void *));
 uint16_t vsfhal_usart_tx_bytes(uint8_t index, uint8_t *data, uint16_t size);
 uint16_t vsfhal_usart_tx_get_free_size(uint8_t index);
+void vsfhal_usart_rx_control(uint8_t index, bool enable);
 uint16_t vsfhal_usart_rx_bytes(uint8_t index, uint8_t *data, uint16_t size);
 uint16_t vsfhal_usart_rx_get_data_size(uint8_t index);
 
