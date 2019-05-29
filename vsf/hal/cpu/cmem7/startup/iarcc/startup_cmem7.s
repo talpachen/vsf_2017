@@ -80,6 +80,9 @@ __vector_table
         DCD     PAD_IRQHandler             ; PAD
         DCD     DDRC_LANE_SYNC_IRQHandler  ; DDRC lane sync
         DCD     UART2_IRQHandler           ; UART2
+        DCD     USERADD0_IRQHandler
+        DCD     USERADD1_IRQHandler
+        DCD     USERADD2_IRQHandler
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -327,6 +330,21 @@ DDRC_LANE_SYNC_IRQHandler
         SECTION .text:CODE:REORDER:NOROOT(1)
 UART2_IRQHandler  
         B UART2_IRQHandler
+
+        PUBWEAK USERADD0_IRQHandler
+        SECTION .text:CODE:REORDER:NOROOT(1)
+USERADD0_IRQHandler  
+        B USERADD0_IRQHandler
+
+        PUBWEAK USERADD1_IRQHandler
+        SECTION .text:CODE:REORDER:NOROOT(1)
+USERADD1_IRQHandler  
+        B USERADD1_IRQHandler
+
+        PUBWEAK USERADD2_IRQHandler
+        SECTION .text:CODE:REORDER:NOROOT(1)
+USERADD2_IRQHandler  
+        B USERADD2_IRQHandler
 
         END
         

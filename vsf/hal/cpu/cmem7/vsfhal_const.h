@@ -17,6 +17,7 @@
 #define __VSFHAL_CONST_H_INCLUDED__
 
 #include "cmem7.h"
+#include "compiler.h"
 
 // common
 #define VSFHAL_DUMMY_PORT					0xFF

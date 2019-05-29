@@ -12,37 +12,127 @@ vsf_err_t vsfhal_core_get_info(struct vsfhal_info_t **info)
 	return VSFERR_NONE;
 }
 
-// Pendsv
-struct vsfhal_pendsv_t
+#if defined(VSFHAL_SWI_NUMBER) && (VSFHAL_SWI_NUMBER > 0)
+struct vsfhal_swi_t
 {
-	void (*on_pendsv)(void *);
+	void (*handler)(void *);
 	void *param;
-} static vsfhal_pendsv;
+} static vsfhal_swi[VSFHAL_SWI_NUMBER];
 
-ROOT void PendSV_Handler(void)
+#define SWI0_IRQn			USERADD0_IRQn
+#define SWI0_IRQHandler		USERADD0_IRQHandler
+#define SWI0_Trigger()		NVIC_SetPendingIRQ(USERADD0_IRQn)
+ROOT void SWI0_IRQHandler(void)
 {
-	if (vsfhal_pendsv.on_pendsv != NULL)
-	{
-		vsfhal_pendsv.on_pendsv(vsfhal_pendsv.param);
-	}
+	if (vsfhal_swi[0].handler)
+		vsfhal_swi[0].handler(vsfhal_swi[0].param);
 }
-
-vsf_err_t vsfhal_core_pendsv_config(void (*on_pendsv)(void *), void *param)
+#if VSFHAL_SWI_NUMBER >= 2
+#define SWI1_IRQn			USERADD1_IRQn
+#define SWI1_IRQHandler		USERADD1_IRQHandler
+#define SWI1_Trigger()		NVIC_SetPendingIRQ(USERADD1_IRQn)
+ROOT void SWI1_IRQHandler(void)
 {
-	vsfhal_pendsv.on_pendsv = on_pendsv;
-	vsfhal_pendsv.param = param;
+	if (vsfhal_swi[1].handler)
+		vsfhal_swi[1].handler(vsfhal_swi[1].param);
+}
+#endif
+#if VSFHAL_SWI_NUMBER >= 3
+#define SWI2_IRQn			USERADD2_IRQn
+#define SWI2_IRQHandler		USERADD2_IRQHandler
+#define SWI2_Trigger()		NVIC_SetPendingIRQ(USERADD2_IRQn)
+ROOT void SWI2_IRQHandler(void)
+{
+	if (vsfhal_swi[2].handler)
+		vsfhal_swi[2].handler(vsfhal_swi[2].param);
+}
+#endif
+#if VSFHAL_SWI_NUMBER >= 4
+#error "Need select IRQ and replace it"
+#define SWI3_IRQn			PendSV_IRQn
+#define SWI3_IRQHandler		PendSV_Handler
+#define SWI3_Trigger()		do {SCB->ICSR = SCB_ICSR_PENDSVSET_Msk;} while(0)
+ROOT void SWI3_IRQHandler(void)
+{
+	if (vsfhal_swi[3].handler)
+		vsfhal_swi[3].handler(vsfhal_swi[3].param);
+}
+#endif
+#endif
 
-	if (vsfhal_pendsv.on_pendsv != NULL)
+vsf_err_t vsfhal_swi_config_priority(uint8_t index, int32_t int_priority)
+{
+#if defined(VSFHAL_SWI_NUMBER) && (VSFHAL_SWI_NUMBER > 0)
+	switch (index)
 	{
-		SCB->SHP[10] = 0xFF;
+	case 0:
+		NVIC_SetPriority(SWI0_IRQn, int_priority);
+		NVIC_EnableIRQ(SWI0_IRQn);
+		break;
+#if VSFHAL_SWI_NUMBER >= 2
+	case 1:
+		NVIC_SetPriority(SWI1_IRQn, int_priority);
+		NVIC_EnableIRQ(SWI1_IRQn);
+		break;
+#endif
+#if VSFHAL_SWI_NUMBER >= 3
+	case 2:
+		NVIC_SetPriority(SWI2_IRQn, int_priority);
+		NVIC_EnableIRQ(SWI2_IRQn);
+		break;
+#endif
+#if VSFHAL_SWI_NUMBER >= 4
+	case 3:
+		NVIC_SetPriority(SWI3_IRQn, int_priority);
+		NVIC_EnableIRQ(SWI3_IRQn);
+		break;
+#endif
 	}
 	return VSFERR_NONE;
+#else
+	return VSFERR_NOT_SUPPORT;
+#endif
 }
 
-vsf_err_t vsfhal_core_pendsv_trigger(void)
+vsf_err_t vsfhal_swi_init(uint8_t index, int32_t int_priority,
+		void (*handler)(void *), void *param) @ "VSF_INIT_CODE"
 {
-	SCB->ICSR = SCB_ICSR_PENDSVSET_Msk;
-	return VSFERR_NONE;
+#if defined(VSFHAL_SWI_NUMBER) && (VSFHAL_SWI_NUMBER > 0)
+	vsfhal_swi[index].handler = handler;
+	vsfhal_swi[index].param = param;
+	vsfhal_swi_config_priority(index, int_priority);
+#else
+	return VSFERR_NOT_SUPPORT;
+#endif
+}
+
+void vsfhal_swi_trigger(uint8_t index)
+{
+#if defined(VSFHAL_SWI_NUMBER) && (VSFHAL_SWI_NUMBER > 0)
+	switch (index)
+	{
+	case 0:
+		SWI0_Trigger();
+		break;
+#if VSFHAL_SWI_NUMBER >= 2
+	case 1:
+		SWI1_Trigger();
+		break;
+#endif
+#if VSFHAL_SWI_NUMBER >= 3
+	case 2:
+		SWI0_Trigger();
+		SWI1_Trigger();
+		SWI2_Trigger();
+		break;
+#endif
+#if VSFHAL_SWI_NUMBER >= 4
+	case 3:
+		SWI3_Trigger();
+		break;
+#endif
+	}
+#endif
 }
 
 uint32_t vsfhal_core_get_stack(void)
@@ -61,10 +151,9 @@ vsf_err_t vsfhal_core_fini(void *p)
 	return VSFERR_NONE;
 }
 
-vsf_err_t vsfhal_core_reset(void *p)
+void vsfhal_core_reset(void *p)
 {
 	// TODO
-	return VSFERR_NONE;
 }
 
 uint8_t vsfhal_core_set_intlevel(uint8_t level)

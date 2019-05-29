@@ -7,13 +7,13 @@ struct usrapp_t
 };
 
 extern struct usrapp_t usrapp;
-#if defined(SOC_TYPE_CMEM7_KEIL)
-extern uint8_t heap_buf[1024 * 8];
-#endif
 
 void usrapp_initial_init(struct usrapp_t *app);
-void usrapp_srt_init(struct usrapp_t *app);
 void usrapp_nrt_init(struct usrapp_t *app);
+void usrapp_srt0_init(struct usrapp_t *app);
+void usrapp_srt1_init(struct usrapp_t *app);
+void usrapp_srt2_init(struct usrapp_t *app);
+void usrapp_srt3_init(struct usrapp_t *app);
 
 #endif // __USRAPP_H__
 
